@@ -1,0 +1,74 @@
+[gd_scene load_steps=2 format=3 uid="uid://by5fgbvxh4h1j"]
+
+[ext_resource type="Texture2D" uid="uid://d0ygs23bk7625" path="res://icon.svg" id="1_vf33x"]
+
+[node name="AuthScreen" type="Control"]
+custom_minimum_size = Vector2(400, 525)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+custom_minimum_size = Vector2(425, 500)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -212.5
+offset_top = -250.0
+offset_right = 212.5
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_vf33x")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="NinePatchRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 41.5
+offset_top = 15.0
+offset_right = -45.5
+offset_bottom = -17.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
+
+[node name="EmailField" type="LineEdit" parent="."]
+layout_mode = 0
+offset_left = 437.0
+offset_top = 186.0
+offset_right = 711.0
+offset_bottom = 217.0
+text = "Email"
+
+[node name="PasswordField" type="LineEdit" parent="."]
+layout_mode = 0
+offset_left = 436.0
+offset_top = 233.0
+offset_right = 711.0
+offset_bottom = 264.0
+text = "Password"
+
+[node name="SignupButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 484.0
+offset_top = 338.0
+offset_right = 666.0
+offset_bottom = 364.0
+text = "Signup"
+
+[node name="LoginButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 512.0
+offset_top = 375.0
+offset_right = 625.0
+offset_bottom = 413.0
+text = "Login"
