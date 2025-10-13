@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://by5fgbvxh4h1j"]
+[gd_scene load_steps=3 format=3 uid="uid://by5fgbvxh4h1j"]
 
+[ext_resource type="Script" uid="uid://dcok1x2wt8fld" path="res://AuthScreen.gd" id="1_sk302"]
 [ext_resource type="Texture2D" uid="uid://d0ygs23bk7625" path="res://icon.svg" id="1_vf33x"]
 
 [node name="AuthScreen" type="Control"]
@@ -10,6 +11,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_sk302")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="."]
 custom_minimum_size = Vector2(425, 500)
