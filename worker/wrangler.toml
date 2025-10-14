@@ -1,0 +1,12 @@
+name = "life-sim-worker"
+main = "src/index.js"
+compatibility_date = "2025-10-13"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "life_sim_db"
+database_id = "1637853b-0eb9-4ec2-8bef-4da313b87320"
+
+[vars]
+SUPABASE_URL = "https://rzsndtstonztfuayodmg.supabase.co"
+SUPABASE_PROJECT = "rzsndtstonztfuayodmg"
