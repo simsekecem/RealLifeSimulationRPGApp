@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://by5fgbvxh4h1j"]
+[gd_scene load_steps=9 format=3 uid="uid://by5fgbvxh4h1j"]
 
 [ext_resource type="Script" uid="uid://dcok1x2wt8fld" path="res://AuthScreen.gd" id="1_sk302"]
 [ext_resource type="Texture2D" uid="uid://bspd8qni1fnc" path="res://assets/backgrounds/login.png" id="2_sk302"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_0k8l5"]
+[ext_resource type="Script" uid="uid://dohbukxsjemtd" path="res://forgot_password_label.gd" id="4_a5mb7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0k8l5"]
 bg_color = Color(0.85674167, 0.6555, 0.95, 1)
@@ -64,10 +65,10 @@ grow_vertical = 2
 
 [node name="Title" type="Label" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 86.0
-offset_top = 103.0
-offset_right = 786.0
-offset_bottom = 184.0
+offset_left = 85.0
+offset_top = 60.0
+offset_right = 785.0
+offset_bottom = 141.0
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
 theme_override_font_sizes/font_size = 25
@@ -77,32 +78,36 @@ vertical_alignment = 1
 
 [node name="Email" type="Label" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 159.0
-offset_top = 222.0
-offset_right = 278.0
-offset_bottom = 245.0
+offset_left = 157.0
+offset_top = 166.0
+offset_right = 276.0
+offset_bottom = 189.0
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
 theme_override_font_sizes/font_size = 17
 text = "Email :"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Label" type="Label" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 160.0
-offset_top = 273.0
-offset_right = 330.0
-offset_bottom = 296.0
+offset_left = 109.0
+offset_top = 219.0
+offset_right = 279.0
+offset_bottom = 242.0
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
 theme_override_font_sizes/font_size = 17
 text = "Password :"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Login_Button" type="Button" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 327.0
-offset_top = 335.0
-offset_right = 563.0
-offset_bottom = 383.0
+offset_left = 321.0
+offset_top = 326.0
+offset_right = 557.0
+offset_bottom = 374.0
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.4117647, 0.1764706, 0.5568628, 1)
@@ -114,10 +119,10 @@ text = "Login"
 
 [node name="EmailLineEdit" type="LineEdit" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 294.0
-offset_top = 218.0
-offset_right = 611.0
-offset_bottom = 249.0
+offset_left = 291.0
+offset_top = 164.0
+offset_right = 608.0
+offset_bottom = 195.0
 theme_override_colors/font_color = Color(0.4117647, 0.1764706, 0.5568628, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
 theme_override_font_sizes/font_size = 17
@@ -126,10 +131,10 @@ placeholder_text = "Email"
 
 [node name="PasswordLineEdit" type="LineEdit" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 335.0
-offset_top = 265.0
-offset_right = 611.0
-offset_bottom = 296.0
+offset_left = 295.0
+offset_top = 212.0
+offset_right = 610.0
+offset_bottom = 243.0
 theme_override_colors/font_color = Color(0.39215687, 0.20392157, 0.6, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
 theme_override_font_sizes/font_size = 17
@@ -141,9 +146,9 @@ secret_character = ""
 [node name="Acc_Button" type="Button" parent="NinePatchRect"]
 layout_mode = 0
 offset_left = 273.0
-offset_top = 403.0
+offset_top = 393.0
 offset_right = 617.0
-offset_bottom = 452.0
+offset_bottom = 442.0
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_colors/font_pressed_color = Color(0.4117647, 0.1764706, 0.5568628, 1)
 theme_override_colors/font_hover_color = Color(0.5372549, 0.28235295, 0.9490196, 1)
@@ -152,4 +157,20 @@ theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_a5mb7")
 text = "Create Account"
 
+[node name="ForgotPasswordLabel" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 508.0
+offset_top = 258.0
+offset_right = 780.0
+offset_bottom = 281.0
+mouse_filter = 0
+theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
+theme_override_fonts/font = ExtResource("3_0k8l5")
+text = "Forgot Password?"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("4_a5mb7")
+
 [node name="HTTPRequest" type="HTTPRequest" parent="."]
+
+[connection signal="pressed" from="NinePatchRect/Acc_Button" to="." method="_on_acc_button_pressed"]

@@ -81,3 +81,8 @@ func _on_request_completed(result: int, code: int, headers: PackedStringArray, b
 
 	# Başarılı giriş sonrası sahne geçişi örneği:
 	# get_tree().change_scene_to_file("res://Main.tscn")
+
+
+func _on_acc_button_pressed() -> void:
+	print("Create Account clicked!") # test için
+	get_tree().change_scene_to_file("res://scenes/authscreen_signup.tscn")

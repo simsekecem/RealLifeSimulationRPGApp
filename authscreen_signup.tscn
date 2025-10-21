@@ -86,6 +86,8 @@ theme_override_colors/font_color = Color(0.30745998, 0.13777655, 0.5158161, 1)
 theme_override_fonts/font = ExtResource("2_j50cm")
 theme_override_font_sizes/font_size = 17
 text = "Email :"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PasswordLabel" type="Label" parent="NinePatchRect"]
 layout_mode = 0
@@ -97,6 +99,8 @@ theme_override_colors/font_color = Color(0.30745998, 0.13777655, 0.5158161, 1)
 theme_override_fonts/font = SubResource("FontVariation_pbq7h")
 theme_override_font_sizes/font_size = 17
 text = "Password :"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="Signup_Button" type="Button" parent="NinePatchRect"]
 layout_mode = 0
@@ -114,10 +118,10 @@ text = "Join Now"
 
 [node name="Email_LineEdit" type="LineEdit" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 345.5
-offset_top = 251.5
-offset_right = 665.5
-offset_bottom = 282.5
+offset_left = 343.5
+offset_top = 255.5
+offset_right = 663.5
+offset_bottom = 286.5
 theme_override_colors/font_color = Color(0.4050523, 0.140205, 0.57200295, 1)
 theme_override_fonts/font = ExtResource("2_j50cm")
 theme_override_font_sizes/font_size = 17
