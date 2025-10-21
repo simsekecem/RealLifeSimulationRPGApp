@@ -1,17 +1,28 @@
-[gd_scene load_steps=7 format=3 uid="uid://by5fgbvxh4h1j"]
+[gd_scene load_steps=8 format=3 uid="uid://by5fgbvxh4h1j"]
 
 [ext_resource type="Script" uid="uid://dcok1x2wt8fld" path="res://AuthScreen.gd" id="1_sk302"]
 [ext_resource type="Texture2D" uid="uid://bspd8qni1fnc" path="res://assets/backgrounds/login.png" id="2_sk302"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_0k8l5"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_a5mb7"]
-draw_center = false
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0k8l5"]
+bg_color = Color(0.85674167, 0.6555, 0.95, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b6oif"]
-bg_color = Color(0.49803922, 0.78431374, 0.90588236, 1)
+bg_color = Color(0.2912, 0.7243599, 0.91, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k02ak"]
-bg_color = Color(0.49803922, 0.78431374, 0.90588236, 1)
+bg_color = Color(0.27300003, 0.7188999, 0.91, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a5mb7"]
+bg_color = Color(0.85490197, 0.654902, 0.9490196, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="AuthScreen" type="Control"]
 custom_minimum_size = Vector2(400, 525)
@@ -87,17 +98,17 @@ text = "Password :"
 
 [node name="Button" type="Button" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 310.0
-offset_top = 338.0
-offset_right = 546.0
-offset_bottom = 386.0
+offset_left = 327.0
+offset_top = 335.0
+offset_right = 563.0
+offset_bottom = 383.0
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.4117647, 0.1764706, 0.5568628, 1)
 theme_override_colors/font_hover_color = Color(0.5372549, 0.28235295, 0.9490196, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxTexture_a5mb7")
+theme_override_styles/normal = SubResource("StyleBoxFlat_0k8l5")
 text = "Giriş Yap"
 
 [node name="EmailLineEdit" type="LineEdit" parent="NinePatchRect"]
@@ -123,5 +134,19 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_k02ak")
 placeholder_text = "Password"
 secret = true
 secret_character = ""
+
+[node name="Button2" type="Button" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 285.0
+offset_top = 403.0
+offset_right = 600.0
+offset_bottom = 444.0
+theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
+theme_override_colors/font_pressed_color = Color(0.4117647, 0.1764706, 0.5568628, 1)
+theme_override_colors/font_hover_color = Color(0.5372549, 0.28235295, 0.9490196, 1)
+theme_override_fonts/font = ExtResource("3_0k8l5")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_a5mb7")
+text = "Hesap Oluştur"
 
 [node name="HTTPRequest" type="HTTPRequest" parent="."]
