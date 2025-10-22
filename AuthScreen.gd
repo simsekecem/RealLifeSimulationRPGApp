@@ -10,10 +10,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 var pending_action := ""  # "login" or "signup"
 
-func _ready():
-	$LoginButton.pressed.connect(_on_login)
-	$SignupButton.pressed.connect(_on_signup)
-	http.request_completed.connect(_on_request_completed)
+#func _ready():
+	#$LoginButton.pressed.connect(_on_login)
+	#$SignupButton.pressed.connect(_on_signup)
+	#http.request_completed.connect(_on_request_completed)
 
 # 🔹 LOGIN
 func _on_login() -> void:
@@ -84,5 +84,5 @@ func _on_request_completed(result: int, code: int, headers: PackedStringArray, b
 
 
 func _on_acc_button_pressed() -> void:
-	print("Create Account clicked!") # test için
-	get_tree().change_scene_to_file("res://scenes/authscreen_signup.tscn")
+	#print("Create Account clicked!") # test için
+	get_tree().change_scene_to_file("res://authscreen_signup.tscn")
