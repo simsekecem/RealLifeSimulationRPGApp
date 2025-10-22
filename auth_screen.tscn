@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://by5fgbvxh4h1j"]
+[gd_scene load_steps=13 format=3 uid="uid://by5fgbvxh4h1j"]
 
 [ext_resource type="Script" uid="uid://dcok1x2wt8fld" path="res://AuthScreen.gd" id="1_sk302"]
 [ext_resource type="Texture2D" uid="uid://bspd8qni1fnc" path="res://assets/backgrounds/login.png" id="2_sk302"]
@@ -7,6 +7,20 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0k8l5"]
 bg_color = Color(0.85674167, 0.6555, 0.95, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sly8s"]
+bg_color = Color(0.94509804, 0.11372549, 0.7411765, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gvc2s"]
+bg_color = Color(0.8676824, 0.41544956, 0.69856614, 1)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
@@ -25,33 +39,52 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cpht8"]
+bg_color = Color(0.94509804, 0.11372549, 0.7411765, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_88a0h"]
+bg_color = Color(0.8676824, 0.41544956, 0.69856614, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
 [node name="AuthScreen" type="Control"]
 custom_minimum_size = Vector2(400, 525)
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = -2.0
+offset_right = 5.0
+offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_sk302")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="."]
-custom_minimum_size = Vector2(425, 500)
+custom_minimum_size = Vector2(1280, 720)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -432.0
-offset_top = -250.0
-offset_right = 432.0
-offset_bottom = 250.0
+offset_left = -641.0
+offset_top = -355.0
+offset_right = 632.0
+offset_bottom = 358.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_sk302")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="NinePatchRect"]
+custom_minimum_size = Vector2(1200, 650)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -65,107 +98,116 @@ grow_vertical = 2
 
 [node name="Title" type="Label" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 85.0
-offset_top = 60.0
-offset_right = 785.0
-offset_bottom = 141.0
+offset_left = 127.5
+offset_top = 118.5
+offset_right = 1135.5
+offset_bottom = 199.5
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 36
 text = "REAL LIFE SIMULATION RPG APP"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Email" type="Label" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 157.0
-offset_top = 166.0
-offset_right = 276.0
-offset_bottom = 189.0
+offset_left = 178.5
+offset_top = 268.5
+offset_right = 346.5
+offset_bottom = 292.5
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 24
 text = "Email :"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Label" type="Label" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 109.0
-offset_top = 219.0
-offset_right = 279.0
-offset_bottom = 242.0
+offset_left = 173.5
+offset_top = 339.5
+offset_right = 413.5
+offset_bottom = 363.5
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 24
 text = "Password :"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Login_Button" type="Button" parent="NinePatchRect"]
+custom_minimum_size = Vector2(200, 60)
 layout_mode = 0
-offset_left = 321.0
-offset_top = 326.0
-offset_right = 557.0
-offset_bottom = 374.0
+offset_left = 540.5
+offset_top = 466.5
+offset_right = 776.5
+offset_bottom = 526.5
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.4117647, 0.1764706, 0.5568628, 1)
 theme_override_colors/font_hover_color = Color(0.5372549, 0.28235295, 0.9490196, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_0k8l5")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_sly8s")
+theme_override_styles/hover = SubResource("StyleBoxFlat_gvc2s")
 text = "Login"
 
 [node name="EmailLineEdit" type="LineEdit" parent="NinePatchRect"]
+custom_minimum_size = Vector2(350, 45)
 layout_mode = 0
-offset_left = 291.0
-offset_top = 164.0
-offset_right = 608.0
-offset_bottom = 195.0
+offset_left = 484.5
+offset_top = 254.5
+offset_right = 834.5
+offset_bottom = 299.5
 theme_override_colors/font_color = Color(0.4117647, 0.1764706, 0.5568628, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 23
 theme_override_styles/normal = SubResource("StyleBoxFlat_b6oif")
 placeholder_text = "Email"
 
 [node name="PasswordLineEdit" type="LineEdit" parent="NinePatchRect"]
+custom_minimum_size = Vector2(350, 45)
 layout_mode = 0
-offset_left = 295.0
-offset_top = 212.0
-offset_right = 610.0
-offset_bottom = 243.0
+offset_left = 484.5
+offset_top = 324.5
+offset_right = 834.5
+offset_bottom = 369.5
 theme_override_colors/font_color = Color(0.39215687, 0.20392157, 0.6, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 23
 theme_override_styles/normal = SubResource("StyleBoxFlat_k02ak")
 placeholder_text = "Password"
 secret = true
 secret_character = ""
 
 [node name="Acc_Button" type="Button" parent="NinePatchRect"]
+custom_minimum_size = Vector2(380, 60)
 layout_mode = 0
-offset_left = 273.0
-offset_top = 393.0
-offset_right = 617.0
-offset_bottom = 442.0
+offset_left = 462.5
+offset_top = 556.5
+offset_right = 842.5
+offset_bottom = 616.5
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_colors/font_pressed_color = Color(0.4117647, 0.1764706, 0.5568628, 1)
 theme_override_colors/font_hover_color = Color(0.5372549, 0.28235295, 0.9490196, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 23
 theme_override_styles/normal = SubResource("StyleBoxFlat_a5mb7")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_cpht8")
+theme_override_styles/hover = SubResource("StyleBoxFlat_88a0h")
 text = "Create Account"
 
 [node name="ForgotPasswordLabel" type="Label" parent="NinePatchRect"]
 layout_mode = 0
-offset_left = 508.0
-offset_top = 258.0
-offset_right = 780.0
-offset_bottom = 281.0
+offset_left = 776.5
+offset_top = 401.5
+offset_right = 1128.5
+offset_bottom = 424.5
 mouse_filter = 0
 theme_override_colors/font_color = Color(0.84313726, 0.1764706, 0.5568628, 1)
 theme_override_fonts/font = ExtResource("3_0k8l5")
+theme_override_font_sizes/font_size = 22
 text = "Forgot Password?"
 horizontal_alignment = 1
 vertical_alignment = 1
