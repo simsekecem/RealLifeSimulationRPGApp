@@ -1,8 +1,8 @@
 extends "res://scripts/AuthBase.gd"
 
-@onready var email_field = $LineEdit
-@onready var reset_button = $Reset_Button
-@onready var message_label = $ResetMessageLabel
+@onready var email_field = $NinePatchRect/LineEdit
+@onready var reset_button = $NinePatchRect/Reset_Button
+@onready var message_label = $NinePatchRect/ResetMessageLabel
 @onready var http = $HTTPRequest
 
 func _ready():
@@ -20,7 +20,5 @@ func _on_reset_pressed() -> void:
 func _on_request_completed(result: int, code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
 	if code == 200:
 		message_label.visible = true
-		message_label.text = "📧 Şifre sıfırlama e-postası gönderildi!"
 	else:
-		message_label.visible = true
-		message_label.text = "⚠️ Şifre sıfırlama başarısız. E-postayı kontrol et."
+		message_label.visible = false

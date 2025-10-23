@@ -161,3 +161,5 @@ theme_override_fonts/font = ExtResource("3_ri3o2")
 theme_override_font_sizes/font_size = 23
 theme_override_styles/normal = SubResource("StyleBoxFlat_uaa5n")
 placeholder_text = "Password"
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]

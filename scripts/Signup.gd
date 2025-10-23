@@ -1,8 +1,8 @@
 extends "res://scripts/AuthBase.gd"
 
-@onready var email_field = $Email_LineEdit
-@onready var password_field = $Password_LineEdit
-@onready var signup_button = $Signup_Button
+@onready var email_field = $NinePatchRect/Email_LineEdit
+@onready var password_field = $NinePatchRect/Password_LineEdit
+@onready var signup_button = $NinePatchRect/Signup_Button
 @onready var http = $HTTPRequest
 
 func _ready():
