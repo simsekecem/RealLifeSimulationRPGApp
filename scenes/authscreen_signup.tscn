@@ -1,0 +1,163 @@
+[gd_scene load_steps=10 format=3 uid="uid://bpeqbnhvknrg1"]
+
+[ext_resource type="Script" uid="uid://dnnmdu0epangt" path="res://scripts/Signup.gd" id="1_55345"]
+[ext_resource type="Texture2D" uid="uid://bstqm8ldnm0ok" path="res://assets/backgrounds/orig_big.png" id="2_s4chm"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_ri3o2"]
+
+[sub_resource type="FontVariation" id="FontVariation_pbq7h"]
+base_font = ExtResource("3_ri3o2")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l1q2x"]
+bg_color = Color(0.5294118, 0.29803923, 1, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fc705"]
+bg_color = Color(0.4050523, 0.140205, 0.57200295, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j50cm"]
+bg_color = Color(0.5921569, 0.28235295, 0.8117647, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60nid"]
+bg_color = Color(0.4627451, 0.34901962, 0.9490196, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uaa5n"]
+bg_color = Color(0.4627451, 0.34901962, 0.9490196, 1)
+
+[node name="Authscreen_signup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_55345")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+custom_minimum_size = Vector2(1280, 720)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -463.5
+offset_top = -264.5
+offset_right = 463.5
+offset_bottom = 264.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_s4chm")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="NinePatchRect"]
+custom_minimum_size = Vector2(1200, 650)
+layout_mode = 0
+offset_left = 35.5
+offset_top = 26.5
+offset_right = 884.5
+offset_bottom = 501.5
+
+[node name="Title" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 149.0
+offset_top = 157.0
+offset_right = 1129.0
+offset_bottom = 222.0
+theme_override_colors/font_color = Color(0.30745998, 0.13777655, 0.5158161, 1)
+theme_override_fonts/font = ExtResource("3_ri3o2")
+theme_override_font_sizes/font_size = 36
+text = "REAL LIFE SIMULATION RPG APP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TextLabel" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 244.0
+offset_top = 244.0
+offset_right = 1026.0
+offset_bottom = 267.0
+theme_override_colors/font_color = Color(0.30745998, 0.13777655, 0.5158161, 1)
+theme_override_fonts/font = ExtResource("3_ri3o2")
+theme_override_font_sizes/font_size = 23
+text = "“Join the quest. Live your story.”"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EmailLabel" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 276.0
+offset_top = 381.0
+offset_right = 395.0
+offset_bottom = 404.0
+theme_override_colors/font_color = Color(0.30745998, 0.13777655, 0.5158161, 1)
+theme_override_fonts/font = ExtResource("3_ri3o2")
+theme_override_font_sizes/font_size = 24
+text = "Email :"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PasswordLabel" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 205.0
+offset_top = 453.0
+offset_right = 445.0
+offset_bottom = 477.0
+theme_override_colors/font_color = Color(0.30745998, 0.13777655, 0.5158161, 1)
+theme_override_fonts/font = SubResource("FontVariation_pbq7h")
+theme_override_font_sizes/font_size = 24
+text = "Password :"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Signup_Button" type="Button" parent="NinePatchRect"]
+custom_minimum_size = Vector2(360, 60)
+layout_mode = 0
+offset_left = 480.0
+offset_top = 574.0
+offset_right = 827.0
+offset_bottom = 633.0
+theme_override_colors/font_color = Color(0.30745998, 0.13777655, 0.5158161, 1)
+theme_override_colors/font_pressed_color = Color(0.5294118, 0.54901963, 1, 1)
+theme_override_colors/font_hover_color = Color(0.4627451, 0.69411767, 0.9490196, 1)
+theme_override_fonts/font = ExtResource("3_ri3o2")
+theme_override_font_sizes/font_size = 25
+theme_override_styles/normal = SubResource("StyleBoxFlat_l1q2x")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_fc705")
+theme_override_styles/hover = SubResource("StyleBoxFlat_j50cm")
+text = "Join Now"
+
+[node name="Email_LineEdit" type="LineEdit" parent="NinePatchRect"]
+custom_minimum_size = Vector2(350, 45)
+layout_mode = 0
+offset_left = 471.0
+offset_top = 375.0
+offset_right = 884.0
+offset_bottom = 420.0
+theme_override_colors/font_color = Color(0.4050523, 0.140205, 0.57200295, 1)
+theme_override_fonts/font = ExtResource("3_ri3o2")
+theme_override_font_sizes/font_size = 23
+theme_override_styles/normal = SubResource("StyleBoxFlat_60nid")
+placeholder_text = "Email"
+
+[node name="Password_LineEdit" type="LineEdit" parent="NinePatchRect"]
+custom_minimum_size = Vector2(350, 45)
+layout_mode = 0
+offset_left = 471.0
+offset_top = 446.0
+offset_right = 884.0
+offset_bottom = 491.0
+theme_override_colors/font_color = Color(0.4050523, 0.140205, 0.57200295, 1)
+theme_override_fonts/font = ExtResource("3_ri3o2")
+theme_override_font_sizes/font_size = 23
+theme_override_styles/normal = SubResource("StyleBoxFlat_uaa5n")
+placeholder_text = "Password"

@@ -1,0 +1,131 @@
+[gd_scene load_steps=8 format=3 uid="uid://b1cv8k5tedi8k"]
+
+[ext_resource type="Script" uid="uid://xo21tpyg3s7e" path="res://scripts/ResetPassword.gd" id="1_6t2li"]
+[ext_resource type="Texture2D" uid="uid://bejnmtmc8xfaa" path="res://assets/backgrounds/signup.png" id="2_lglgl"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_fl0re"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lflpb"]
+bg_color = Color(0.5921569, 0.2627451, 0.8117647, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u0e4d"]
+bg_color = Color(0.5921569, 0.4392157, 0.8117647, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_erefk"]
+bg_color = Color(0.4050523, 0.140205, 0.57200295, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8qvy1"]
+bg_color = Color(0.5921569, 0.49803922, 0.8117647, 1)
+
+[node name="authscreen_forgotps" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_6t2li")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+custom_minimum_size = Vector2(1280, 720)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -375.0
+offset_right = 640.0
+offset_bottom = 375.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_lglgl")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="NinePatchRect"]
+custom_minimum_size = Vector2(1200, 750)
+layout_mode = 0
+offset_left = 33.0
+offset_top = 22.0
+offset_right = 567.0
+offset_bottom = 414.0
+
+[node name="Label" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 381.0
+offset_top = 141.0
+offset_right = 913.0
+offset_bottom = 229.0
+theme_override_colors/font_color = Color(0.5921569, 0.2627451, 0.8117647, 1)
+theme_override_fonts/font = ExtResource("3_fl0re")
+theme_override_font_sizes/font_size = 32
+text = "Forgot Password"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label2" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 266.0
+offset_top = 277.0
+offset_right = 434.0
+offset_bottom = 321.0
+theme_override_colors/font_color = Color(0.5921569, 0.2627451, 0.8117647, 1)
+theme_override_fonts/font = ExtResource("3_fl0re")
+theme_override_font_sizes/font_size = 24
+text = "Email :"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Reset_Button" type="Button" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 452.0
+offset_top = 413.0
+offset_right = 878.0
+offset_bottom = 473.0
+theme_override_fonts/font = ExtResource("3_fl0re")
+theme_override_font_sizes/font_size = 21
+theme_override_styles/normal = SubResource("StyleBoxFlat_lflpb")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_u0e4d")
+theme_override_styles/hover = SubResource("StyleBoxFlat_erefk")
+text = "Reset My Password"
+
+[node name="LineEdit" type="LineEdit" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 481.0
+offset_top = 272.0
+offset_right = 889.0
+offset_bottom = 322.0
+theme_override_fonts/font = ExtResource("3_fl0re")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_8qvy1")
+placeholder_text = "Enter Your Email"
+
+[node name="ResetMessageLabel" type="Label" parent="NinePatchRect"]
+visible = false
+layout_mode = 0
+offset_left = 30.0
+offset_top = 519.0
+offset_right = 1262.0
+offset_bottom = 572.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_fl0re")
+theme_override_font_sizes/font_size = 18
+text = "If an account with that email exists, 
+we've sent password reset instructions."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
