@@ -6,8 +6,11 @@ export default {
 
         // Pages uygulamanızın CORS için kabul edilen URL'si
         const ALLOWED_ORIGIN = "https://life-sim.pages.dev"; 
-        // Kullanıcının e-postadan tıklayınca yönlendirileceği adres
-        const REDIRECT_URL = "https://life-sim.pages.dev/reset-password"; 
+        
+        // Şifre Sıfırlama için varsayılan URL (Artık kullanılmıyor ama durabilir)
+        const REDIRECT_URL_RESET = "https://life-sim.pages.dev/reset-password";
+        // 🔥 YENİ: Kayıt Onayı sonrası yönlendirme URL'si
+        const REDIRECT_URL_SIGNUP = "https://life-sim.pages.dev/signup-confirmed"; 
         
         // Tüm yanıtlara CORS başlıklarını ekleyen yardımcı fonksiyon
         const addCorsHeaders = (response) => {
@@ -23,15 +26,65 @@ export default {
         // ====================================================================
 
         // CORS Pre-flight (OPTIONS) İsteğini Yönet
-        // Hem şifre güncelleme hem de mail gönderme endpoint'leri için OPTIONS kontrolü
-        if ((path === "/api/update-password" || path === "/api/password-recover") && method === "OPTIONS") {
+        // OPTIONS kontrolüne /api/signup endpoint'i de eklendi
+        if ((path === "/api/update-password" || path === "/api/password-recover" || path === "/api/signup") && method === "OPTIONS") {
              return addCorsHeaders(new Response(null, { status: 204 }));
         }
         
         /**
-         * YENİ ENDPOINT: Şifre Sıfırlama Mailini Gönderme
+         * YENİ ENDPOINT: Kullanıcı Kaydı (Sign-up)
+         * POST /api/signup
+         */
+        if (path === "/api/signup" && method === "POST") {
+            try {
+                const { email, password } = await request.json();
+
+                if (!email || !password) {
+                    const response = new Response(JSON.stringify({ error: "Email ve şifre gereklidir." }), {
+                        status: 400, headers: { "Content-Type": "application/json" }
+                    });
+                    return addCorsHeaders(response);
+                }
+
+                // Supabase /auth/v1/signup endpoint'ine isteği gönder
+                const signupRes = await fetch(`${env.SUPABASE_URL}/auth/v1/signup`, {
+                    method: "POST",
+                    headers: {
+                        "apikey": env.SUPABASE_ANON_KEY,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        // Kayıt onay linki tıklandığında buraya yönlendirilir.
+                        email_redirect_to: REDIRECT_URL_SIGNUP 
+                    })
+                });
+
+                if (signupRes.ok || signupRes.status === 200) {
+                    const response = new Response(JSON.stringify({ message: "Kayıt başarılı! Onay maili gönderildi. Lütfen e-posta kutunuzu kontrol edin." }), {
+                        status: 200, headers: { "Content-Type": "application/json" }
+                    });
+                    return addCorsHeaders(response);
+                } else {
+                    const errorData = await signupRes.json();
+                    const response = new Response(JSON.stringify({ error: errorData.msg || "Kayıt hatası." }), {
+                        status: signupRes.status, headers: { "Content-Type": "application/json" }
+                    });
+                    return addCorsHeaders(response);
+                }
+
+            } catch (e) {
+                const response = new Response(JSON.stringify({ error: "Sunucu hatası: Kayıt sırasında bir sorun oluştu." }), {
+                    status: 500, headers: { "Content-Type": "application/json" }
+                });
+                return addCorsHeaders(response);
+            }
+        }
+        
+        /**
+         * ENDPOINT: Şifre Sıfırlama Mailini Gönderme
          * POST /api/password-recover
-         * Body: { "email": "kullanici@mail.com" }
          */
         if (path === "/api/password-recover" && method === "POST") {
             try {
@@ -53,15 +106,11 @@ export default {
                     },
                     body: JSON.stringify({
                         email: email,
-                        // BURASI EN ÖNEMLİ KISIM: Kullanıcıyı doğru Pages sayfasına yönlendirir
-                        redirect_to: REDIRECT_URL 
+                        // Şifre sıfırlama için artık redirect_to kullanılmıyor.
                     })
                 });
 
                 if (recoverRes.ok || recoverRes.status === 200) {
-                    // Supabase, mail başarıyla gönderilse bile (güvenlik nedeniyle)
-                    // her zaman 200 döner ve kullanıcı mailde yazanı görmez,
-                    // sadece "mail gönderildi" mesajı gösteririz.
                     const response = new Response(JSON.stringify({ message: "Şifre sıfırlama maili gönderildi. Lütfen e-posta kutunuzu kontrol edin." }), {
                         status: 200, headers: { "Content-Type": "application/json" }
                     });
@@ -83,70 +132,68 @@ export default {
         }
         
         /**
-         * ENDPOINT: Yeni Şifreyi Güncelleme (Mevcut, çalışanı korundu)
+         * ENDPOINT: Yeni Şifreyi Güncelleme
          * POST /api/update-password
          */
         if (path === "/api/update-password" && method === "POST") {
-             // ... BU KISIM ESKİ KODUNUZLA AYNI KALACAK ...
              try {
-                const { access_token, new_password } = await request.json();
+                 const { access_token, new_password } = await request.json();
 
-                if (!access_token || !new_password) {
-                    const response = new Response(JSON.stringify({ error: "Token ve yeni şifre gerekli" }), {
-                        status: 400,
-                        headers: { "Content-Type": "application/json" }
-                    });
-                    return addCorsHeaders(response);
-                }
+                 if (!access_token || !new_password) {
+                     const response = new Response(JSON.stringify({ error: "Token ve yeni şifre gerekli" }), {
+                         status: 400,
+                         headers: { "Content-Type": "application/json" }
+                     });
+                     return addCorsHeaders(response);
+                 }
 
-                // Supabase'e şifreyi güncelleme komutu gönder
-                const updateRes = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
-                    method: "PUT",
-                    headers: {
-                        "Authorization": `Bearer ${access_token}`,
-                        "apikey": env.SUPABASE_ANON_KEY,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        password: new_password
-                    })
-                });
+                 // Supabase'e şifreyi güncelleme komutu gönder
+                 const updateRes = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+                     method: "PUT",
+                     headers: {
+                         "Authorization": `Bearer ${access_token}`,
+                         "apikey": env.SUPABASE_ANON_KEY,
+                         "Content-Type": "application/json"
+                     },
+                     body: JSON.stringify({
+                         password: new_password
+                     })
+                 });
 
-                if (!updateRes.ok) {
-                    const errorText = await updateRes.text();
-                    let errorMessage = "Şifre güncellenirken bir hata oluştu.";
-                    try {
-                        const errorData = JSON.parse(errorText);
-                        errorMessage = errorData.msg || errorData.error_description || errorMessage;
-                    } catch (e) {
-                        errorMessage = errorText;
-                    }
+                 if (!updateRes.ok) {
+                     const errorText = await updateRes.text();
+                     let errorMessage = "Şifre güncellenirken bir hata oluştu.";
+                     try {
+                         const errorData = JSON.parse(errorText);
+                         errorMessage = errorData.msg || errorData.error_description || errorMessage;
+                     } catch (e) {
+                         errorMessage = errorText;
+                     }
 
-                    const response = new Response(JSON.stringify({ error: errorMessage }), {
-                        status: updateRes.status,
-                        headers: { "Content-Type": "application/json" }
-                    });
-                    return addCorsHeaders(response);
-                }
+                     const response = new Response(JSON.stringify({ error: errorMessage }), {
+                         status: updateRes.status,
+                         headers: { "Content-Type": "application/json" }
+                     });
+                     return addCorsHeaders(response);
+                 }
 
-                // Başarılı Yanıt
-                const response = new Response(JSON.stringify({ message: "Şifreniz başarıyla güncellendi." }), {
-                    status: 200, headers: { "Content-Type": "application/json" }
-                });
-                return addCorsHeaders(response);
+                 // Başarılı Yanıt
+                 const response = new Response(JSON.stringify({ message: "Şifreniz başarıyla güncellendi." }), {
+                     status: 200, headers: { "Content-Type": "application/json" }
+                 });
+                 return addCorsHeaders(response);
 
-            } catch (e) {
-                // JSON ayrıştırma veya fetch hatası
-                const response = new Response(JSON.stringify({ error: "Sunucu hatası: İşlem sırasında bir sorun oluştu." }), {
-                    status: 500,
-                    headers: { "Content-Type": "application/json" }
-                });
-                return addCorsHeaders(response);
-            }
+             } catch (e) {
+                 const response = new Response(JSON.stringify({ error: "Sunucu hatası: İşlem sırasında bir sorun oluştu." }), {
+                     status: 500,
+                     headers: { "Content-Type": "application/json" }
+                 });
+                 return addCorsHeaders(response);
+             }
         }
 
         // ====================================================================
-        // 2. KİMLİK DOĞRULAMASI GEREKEN (PRIVATE) ENDPOINT'LER (Mevcut Kodunuz)
+        // 2. KİMLİK DOĞRULAMASI GEREKEN (PRIVATE) ENDPOINT'LER
         // ====================================================================
 
         const authHeader = request.headers.get("Authorization");
@@ -178,7 +225,7 @@ export default {
         const user = await userRes.json();
         const userId = user.id;
 
-        // --- Mevcut /prefs Mantığı ---
+        // --- Preferences (Tercihler) Mantığı --- 🔥 GERİ EKLENDİ!
 
         if (path === "/prefs/get" && method === "GET") {
             const { results } = await env.DB.prepare(
@@ -190,6 +237,7 @@ export default {
 
         if (path === "/prefs/set" && method === "POST") {
             const body = await request.json();
+            // JSON verisini stringify yapıp veritabanına kaydet
             await env.DB.prepare(`
                 INSERT INTO preferences (user_id, prefs)
                 VALUES (?, ?)
