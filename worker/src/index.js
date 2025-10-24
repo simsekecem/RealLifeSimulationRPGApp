@@ -5,8 +5,9 @@ export default {
         const method = request.method;
 
         // Pages uygulamanızın CORS için kabul edilen URL'si
-        // Eğer her yerden erişime izin vermek isterseniz "*" kullanabilirsiniz (güvenlik riski taşıyabilir).
         const ALLOWED_ORIGIN = "https://life-sim.pages.dev"; 
+        // Kullanıcının e-postadan tıklayınca yönlendirileceği adres
+        const REDIRECT_URL = "https://life-sim.pages.dev/reset-password"; 
         
         // Tüm yanıtlara CORS başlıklarını ekleyen yardımcı fonksiyon
         const addCorsHeaders = (response) => {
@@ -16,22 +17,78 @@ export default {
             response.headers.set("Access-Control-Max-Age", "86400"); // 24 saat
             return response;
         };
-
+        
         // ====================================================================
         // 1. HERKESE AÇIK ENDPOINT'LER ve CORS PRE-FLIGHT (ÖN KONTROL)
         // ====================================================================
 
         // CORS Pre-flight (OPTIONS) İsteğini Yönet
-        if (path === "/api/update-password" && method === "OPTIONS") {
-            return addCorsHeaders(new Response(null, { status: 204 })); // 204 No Content
+        // Hem şifre güncelleme hem de mail gönderme endpoint'leri için OPTIONS kontrolü
+        if ((path === "/api/update-password" || path === "/api/password-recover") && method === "OPTIONS") {
+             return addCorsHeaders(new Response(null, { status: 204 }));
         }
-
+        
         /**
-         * ENDPOINT: Yeni Şifreyi Güncelleme
+         * YENİ ENDPOINT: Şifre Sıfırlama Mailini Gönderme
+         * POST /api/password-recover
+         * Body: { "email": "kullanici@mail.com" }
+         */
+        if (path === "/api/password-recover" && method === "POST") {
+            try {
+                const { email } = await request.json();
+
+                if (!email) {
+                    const response = new Response(JSON.stringify({ error: "Email adresi gereklidir." }), {
+                        status: 400, headers: { "Content-Type": "application/json" }
+                    });
+                    return addCorsHeaders(response);
+                }
+
+                // Supabase /auth/v1/recover endpoint'ine isteği gönder
+                const recoverRes = await fetch(`${env.SUPABASE_URL}/auth/v1/recover`, {
+                    method: "POST",
+                    headers: {
+                        "apikey": env.SUPABASE_ANON_KEY,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        // BURASI EN ÖNEMLİ KISIM: Kullanıcıyı doğru Pages sayfasına yönlendirir
+                        redirect_to: REDIRECT_URL 
+                    })
+                });
+
+                if (recoverRes.ok || recoverRes.status === 200) {
+                    // Supabase, mail başarıyla gönderilse bile (güvenlik nedeniyle)
+                    // her zaman 200 döner ve kullanıcı mailde yazanı görmez,
+                    // sadece "mail gönderildi" mesajı gösteririz.
+                    const response = new Response(JSON.stringify({ message: "Şifre sıfırlama maili gönderildi. Lütfen e-posta kutunuzu kontrol edin." }), {
+                        status: 200, headers: { "Content-Type": "application/json" }
+                    });
+                    return addCorsHeaders(response);
+                } else {
+                    const errorData = await recoverRes.json();
+                    const response = new Response(JSON.stringify({ error: errorData.msg || "Supabase hatası: Mail gönderilemedi." }), {
+                        status: recoverRes.status, headers: { "Content-Type": "application/json" }
+                    });
+                    return addCorsHeaders(response);
+                }
+
+            } catch (e) {
+                const response = new Response(JSON.stringify({ error: "Sunucu hatası: İşlem sırasında bir sorun oluştu." }), {
+                    status: 500, headers: { "Content-Type": "application/json" }
+                });
+                return addCorsHeaders(response);
+            }
+        }
+        
+        /**
+         * ENDPOINT: Yeni Şifreyi Güncelleme (Mevcut, çalışanı korundu)
          * POST /api/update-password
          */
         if (path === "/api/update-password" && method === "POST") {
-            try {
+             // ... BU KISIM ESKİ KODUNUZLA AYNI KALACAK ...
+             try {
                 const { access_token, new_password } = await request.json();
 
                 if (!access_token || !new_password) {
@@ -142,11 +199,6 @@ export default {
             return addCorsHeaders(response);
         }
         
-        // Son bir CORS kontrolü: Eğer tanımlı bir endpoint değilse ama OPTIONS ise
-        if (method === "OPTIONS") {
-             return addCorsHeaders(new Response(null, { status: 204 }));
-        }
-
         // Eşleşen başka hiçbir endpoint yoksa
         const response = new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: { "Content-Type": "application/json" } });
         return addCorsHeaders(response);
