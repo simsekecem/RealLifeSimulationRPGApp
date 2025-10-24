@@ -4,7 +4,6 @@ export default {
     const path = url.pathname;
     const method = request.method;
 
-    // --- AUTH CHECK ---
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -25,7 +24,6 @@ export default {
     const user = await userRes.json();
     const userId = user.id;
 
-    // --- PREFERENCES ENDPOINTS ---
     if (path === "/prefs/get" && method === "GET") {
       const { results } = await env.DB.prepare(
         "SELECT prefs FROM preferences WHERE user_id = ?"
@@ -43,34 +41,6 @@ export default {
       return new Response(JSON.stringify({ ok: true }));
     }
 
-    // --- RESET PASSWORD ENDPOINT ---
-    if (path === "/reset-password" && method === "POST") {
-      const body = await request.json();
-      const { access_token, new_password } = body;
-
-      if (!access_token || !new_password) {
-        return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400 });
-      }
-
-      // Supabase Admin Key ile şifre güncelle
-      const supabaseRes = await fetch(`${env.SUPABASE_URL}/auth/v1/admin/users`, {
-        method: "PUT",
-        headers: {
-          "apikey": env.SUPABASE_SERVICE_ROLE_KEY,
-          "Authorization": `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          password: new_password,
-          id_token: access_token
-        })
-      });
-
-      const data = await supabaseRes.json();
-      return new Response(JSON.stringify(data), { status: supabaseRes.status, headers: { "Content-Type": "application/json" } });
-    }
-
-    // --- NOT FOUND ---
     return new Response("Not found", { status: 404 });
   }
 };
