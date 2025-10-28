@@ -123,9 +123,9 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(360, 60)
 layout_mode = 0
 offset_left = 480.0
-offset_top = 574.0
-offset_right = 827.0
-offset_bottom = 633.0
+offset_top = 535.0
+offset_right = 840.0
+offset_bottom = 595.0
 theme_override_colors/font_color = Color(0.30745998, 0.13777655, 0.5158161, 1)
 theme_override_colors/font_pressed_color = Color(0.5294118, 0.54901963, 1, 1)
 theme_override_colors/font_hover_color = Color(0.4627451, 0.69411767, 0.9490196, 1)
@@ -161,5 +161,19 @@ theme_override_fonts/font = ExtResource("3_ri3o2")
 theme_override_font_sizes/font_size = 23
 theme_override_styles/normal = SubResource("StyleBoxFlat_uaa5n")
 placeholder_text = "Password"
+
+[node name="EmailSendLabel" type="Label" parent="NinePatchRect"]
+visible = false
+layout_mode = 0
+offset_left = 55.0
+offset_top = 628.0
+offset_right = 1239.0
+offset_bottom = 663.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_ri3o2")
+text = "You're almost there! We’ve sent you an email with a confirmation link. 
+Check your inbox (and spam folder just in case) to activate your account."
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="HTTPRequest" type="HTTPRequest" parent="."]

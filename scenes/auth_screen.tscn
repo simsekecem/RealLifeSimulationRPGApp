@@ -213,6 +213,19 @@ horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("4_jq82d")
 
+[node name="CoudlntLoginLabel" type="Label" parent="NinePatchRect"]
+visible = false
+layout_mode = 0
+offset_left = 137.5
+offset_top = 642.5
+offset_right = 1161.5
+offset_bottom = 665.5
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_teljs")
+text = "Login failed. Please check your email and password and try again."
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="HTTPRequest" type="HTTPRequest" parent="."]
 
 [connection signal="pressed" from="NinePatchRect/Acc_Button" to="." method="_on_acc_button_pressed"]
