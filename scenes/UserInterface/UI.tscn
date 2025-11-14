@@ -1,8 +1,23 @@
-[gd_scene load_steps=7 format=3 uid="uid://fr47ehb8faon"]
+[gd_scene load_steps=13 format=3 uid="uid://fr47ehb8faon"]
 
 [ext_resource type="Texture2D" uid="uid://dlm3mtwrkycbc" path="res://assets/ui/GUI/Icons.png" id="1_bng0l"]
 [ext_resource type="PackedScene" uid="uid://cfvygcqwkg8yb" path="res://scenes/UserInterface/AvatarWindow.tscn" id="1_f3sfo"]
+[ext_resource type="Texture2D" uid="uid://c26l5j177qlfd" path="res://assets/ui/GUI/character_panel2.png" id="1_vdak2"]
 [ext_resource type="PackedScene" uid="uid://dw7ipw30a2pk5" path="res://scenes/UserInterface/SettingsWindow.tscn" id="2_bng0l"]
+[ext_resource type="Texture2D" uid="uid://dkyny56ejfvgy" path="res://assets/ui/GUI/character_panel.png" id="2_m6eke"]
+[ext_resource type="FontFile" uid="uid://da4t1i3tr1hvt" path="res://assets/fonts/CherrySwash-Bold.ttf" id="3_onsxm"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4g11r"]
+atlas = ExtResource("2_m6eke")
+region = Rect2(116.992256, 132.01564, 24.724907, 24.724915)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rbwta"]
+atlas = ExtResource("2_m6eke")
+region = Rect2(69.87499, 144.61136, 6.9976196, 4.6650696)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_olpf3"]
+atlas = ExtResource("2_m6eke")
+region = Rect2(12.961067, 137.14723, 54.58139, 3.2655487)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vdak2"]
 atlas = ExtResource("1_bng0l")
@@ -24,17 +39,54 @@ grow_vertical = 2
 
 [node name="TopLeftButtons" type="HBoxContainer" parent="UIRoot"]
 layout_mode = 1
-offset_right = 207.0
-offset_bottom = 67.0
+offset_right = 315.0
+offset_bottom = 127.0
+alignment = 1
 
 [node name="Frame" type="TextureRect" parent="UIRoot/TopLeftButtons"]
+custom_minimum_size = Vector2(350, 30)
+layout_direction = 1
 layout_mode = 2
+texture = ExtResource("1_vdak2")
+expand_mode = 1
 
-[node name="AvatarIcon" type="TextureButton" parent="UIRoot/TopLeftButtons"]
-layout_mode = 2
+[node name="AvatarIcon" type="TextureButton" parent="UIRoot/TopLeftButtons/Frame"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 0
+offset_left = 15.0
+offset_top = 14.0
+offset_right = 109.0
+offset_bottom = 114.0
+texture_normal = SubResource("AtlasTexture_4g11r")
+stretch_mode = 0
 
-[node name="XPBar" type="TextureProgressBar" parent="UIRoot/TopLeftButtons"]
-layout_mode = 2
+[node name="XPBar" type="TextureProgressBar" parent="UIRoot/TopLeftButtons/Frame"]
+layout_direction = 4
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.74857146
+anchor_top = -0.16535409
+anchor_right = -0.74857146
+anchor_bottom = -1.1338581
+offset_left = 373.0
+offset_top = 52.0
+offset_right = 427.0
+offset_bottom = 179.0
+scale = Vector2(5, 5)
+texture_under = SubResource("AtlasTexture_rbwta")
+texture_progress = SubResource("AtlasTexture_olpf3")
+metadata/_edit_use_anchors_ = true
+
+[node name="UsernameText" type="Label" parent="UIRoot/TopLeftButtons/Frame"]
+layout_mode = 0
+offset_left = 129.0
+offset_top = 58.0
+offset_right = 233.0
+offset_bottom = 89.0
+theme_override_fonts/font = ExtResource("3_onsxm")
+theme_override_font_sizes/font_size = 22
+text = "Username
+"
 
 [node name="TopRightButtons" type="HBoxContainer" parent="UIRoot"]
 layout_mode = 1
