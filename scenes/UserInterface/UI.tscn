@@ -1,30 +1,65 @@
-[gd_scene load_steps=3 format=3 uid="uid://fr47ehb8faon"]
+[gd_scene load_steps=7 format=3 uid="uid://fr47ehb8faon"]
 
+[ext_resource type="Texture2D" uid="uid://dlm3mtwrkycbc" path="res://assets/ui/GUI/Icons.png" id="1_bng0l"]
 [ext_resource type="PackedScene" uid="uid://cfvygcqwkg8yb" path="res://scenes/UserInterface/AvatarWindow.tscn" id="1_f3sfo"]
 [ext_resource type="PackedScene" uid="uid://dw7ipw30a2pk5" path="res://scenes/UserInterface/SettingsWindow.tscn" id="2_bng0l"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vdak2"]
+atlas = ExtResource("1_bng0l")
+region = Rect2(80.772, 48.751476, 15, 15.042736)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m6eke"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_onsxm"]
 
 [node name="UI" type="CanvasLayer"]
 
 [node name="UIRoot" type="Control" parent="."]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="TopLeftButtons" type="HBoxContainer" parent="UIRoot"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+layout_mode = 1
+offset_right = 207.0
+offset_bottom = 67.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UIRoot"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="Frame" type="TextureRect" parent="UIRoot/TopLeftButtons"]
+layout_mode = 2
+
+[node name="AvatarIcon" type="TextureButton" parent="UIRoot/TopLeftButtons"]
+layout_mode = 2
+
+[node name="XPBar" type="TextureProgressBar" parent="UIRoot/TopLeftButtons"]
+layout_mode = 2
+
+[node name="TopRightButtons" type="HBoxContainer" parent="UIRoot"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -224.0
+offset_bottom = 50.0
+grow_horizontal = 0
+alignment = 2
+
+[node name="SettingsButton" type="TextureButton" parent="UIRoot/TopRightButtons"]
+custom_minimum_size = Vector2(50, 30)
+layout_mode = 2
+texture_normal = SubResource("AtlasTexture_vdak2")
+texture_pressed = SubResource("AtlasTexture_m6eke")
+texture_hover = SubResource("AtlasTexture_onsxm")
+stretch_mode = 5
 
 [node name="Windows" type="Control" parent="UIRoot"]
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 767.0
+offset_top = 404.0
+offset_right = 807.0
+offset_bottom = 444.0
 
 [node name="AvatarWindow" parent="UIRoot/Windows" instance=ExtResource("1_f3sfo")]
 layout_mode = 0
