@@ -7,13 +7,13 @@
 atlas = ExtResource("1_g7hd6")
 region = Rect2(12.490143, 0, 208.12009, 313.95016)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_q40td"]
-atlas = ExtResource("1_g7hd6")
-region = Rect2(7.0201416, 334.91013, 85.910034, 30.25003)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_g7hd6"]
 atlas = ExtResource("1_g7hd6")
 region = Rect2(191.61072, 3.9447708, 23.958008, 21.29601)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q40td"]
+atlas = ExtResource("1_g7hd6")
+region = Rect2(407.37277, 333.77734, 85.37668, 33.46765)
 
 [node name="SettingsWindow" type="Control"]
 layout_mode = 3
@@ -38,52 +38,29 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("AtlasTexture_in2ko")
 
-[node name="SettingsLabel" type="Label" parent="Background"]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -64.0
-offset_top = 16.0
-offset_right = 64.0
-offset_bottom = 55.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_fonts/font = ExtResource("2_in2ko")
-text = "SETTINGS"
-
-[node name="SaveButton" type="TextureButton" parent="Background"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -50.0
-offset_top = -161.0
-offset_right = 55.5
-offset_bottom = -122.0
-grow_horizontal = 2
-grow_vertical = 0
-texture_normal = SubResource("AtlasTexture_q40td")
-stretch_mode = 0
-
-[node name="CloseButton" type="TextureButton" parent="."]
+[node name="CloseButton" type="TextureButton" parent="Background"]
 layout_mode = 0
-offset_left = 767.0
-offset_top = 129.0
-offset_right = 806.0
-offset_bottom = 161.0
+offset_left = 303.0
+offset_top = 6.0
+offset_right = 342.0
+offset_bottom = 38.0
 texture_normal = SubResource("AtlasTexture_g7hd6")
 stretch_mode = 0
 
 [node name="VolumeSlider" type="HSlider" parent="."]
 modulate = Color(0.14468798, 0.73489374, 0.58404255, 1)
-layout_mode = 0
-offset_left = 614.0
-offset_top = 217.0
-offset_right = 791.0
-offset_bottom = 290.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -37.5
+offset_top = -145.5
+offset_right = 139.5
+offset_bottom = -72.5
+grow_horizontal = 2
+grow_vertical = 2
 value = 50.0
 
 [node name="MusicLabel" type="Label" parent="."]
@@ -95,3 +72,29 @@ offset_bottom = 265.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_in2ko")
 text = "Music"
+
+[node name="SaveButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 592.0
+offset_top = 433.0
+offset_right = 690.0
+offset_bottom = 481.0
+texture_normal = SubResource("AtlasTexture_q40td")
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="SaveButton"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -11.5
+offset_right = 32.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_in2ko")
+text = "SAVE"

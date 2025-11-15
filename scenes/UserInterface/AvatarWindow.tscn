@@ -1,14 +1,41 @@
-[gd_scene load_steps=4 format=3 uid="uid://cfvygcqwkg8yb"]
+[gd_scene load_steps=13 format=3 uid="uid://cfvygcqwkg8yb"]
 
+[ext_resource type="Texture2D" uid="uid://blbtmadk6t0n4" path="res://assets/ui/GUI/Equipment.png" id="1_lochu"]
 [ext_resource type="Texture2D" uid="uid://csepbew64lyh1" path="res://assets/ui/GUI/Settings.png" id="1_obayw"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_378xl"]
+[ext_resource type="FontFile" uid="uid://b63qvrxir6pmy" path="res://assets/fonts/CherrySwash-Regular.ttf" id="4_xix68"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_lochu"]
-atlas = ExtResource("1_obayw")
-region = Rect2(12.490143, 0, 208.12009, 313.95016)
+atlas = ExtResource("1_lochu")
+region = Rect2(9.835999, 830.7283, 675.2308, 394.42053)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_378xl"]
 atlas = ExtResource("1_obayw")
 region = Rect2(191.61072, 3.9447708, 23.958008, 21.29601)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xix68"]
+atlas = ExtResource("1_obayw")
+region = Rect2(278.22464, 499.19836, 25.954498, 32.101624)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oh5fi"]
+atlas = ExtResource("1_obayw")
+region = Rect2(407.37277, 333.77734, 85.37668, 33.46765)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q31jy"]
+atlas = ExtResource("1_obayw")
+region = Rect2(407.23273, 336.3779, 81.19104, 30.613037)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hk04k"]
+atlas = ExtResource("1_obayw")
+region = Rect2(12.490143, 0, 208.12009, 313.95016)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vfbpj"]
+atlas = ExtResource("1_obayw")
+region = Rect2(191.61072, 3.9447708, 23.958008, 21.29601)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vbpkm"]
+atlas = ExtResource("1_obayw")
+region = Rect2(407.37277, 333.77734, 85.37668, 33.46765)
 
 [node name="AvatarWindow" type="Control"]
 layout_mode = 3
@@ -25,19 +52,269 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -334.0
-offset_top = -265.0
-offset_right = 18.0
-offset_bottom = 209.0
+offset_left = -308.5
+offset_top = -199.5
+offset_right = 308.5
+offset_bottom = 199.5
 grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("AtlasTexture_lochu")
 
 [node name="CloseButton" type="TextureButton" parent="."]
-layout_mode = 0
-offset_left = 609.0
-offset_top = 101.0
-offset_right = 648.0
-offset_bottom = 133.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 250.0
+offset_top = -181.0
+offset_right = 296.0
+offset_bottom = -137.0
+grow_horizontal = 2
+grow_vertical = 2
 texture_normal = SubResource("AtlasTexture_378xl")
 stretch_mode = 0
+
+[node name="NextButton" type="TextureButton" parent="."]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 581.0
+offset_top = -16.0
+offset_right = -674.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = SubResource("AtlasTexture_xix68")
+
+[node name="BackButton" type="TextureButton" parent="."]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 364.0
+offset_top = -16.0
+offset_right = -889.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = SubResource("AtlasTexture_xix68")
+flip_h = true
+
+[node name="Information" type="GridContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="NameLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 644.0
+offset_top = 270.0
+offset_right = 724.0
+offset_bottom = 305.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+text = "Name:
+"
+
+[node name="LevelLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 643.0
+offset_top = 310.0
+offset_right = 739.0
+offset_bottom = 345.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+text = "Level:"
+
+[node name="XPLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 643.0
+offset_top = 350.0
+offset_right = 739.0
+offset_bottom = 385.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+text = "XP:
+"
+
+[node name="Name" type="Label" parent="."]
+layout_mode = 0
+offset_left = 754.0
+offset_top = 270.0
+offset_right = 882.0
+offset_bottom = 305.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+text = "Bakircay
+"
+
+[node name="Level" type="Label" parent="."]
+layout_mode = 0
+offset_left = 754.0
+offset_top = 310.0
+offset_right = 850.0
+offset_bottom = 345.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+text = "5
+"
+
+[node name="XP" type="Label" parent="."]
+layout_mode = 0
+offset_left = 754.0
+offset_top = 350.0
+offset_right = 850.0
+offset_bottom = 385.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+text = "180"
+
+[node name="SaveButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 813.0
+offset_top = 431.0
+offset_right = 911.0
+offset_bottom = 479.0
+texture_normal = SubResource("AtlasTexture_oh5fi")
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="SaveButton"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -9.5
+offset_right = 32.0
+offset_bottom = 13.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+text = "SAVE"
+
+[node name="ChangeNameButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 738.0
+offset_top = 480.0
+offset_right = 914.0
+offset_bottom = 528.0
+texture_normal = SubResource("AtlasTexture_q31jy")
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="ChangeNameButton"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -159.0
+offset_top = -9.0
+offset_right = 10.0
+offset_bottom = 11.5
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 13
+text = "CHANGE NAME"
+
+[node name="NameWindow" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Background" type="NinePatchRect" parent="NameWindow"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 462.0
+offset_top = 272.0
+offset_right = 832.0
+offset_bottom = 444.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("AtlasTexture_hk04k")
+
+[node name="BackgroundBar" type="NinePatchRect" parent="NameWindow/Background"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -188.0
+offset_top = -104.0
+offset_right = 187.0
+offset_bottom = -63.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("AtlasTexture_hk04k")
+region_rect = Rect2(0, 0, 208, 29.389801)
+
+[node name="CloseButton" type="TextureButton" parent="NameWindow/Background"]
+layout_mode = 0
+offset_left = 322.0
+offset_top = -12.0
+offset_right = 361.0
+offset_bottom = 15.0
+texture_normal = SubResource("AtlasTexture_vfbpj")
+stretch_mode = 0
+
+[node name="NameLabel" type="Label" parent="NameWindow/Background"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 41.0
+offset_right = 171.0
+offset_bottom = 76.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+text = "New Name:
+"
+
+[node name="SaveButton" type="TextureButton" parent="NameWindow"]
+layout_mode = 0
+offset_left = 704.0
+offset_top = 388.0
+offset_right = 802.0
+offset_bottom = 436.0
+texture_normal = SubResource("AtlasTexture_vbpkm")
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="NameWindow/SaveButton"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = -9.5
+offset_right = 32.0
+offset_bottom = 13.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+text = "SAVE"
+
+[node name="NewNameLE" type="LineEdit" parent="NameWindow"]
+layout_mode = 0
+offset_left = 656.0
+offset_top = 325.0
+offset_right = 822.0
+offset_bottom = 356.0
+theme_override_fonts/font = ExtResource("4_xix68")
