@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://cfvygcqwkg8yb"]
+[gd_scene load_steps=11 format=3 uid="uid://cfvygcqwkg8yb"]
 
 [ext_resource type="Texture2D" uid="uid://blbtmadk6t0n4" path="res://assets/ui/GUI/Equipment.png" id="1_lochu"]
 [ext_resource type="Texture2D" uid="uid://csepbew64lyh1" path="res://assets/ui/GUI/Settings.png" id="1_obayw"]
@@ -13,17 +13,9 @@ region = Rect2(9.835999, 830.7283, 675.2308, 394.42053)
 atlas = ExtResource("1_obayw")
 region = Rect2(191.61072, 3.9447708, 23.958008, 21.29601)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_xix68"]
-atlas = ExtResource("1_obayw")
-region = Rect2(278.22464, 499.19836, 25.954498, 32.101624)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_oh5fi"]
 atlas = ExtResource("1_obayw")
 region = Rect2(407.37277, 333.77734, 85.37668, 33.46765)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_q31jy"]
-atlas = ExtResource("1_obayw")
-region = Rect2(407.23273, 336.3779, 81.19104, 30.613037)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hk04k"]
 atlas = ExtResource("1_obayw")
@@ -76,35 +68,6 @@ grow_vertical = 2
 texture_normal = SubResource("AtlasTexture_378xl")
 stretch_mode = 0
 
-[node name="NextButton" type="TextureButton" parent="."]
-layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = 581.0
-offset_top = -16.0
-offset_right = -674.0
-offset_bottom = 16.0
-grow_horizontal = 2
-grow_vertical = 2
-texture_normal = SubResource("AtlasTexture_xix68")
-
-[node name="BackButton" type="TextureButton" parent="."]
-layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = 364.0
-offset_top = -16.0
-offset_right = -889.0
-offset_bottom = 16.0
-grow_horizontal = 2
-grow_vertical = 2
-texture_normal = SubResource("AtlasTexture_xix68")
-flip_h = true
-
 [node name="Information" type="GridContainer" parent="."]
 layout_mode = 0
 offset_right = 40.0
@@ -118,72 +81,100 @@ offset_right = 724.0
 offset_bottom = 305.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 14
 text = "Name:
 "
 
 [node name="LevelLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 643.0
-offset_top = 310.0
+offset_top = 350.0
 offset_right = 739.0
-offset_bottom = 345.0
+offset_bottom = 385.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 14
 text = "Level:"
 
 [node name="XPLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 643.0
-offset_top = 350.0
+offset_top = 390.0
 offset_right = 739.0
-offset_bottom = 385.0
+offset_bottom = 425.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 14
 text = "XP:
 "
 
 [node name="Name" type="Label" parent="."]
 layout_mode = 0
-offset_left = 754.0
+offset_left = 771.0
 offset_top = 270.0
-offset_right = 882.0
+offset_right = 899.0
 offset_bottom = 305.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 14
 text = "Bakircay
 "
 
 [node name="Level" type="Label" parent="."]
 layout_mode = 0
-offset_left = 754.0
-offset_top = 310.0
-offset_right = 850.0
-offset_bottom = 345.0
+offset_left = 771.0
+offset_top = 350.0
+offset_right = 867.0
+offset_bottom = 385.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 14
 text = "5
 "
 
 [node name="XP" type="Label" parent="."]
 layout_mode = 0
-offset_left = 754.0
-offset_top = 350.0
-offset_right = 850.0
-offset_bottom = 385.0
+offset_left = 771.0
+offset_top = 390.0
+offset_right = 867.0
+offset_bottom = 425.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 14
 text = "180"
 
-[node name="SaveButton" type="TextureButton" parent="."]
+[node name="BirthdayLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 643.0
+offset_top = 310.0
+offset_right = 760.0
+offset_bottom = 345.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 13
+text = "Birthday:"
+
+[node name="Birthday" type="Label" parent="."]
+layout_mode = 0
+offset_left = 771.0
+offset_top = 310.0
+offset_right = 901.0
+offset_bottom = 345.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 13
+text = "10.10.2010"
+
+[node name="EditButton" type="TextureButton" parent="."]
 layout_mode = 0
 offset_left = 813.0
-offset_top = 431.0
+offset_top = 473.0
 offset_right = 911.0
-offset_bottom = 479.0
+offset_bottom = 521.0
 texture_normal = SubResource("AtlasTexture_oh5fi")
 stretch_mode = 0
 
-[node name="Label" type="Label" parent="SaveButton"]
+[node name="Label" type="Label" parent="EditButton"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -198,43 +189,16 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
-text = "SAVE"
+text = "EDIT"
 
-[node name="ChangeNameButton" type="TextureButton" parent="."]
-layout_mode = 0
-offset_left = 738.0
-offset_top = 480.0
-offset_right = 914.0
-offset_bottom = 528.0
-texture_normal = SubResource("AtlasTexture_q31jy")
-stretch_mode = 0
-
-[node name="Label" type="Label" parent="ChangeNameButton"]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -159.0
-offset_top = -9.0
-offset_right = 10.0
-offset_bottom = 11.5
-grow_horizontal = 0
-grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_fonts/font = ExtResource("3_378xl")
-theme_override_font_sizes/font_size = 13
-text = "CHANGE NAME"
-
-[node name="NameWindow" type="Control" parent="."]
+[node name="EditWindow" type="Control" parent="."]
 visible = false
 layout_mode = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="Background" type="NinePatchRect" parent="NameWindow"]
+[node name="Background" type="NinePatchRect" parent="EditWindow"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -249,7 +213,7 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("AtlasTexture_hk04k")
 
-[node name="BackgroundBar" type="NinePatchRect" parent="NameWindow/Background"]
+[node name="BackgroundBar" type="NinePatchRect" parent="EditWindow/Background"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -265,7 +229,7 @@ grow_vertical = 2
 texture = SubResource("AtlasTexture_hk04k")
 region_rect = Rect2(0, 0, 208, 29.389801)
 
-[node name="CloseButton" type="TextureButton" parent="NameWindow/Background"]
+[node name="CloseButton" type="TextureButton" parent="EditWindow/Background"]
 layout_mode = 0
 offset_left = 322.0
 offset_top = -12.0
@@ -274,47 +238,85 @@ offset_bottom = 15.0
 texture_normal = SubResource("AtlasTexture_vfbpj")
 stretch_mode = 0
 
-[node name="NameLabel" type="Label" parent="NameWindow/Background"]
+[node name="NameLabel" type="Label" parent="EditWindow/Background"]
 layout_mode = 0
 offset_left = 27.0
-offset_top = 41.0
+offset_top = 47.0
 offset_right = 171.0
-offset_bottom = 76.0
+offset_bottom = 82.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 14
 text = "New Name:
 "
 
-[node name="SaveButton" type="TextureButton" parent="NameWindow"]
+[node name="SaveButton" type="TextureButton" parent="EditWindow"]
 layout_mode = 0
-offset_left = 704.0
-offset_top = 388.0
-offset_right = 802.0
-offset_bottom = 436.0
+offset_left = 732.0
+offset_top = 412.0
+offset_right = 820.0
+offset_bottom = 455.0
 texture_normal = SubResource("AtlasTexture_vbpkm")
 stretch_mode = 0
 
-[node name="Label" type="Label" parent="NameWindow/SaveButton"]
+[node name="Label" type="Label" parent="EditWindow/SaveButton"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -32.0
-offset_top = -9.5
-offset_right = 32.0
-offset_bottom = 13.5
+offset_left = -29.0
+offset_top = -8.5
+offset_right = 35.0
+offset_bottom = 14.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 14
 text = "SAVE"
 
-[node name="NewNameLE" type="LineEdit" parent="NameWindow"]
+[node name="NewNameLE" type="LineEdit" parent="EditWindow"]
 layout_mode = 0
-offset_left = 656.0
-offset_top = 325.0
-offset_right = 822.0
-offset_bottom = 356.0
+offset_left = 649.0
+offset_top = 331.0
+offset_right = 815.0
+offset_bottom = 359.0
+theme_override_fonts/font = ExtResource("4_xix68")
+theme_override_font_sizes/font_size = 14
+placeholder_text = "Test"
+
+[node name="BirthdayLabel" type="Label" parent="EditWindow"]
+layout_mode = 0
+offset_left = 508.0
+offset_top = 380.0
+offset_right = 625.0
+offset_bottom = 415.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_378xl")
+theme_override_font_sizes/font_size = 13
+text = "Birthday:"
+
+[node name="BirthdayContainer" type="HBoxContainer" parent="EditWindow"]
+layout_mode = 0
+offset_left = 637.0
+offset_top = 376.0
+offset_right = 814.0
+offset_bottom = 396.0
+alignment = 1
+
+[node name="Day" type="OptionButton" parent="EditWindow/BirthdayContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_xix68")
+
+[node name="Month" type="OptionButton" parent="EditWindow/BirthdayContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("4_xix68")
+autowrap_mode = 2
+
+[node name="Year" type="OptionButton" parent="EditWindow/BirthdayContainer"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
 theme_override_fonts/font = ExtResource("4_xix68")
