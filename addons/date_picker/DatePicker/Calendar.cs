@@ -19,6 +19,7 @@ public partial class Calendar : Control
     /// </summary>
     [Export]
     public BaseButton Next { get; private set; }
+    /// <summary>
     /// The button to go the previous part of the view (i.e. next month/year).
     /// </summary>
     [Export]
