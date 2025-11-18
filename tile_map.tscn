@@ -11718,6 +11718,7 @@ texture = ExtResource("6_i6cpi")
 9:55/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_l1e5b"]
+tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_s20o0")
 sources/1 = SubResource("TileSetAtlasSource_47trr")
 sources/2 = SubResource("TileSetAtlasSource_mvv3g")
