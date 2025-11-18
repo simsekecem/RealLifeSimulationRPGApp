@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bawus3d7gq60s"
-path="res://.godot/imported/map2.png-3d679152a27c5b06df7271c330e05a29.ctex"
+uid="uid://wpytollh2xvl"
+path="res://.godot/imported/joystick_handle.png-a4ee1bbb2702d7383bd6edef38109b77.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/make it big/map2.png"
-dest_files=["res://.godot/imported/map2.png-3d679152a27c5b06df7271c330e05a29.ctex"]
+source_file="res://assets/joystick/joystick_handle.png"
+dest_files=["res://.godot/imported/joystick_handle.png-a4ee1bbb2702d7383bd6edef38109b77.ctex"]
 
 [params]
 
