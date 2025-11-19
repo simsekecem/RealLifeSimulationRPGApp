@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://deoxjq7apoo6a"
-path="res://.godot/imported/Serene_Village_XP.png-01d2e63a21bf6af8fb8aa408148ec537.ctex"
+path="res://.godot/imported/Serene_Village_XP.png-891b79d5f0bfdaa07c6f3cd55855f1e5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/town/RPG_MAKER_XP/Serene_Village_XP.png"
-dest_files=["res://.godot/imported/Serene_Village_XP.png-01d2e63a21bf6af8fb8aa408148ec537.ctex"]
+source_file="res://assets/make it big/Serene_Village_XP.png"
+dest_files=["res://.godot/imported/Serene_Village_XP.png-891b79d5f0bfdaa07c6f3cd55855f1e5.ctex"]
 
 [params]
 

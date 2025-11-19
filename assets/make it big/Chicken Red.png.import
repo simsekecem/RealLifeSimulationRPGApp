@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ncg2pskbqdol"
-path="res://.godot/imported/Chicken Red.png-66a200c9d5b7a4c6374e222b114bf2c1.ctex"
+path="res://.godot/imported/Chicken Red.png-f081a80ebeb255ce8031926d9f62ff35.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/town/Farm RPG FREE 16x16 - Tiny Asset Pack/Farm Animals/Chicken Red.png"
-dest_files=["res://.godot/imported/Chicken Red.png-66a200c9d5b7a4c6374e222b114bf2c1.ctex"]
+source_file="res://assets/make it big/Chicken Red.png"
+dest_files=["res://.godot/imported/Chicken Red.png-f081a80ebeb255ce8031926d9f62ff35.ctex"]
 
 [params]
 

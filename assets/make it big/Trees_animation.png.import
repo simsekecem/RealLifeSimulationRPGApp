@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ccaveagge2mbm"
-path="res://.godot/imported/Trees_animation.png-4ea35e86c0eb4d85fd5a76e81e520400.ctex"
+path="res://.godot/imported/Trees_animation.png-3911a11b97821fb64067f00fbaa2f70b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/town/Tiled_files/Trees_animation.png"
-dest_files=["res://.godot/imported/Trees_animation.png-4ea35e86c0eb4d85fd5a76e81e520400.ctex"]
+source_file="res://assets/make it big/Trees_animation.png"
+dest_files=["res://.godot/imported/Trees_animation.png-3911a11b97821fb64067f00fbaa2f70b.ctex"]
 
 [params]
 

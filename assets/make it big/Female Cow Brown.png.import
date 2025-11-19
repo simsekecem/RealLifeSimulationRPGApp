@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lpbaobgmp32q"
-path="res://.godot/imported/Female Cow Brown.png-c3e9ee9fd062a037dd4e7426d0c23a0e.ctex"
+path="res://.godot/imported/Female Cow Brown.png-f857215ce4aba54e7ff71a001ce75bfd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/town/Farm RPG FREE 16x16 - Tiny Asset Pack/Farm Animals/Female Cow Brown.png"
-dest_files=["res://.godot/imported/Female Cow Brown.png-c3e9ee9fd062a037dd4e7426d0c23a0e.ctex"]
+source_file="res://assets/make it big/Female Cow Brown.png"
+dest_files=["res://.godot/imported/Female Cow Brown.png-f857215ce4aba54e7ff71a001ce75bfd.ctex"]
 
 [params]
 

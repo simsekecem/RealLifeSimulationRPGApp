@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bawus3d7gq60s"
-path="res://.godot/imported/map2.png-d4edeec7596c7206ff7b4fdc8f5ba4cb.ctex"
+path="res://.godot/imported/map2.png-3d679152a27c5b06df7271c330e05a29.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/town/TilesetGrass/map2.png"
-dest_files=["res://.godot/imported/map2.png-d4edeec7596c7206ff7b4fdc8f5ba4cb.ctex"]
+source_file="res://assets/make it big/map2.png"
+dest_files=["res://.godot/imported/map2.png-3d679152a27c5b06df7271c330e05a29.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://4s7br7hsbnuq"
-path="res://.godot/imported/spr_deco_chicken_01_strip4.png-7dcbed4f05ac6a0f94c861f3c17b9209.ctex"
+path="res://.godot/imported/spr_deco_chicken_01_strip4.png-1dcf0fbba893e16c3fb2945610043cad.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/town/Elements/Animals/spr_deco_chicken_01_strip4.png"
-dest_files=["res://.godot/imported/spr_deco_chicken_01_strip4.png-7dcbed4f05ac6a0f94c861f3c17b9209.ctex"]
+source_file="res://assets/make it big/spr_deco_chicken_01_strip4.png"
+dest_files=["res://.godot/imported/spr_deco_chicken_01_strip4.png-1dcf0fbba893e16c3fb2945610043cad.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bs5t5ieve7nea"
-path="res://.godot/imported/overworld_tileset_grass.png-b7979451e448fd5510bcd9be3e652c73.ctex"
+path="res://.godot/imported/overworld_tileset_grass.png-e48f31f8a8d3469bf091e25241f843cc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/town/TilesetGrass/overworld_tileset_grass.png"
-dest_files=["res://.godot/imported/overworld_tileset_grass.png-b7979451e448fd5510bcd9be3e652c73.ctex"]
+source_file="res://assets/make it big/overworld_tileset_grass.png"
+dest_files=["res://.godot/imported/overworld_tileset_grass.png-e48f31f8a8d3469bf091e25241f843cc.ctex"]
 
 [params]
 

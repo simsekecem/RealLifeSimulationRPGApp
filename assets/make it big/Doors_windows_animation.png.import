@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bmxrnotacpao8"
-path="res://.godot/imported/Doors_windows_animation.png-6f9b2a45274f6d0451ac2617fc51a677.ctex"
+path="res://.godot/imported/Doors_windows_animation.png-7f35fda81e77ae321029c050b3c62290.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/town/Tiled_files/Doors_windows_animation.png"
-dest_files=["res://.godot/imported/Doors_windows_animation.png-6f9b2a45274f6d0451ac2617fc51a677.ctex"]
+source_file="res://assets/make it big/Doors_windows_animation.png"
+dest_files=["res://.godot/imported/Doors_windows_animation.png-7f35fda81e77ae321029c050b3c62290.ctex"]
 
 [params]
 
