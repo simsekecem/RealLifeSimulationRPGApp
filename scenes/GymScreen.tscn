@@ -1,7 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://dm8yea7kjvrhm"]
+[gd_scene load_steps=7 format=3 uid="uid://dm8yea7kjvrhm"]
 
 [ext_resource type="Texture2D" uid="uid://bods6euoxuh5l" path="res://assets/backgrounds/gym2.png" id="1_nmixc"]
 [ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="2_qlnuv"]
+
+[sub_resource type="Theme" id="Theme_qlnuv"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nmixc"]
 bg_color = Color(0.7058824, 0.8509804, 0.8235294, 0.6313726)
@@ -24,6 +26,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_qlnuv")
 
 [node name="Background" type="NinePatchRect" parent="."]
 layout_mode = 0
@@ -127,10 +130,10 @@ text = "Rest"
 
 [node name="AddButton" type="Button" parent="TabContainer/Daily"]
 layout_mode = 0
-offset_left = 281.0
-offset_top = 72.0
-offset_right = 375.0
-offset_bottom = 133.0
+offset_left = 558.0
+offset_top = -47.0
+offset_right = 652.0
+offset_bottom = -2.0
 
 [node name="SaveButton" type="Button" parent="TabContainer/Daily"]
 layout_mode = 0
