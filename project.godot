@@ -28,7 +28,7 @@ window/stretch/aspect="keep_width"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/date_picker/DatePicker/plugin.cfg", "res://addons/date_picker/plugin.cfg", "res://addons/date_picker_android/plugin.cfg", "res://addons/date_picker_android/root/addons/DateTimePicker/plugin.cfg")
+enabled=PackedStringArray()
 
 [rendering]
 

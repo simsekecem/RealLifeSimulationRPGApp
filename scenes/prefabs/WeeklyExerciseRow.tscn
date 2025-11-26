@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://bsbp2gyrwgqtg"]
+
+[node name="WeeklyExerciseRow" type="HBoxContainer"]
+offset_right = 467.0
+offset_bottom = 169.0
+
+[node name="ExerciseName" type="Label" parent="."]
+layout_mode = 2
+
+[node name="Duration" type="Label" parent="."]
+layout_mode = 2

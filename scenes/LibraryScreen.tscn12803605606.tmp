@@ -1,0 +1,126 @@
+[gd_scene load_steps=8 format=3 uid="uid://cd5swl0nqiup6"]
+
+[ext_resource type="Texture2D" uid="uid://1r6d4qjhnbcr" path="res://assets/backgrounds/library.png" id="1_kwsf8"]
+[ext_resource type="Script" uid="uid://35k5ed4pxeom" path="res://scenes/LibraryScreen.gd" id="1_rlh3e"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_o6s3j"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_juet4"]
+bg_color = Color(0.6666667, 0.62352943, 0.7921569, 0)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o6s3j"]
+bg_color = Color(0.6666667, 0.62352943, 0.7921569, 1)
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2yf15"]
+bg_color = Color(0.4117647, 0.3647059, 0.54509807, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rlh3e"]
+bg_color = Color(0.8235294, 0.8, 0.9254902, 1)
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[node name="LibraryScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rlh3e")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -11.0
+offset_top = -159.0
+offset_right = 8.0
+offset_bottom = 219.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_kwsf8")
+
+[node name="BooksPanel" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 44.0
+offset_top = 329.0
+offset_right = 293.0
+offset_bottom = 627.0
+
+[node name="Label" type="Label" parent="BooksPanel"]
+layout_mode = 2
+text = "Still Reading"
+
+[node name="CurrentlyReading" type="TextEdit" parent="BooksPanel"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="BooksPanel"]
+layout_mode = 2
+text = "Completed"
+
+[node name="Finished" type="TextEdit" parent="BooksPanel"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="BooksPanel"]
+layout_mode = 2
+text = "Wishlist"
+
+[node name="Wishlist" type="TextEdit" parent="BooksPanel"]
+layout_mode = 2
+
+[node name="HoursPanel" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 380.0
+offset_top = 188.0
+offset_right = 1242.0
+offset_bottom = 649.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_juet4")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HoursPanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HoursList" type="VBoxContainer" parent="HoursPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="DaysPanel" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 383.0
+offset_top = 125.0
+offset_right = 1219.0
+offset_bottom = 162.0
+
+[node name="MondayButton" type="Button" parent="DaysPanel"]
+custom_minimum_size = Vector2(110, 45)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_focus_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_pressed_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_hover_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_fonts/font = ExtResource("2_o6s3j")
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_o6s3j")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_2yf15")
+theme_override_styles/hover = SubResource("StyleBoxFlat_rlh3e")
+text = "MONDAY
+"

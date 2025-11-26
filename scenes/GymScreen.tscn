@@ -1,0 +1,243 @@
+[gd_scene format=3 uid="uid://dm8yea7kjvrhm"]
+
+[node name="GymScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.02890625
+anchor_top = 0.029166667
+anchor_right = 0.890625
+anchor_bottom = 0.85555553
+grow_horizontal = 2
+grow_vertical = 2
+current_tab = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="Daily" type="Control" parent="TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="YearSelect" type="OptionButton" parent="TabContainer/Daily"]
+layout_mode = 0
+offset_left = 489.0
+offset_top = 122.0
+offset_right = 521.0
+offset_bottom = 142.0
+
+[node name="MonthSelect" type="OptionButton" parent="TabContainer/Daily"]
+layout_mode = 0
+offset_left = 324.0
+offset_top = 206.0
+offset_right = 356.0
+offset_bottom = 226.0
+
+[node name="DaySelect" type="OptionButton" parent="TabContainer/Daily"]
+layout_mode = 0
+offset_left = 610.0
+offset_top = 329.0
+offset_right = 642.0
+offset_bottom = 349.0
+
+[node name="TodayButton" type="Button" parent="TabContainer/Daily"]
+layout_mode = 0
+offset_left = 484.0
+offset_top = 346.0
+offset_right = 553.0
+offset_bottom = 373.0
+
+[node name="TomorrowButton" type="Button" parent="TabContainer/Daily"]
+layout_mode = 0
+offset_left = 187.0
+offset_top = 180.0
+offset_right = 268.0
+offset_bottom = 229.0
+
+[node name="HeaderRow" type="HBoxContainer" parent="TabContainer/Daily"]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 4.0
+offset_right = 691.0
+offset_bottom = 44.0
+
+[node name="CompletedLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+layout_mode = 2
+text = "Completed"
+
+[node name="NameLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+layout_mode = 2
+text = "Name"
+
+[node name="SetsLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+layout_mode = 2
+text = "Sets"
+
+[node name="RepsLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+layout_mode = 2
+text = "Reps"
+
+[node name="RegionLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+layout_mode = 2
+text = "Region"
+
+[node name="DurationLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+layout_mode = 2
+text = "Duration"
+
+[node name="WeightLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+layout_mode = 2
+text = "Weight"
+
+[node name="RestLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+layout_mode = 2
+text = "Rest"
+
+[node name="AddButton" type="Button" parent="TabContainer/Daily"]
+layout_mode = 0
+offset_left = 281.0
+offset_top = 72.0
+offset_right = 375.0
+offset_bottom = 133.0
+
+[node name="SaveButton" type="Button" parent="TabContainer/Daily"]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 48.0
+offset_right = 232.0
+offset_bottom = 94.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Daily"]
+layout_mode = 0
+offset_left = 671.0
+offset_top = 95.0
+offset_right = 711.0
+offset_bottom = 135.0
+
+[node name="ContentList" type="VBoxContainer" parent="TabContainer/Daily/ScrollContainer"]
+layout_mode = 2
+
+[node name="Weekly" type="Control" parent="TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="MondayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/MondayRow"]
+layout_mode = 2
+text = "Monday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/MondayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/MondayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="TuesdayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/TuesdayRow"]
+layout_mode = 2
+text = "Tuesday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/TuesdayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/TuesdayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="WednesdayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/WednesdayRow"]
+layout_mode = 2
+text = "Wednesday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/WednesdayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/WednesdayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="ThursdayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/ThursdayRow"]
+layout_mode = 2
+text = "Thursday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/ThursdayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/ThursdayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="FridayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/FridayRow"]
+layout_mode = 2
+text = "Friday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/FridayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/FridayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="SaturdayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/SaturdayRow"]
+layout_mode = 2
+text = "Saturday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/SaturdayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/SaturdayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="SundayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/SundayRow"]
+layout_mode = 2
+text = "Sunday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/SundayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/SundayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="Legends" type="HBoxContainer" parent="TabContainer/Weekly"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Monthly" type="Control" parent="TabContainer"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2

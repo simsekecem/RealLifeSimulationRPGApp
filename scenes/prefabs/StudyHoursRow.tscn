@@ -1,0 +1,58 @@
+[gd_scene load_steps=5 format=3 uid="uid://ds3utl7tbyaha"]
+
+[ext_resource type="Script" uid="uid://d35gri4r62ays" path="res://scenes/prefabs/StudyHoursRow.gd" id="1_1gvqj"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="1_4lo20"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1gvqj"]
+bg_color = Color(0.6909972, 0.65659595, 0.82224774, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.36862746)
+shadow_size = 3
+shadow_offset = Vector2(2, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0ln4e"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[node name="StudyHoursRow" type="Panel"]
+custom_minimum_size = Vector2(40, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1gvqj")
+script = ExtResource("1_1gvqj")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.015277778
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="HourLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_fonts/font = ExtResource("1_4lo20")
+theme_override_font_sizes/font_size = 14
+text = "10-12am:"
+
+[node name="TaskTextEdit" type="TextEdit" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/caret_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_selected_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/selection_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_fonts/font = ExtResource("1_4lo20")
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_0ln4e")
+wrap_mode = 1
+scroll_smooth = true
