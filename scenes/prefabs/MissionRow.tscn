@@ -1,0 +1,75 @@
+[gd_scene load_steps=3 format=3 uid="uid://dkq4sx1j1sc1a"]
+
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="1_jnupj"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_q8u71"]
+
+[node name="MissionRow" type="Panel"]
+custom_minimum_size = Vector2(778, 75)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 163.0
+offset_top = 60.0
+offset_right = -277.0
+offset_bottom = -478.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_q8u71")
+
+[node name="MissionList" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.94166666
+anchor_bottom = 1.0
+offset_right = 6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+
+[node name="MissionName" type="Label" parent="MissionList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2627451, 0.13725491, 0.11764706, 1)
+theme_override_fonts/font = ExtResource("1_jnupj")
+theme_override_font_sizes/font_size = 13
+text = "asdasda"
+
+[node name="MissionDetail" type="RichTextLabel" parent="MissionList"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_force_pass_scroll_events = false
+theme_override_colors/default_color = Color(0.2627451, 0.13725491, 0.11764706, 1)
+theme_override_colors/font_selected_color = Color(0.2627451, 0.13725491, 0.11764706, 1)
+theme_override_fonts/normal_font = ExtResource("1_jnupj")
+theme_override_font_sizes/normal_font_size = 12
+text = "sadasdasd"
+metadata/_edit_use_anchors_ = true
+
+[node name="Separator" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(2, 0)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.2627451, 0.13725491, 0.11764706, 1)
+
+[node name="Completed" type="CheckBox" parent="."]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -26.0
+offset_top = -12.5
+offset_bottom = 12.5
+grow_horizontal = 0
+grow_vertical = 2
+expand_icon = true
