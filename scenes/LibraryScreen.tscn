@@ -1,9 +1,10 @@
-[gd_scene load_steps=13 format=3 uid="uid://cd5swl0nqiup6"]
+[gd_scene load_steps=14 format=3 uid="uid://cd5swl0nqiup6"]
 
 [ext_resource type="Texture2D" uid="uid://1r6d4qjhnbcr" path="res://assets/backgrounds/library.png" id="1_kwsf8"]
 [ext_resource type="Script" uid="uid://35k5ed4pxeom" path="res://scenes/LibraryScreen.gd" id="1_rlh3e"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_o6s3j"]
 [ext_resource type="Texture2D" uid="uid://c63o8vj6d0qo1" path="res://assets/library_sign.png" id="4_2yf15"]
+[ext_resource type="Theme" uid="uid://cns8x5gumkdgm" path="res://scenes/LibraryScreen.tres" id="4_juet4"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cysxn"]
 bg_color = Color(0.6901961, 0.654902, 0.8235294, 1)
@@ -161,6 +162,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("4_juet4")
 metadata/_edit_use_anchors_ = true
 
 [node name="HoursList" type="VBoxContainer" parent="HoursPanel/ScrollContainer"]

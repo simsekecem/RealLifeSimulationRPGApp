@@ -1,6 +1,21 @@
-[gd_scene load_steps=2 format=3 uid="uid://dm8yea7kjvrhm"]
+[gd_scene load_steps=6 format=3 uid="uid://dm8yea7kjvrhm"]
 
 [ext_resource type="Texture2D" uid="uid://bods6euoxuh5l" path="res://assets/backgrounds/gym2.png" id="1_nmixc"]
+[ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="2_qlnuv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nmixc"]
+bg_color = Color(0.7058824, 0.8509804, 0.8235294, 0.6313726)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qlnuv"]
+bg_color = Color(0.5411765, 0.6509804, 0.70980394, 1)
+
+[sub_resource type="Theme" id="Theme_v4x2c"]
+TabContainer/styles/panel = SubResource("StyleBoxFlat_nmixc")
+TabContainer/styles/tab_focus = SubResource("StyleBoxFlat_qlnuv")
 
 [node name="GymScreen" type="Control"]
 layout_mode = 3
@@ -27,11 +42,13 @@ anchor_right = 0.890625
 anchor_bottom = 0.85555553
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_qlnuv")
 current_tab = 0
 metadata/_edit_use_anchors_ = true
 
 [node name="Daily" type="Control" parent="TabContainer"]
 layout_mode = 2
+theme = SubResource("Theme_v4x2c")
 metadata/_tab_index = 0
 
 [node name="YearSelect" type="OptionButton" parent="TabContainer/Daily"]
