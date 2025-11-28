@@ -1,34 +1,57 @@
-[gd_scene format=3 uid="uid://cphccg5ghjwjp"]
+[gd_scene load_steps=2 format=3 uid="uid://cphccg5ghjwjp"]
+
+[ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="1_jqvq1"]
 
 [node name="DailyExerciseRow" type="HBoxContainer"]
+custom_minimum_size = Vector2(1084, 40)
 offset_left = 31.0
 offset_top = 57.0
 offset_right = 942.0
 offset_bottom = 99.0
+theme = ExtResource("1_jqvq1")
+theme_override_constants/separation = 7
+alignment = 1
 
-[node name="Completed" type="CheckBox" parent="."]
+[node name="BoxContainer" type="BoxContainer" parent="."]
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
+alignment = 1
+
+[node name="Completed" type="CheckBox" parent="BoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
 
 [node name="ExerciseName" type="LineEdit" parent="."]
+custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
+size_flags_stretch_ratio = 3.0
 
 [node name="Sets" type="SpinBox" parent="."]
+custom_minimum_size = Vector2(94, 0)
 layout_mode = 2
 
 [node name="Reps" type="SpinBox" parent="."]
+custom_minimum_size = Vector2(94, 0)
 layout_mode = 2
 
 [node name="Duration" type="SpinBox" parent="."]
+custom_minimum_size = Vector2(128, 0)
 layout_mode = 2
 
 [node name="Rest" type="SpinBox" parent="."]
-layout_mode = 2
-
-[node name="DeleteButton" type="Button" parent="."]
-layout_mode = 2
-
-[node name="Region" type="OptionButton" parent="."]
+custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 
 [node name="Weight" type="SpinBox" parent="."]
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
+
+[node name="Region" type="OptionButton" parent="."]
+custom_minimum_size = Vector2(175, 0)
+layout_mode = 2
+size_flags_stretch_ratio = 2.0
+
+[node name="DeleteButton" type="Button" parent="."]
+layout_mode = 2
+text = "-"

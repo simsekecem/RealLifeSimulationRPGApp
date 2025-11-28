@@ -1,5 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://dm8yea7kjvrhm"]
+[gd_scene load_steps=8 format=3 uid="uid://dm8yea7kjvrhm"]
 
+[ext_resource type="Script" uid="uid://dm6agftvum4vd" path="res://scenes/GymScreen.gd" id="1_jyrom"]
 [ext_resource type="Texture2D" uid="uid://bods6euoxuh5l" path="res://assets/backgrounds/gym2.png" id="1_nmixc"]
 [ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="2_qlnuv"]
 [ext_resource type="Texture2D" uid="uid://c4614rpjrbwnx" path="res://assets/gym_sign.png" id="3_v4x2c"]
@@ -25,6 +26,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_jyrom")
 
 [node name="Background" type="NinePatchRect" parent="."]
 layout_mode = 0
@@ -37,10 +39,10 @@ texture = ExtResource("1_nmixc")
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.02890625
-anchor_top = 0.029166667
-anchor_right = 0.890625
-anchor_bottom = 0.85555553
+anchor_left = 0.03046875
+anchor_top = 0.04027778
+anchor_right = 0.8921875
+anchor_bottom = 0.7847222
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_qlnuv")
@@ -52,218 +54,244 @@ layout_mode = 2
 theme = SubResource("Theme_v4x2c")
 metadata/_tab_index = 0
 
-[node name="YearSelect" type="OptionButton" parent="TabContainer/Daily"]
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Daily"]
 layout_mode = 0
-offset_left = 489.0
-offset_top = 122.0
-offset_right = 521.0
-offset_bottom = 142.0
+offset_left = 102.0
+offset_top = 512.0
+offset_right = 255.0
+offset_bottom = 552.0
 
-[node name="MonthSelect" type="OptionButton" parent="TabContainer/Daily"]
-layout_mode = 0
-offset_left = 324.0
-offset_top = 206.0
-offset_right = 356.0
-offset_bottom = 226.0
-
-[node name="DaySelect" type="OptionButton" parent="TabContainer/Daily"]
-layout_mode = 0
-offset_left = 610.0
-offset_top = 329.0
-offset_right = 642.0
-offset_bottom = 349.0
-
-[node name="TodayButton" type="Button" parent="TabContainer/Daily"]
-layout_mode = 0
-offset_left = 484.0
-offset_top = 346.0
-offset_right = 553.0
-offset_bottom = 373.0
-
-[node name="TomorrowButton" type="Button" parent="TabContainer/Daily"]
-layout_mode = 0
-offset_left = 187.0
-offset_top = 180.0
-offset_right = 268.0
-offset_bottom = 229.0
-
-[node name="HeaderRow" type="HBoxContainer" parent="TabContainer/Daily"]
-layout_mode = 0
-offset_left = 114.0
-offset_top = 4.0
-offset_right = 691.0
-offset_bottom = 44.0
-
-[node name="CompletedLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+[node name="DaySelect" type="OptionButton" parent="TabContainer/Daily/HBoxContainer"]
 layout_mode = 2
-text = "Completed"
 
-[node name="NameLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+[node name="MonthSelect" type="OptionButton" parent="TabContainer/Daily/HBoxContainer"]
 layout_mode = 2
+
+[node name="YearSelect" type="OptionButton" parent="TabContainer/Daily/HBoxContainer"]
+layout_mode = 2
+item_count = 1
+popup/item_0/id = 0
+
+[node name="TodayButton" type="Button" parent="TabContainer/Daily/HBoxContainer"]
+layout_mode = 2
+text = "TODAY"
+
+[node name="TomorrowButton" type="Button" parent="TabContainer/Daily/HBoxContainer"]
+layout_mode = 2
+text = "TOMORROW"
+
+[node name="ListArea" type="VBoxContainer" parent="TabContainer/Daily"]
+custom_minimum_size = Vector2(1080, 0)
+layout_mode = 0
+offset_top = 11.0
+offset_right = 1084.0
+offset_bottom = 455.0
+
+[node name="HeaderRow" type="HBoxContainer" parent="TabContainer/Daily/ListArea"]
+custom_minimum_size = Vector2(1084, 40)
+layout_mode = 2
+theme_override_constants/separation = 9
+
+[node name="CompletedLabel" type="Label" parent="TabContainer/Daily/ListArea/HeaderRow"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.31143, 0.28139997, 0.42, 1)
+text = " Done"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameLabel" type="Label" parent="TabContainer/Daily/ListArea/HeaderRow"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_stretch_ratio = 3.0
+theme_override_colors/font_color = Color(0.30980393, 0.28235295, 0.41960785, 1)
 text = "Name"
+horizontal_alignment = 1
 
-[node name="SetsLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+[node name="SetsLabel" type="Label" parent="TabContainer/Daily/ListArea/HeaderRow"]
+custom_minimum_size = Vector2(94, 0)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.30980393, 0.28235295, 0.41960785, 1)
 text = "Sets"
+horizontal_alignment = 1
 
-[node name="RepsLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+[node name="RepsLabel" type="Label" parent="TabContainer/Daily/ListArea/HeaderRow"]
+custom_minimum_size = Vector2(94, 0)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.30980393, 0.28235295, 0.41960785, 1)
 text = "Reps"
+horizontal_alignment = 1
 
-[node name="RegionLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+[node name="DurationLabel" type="Label" parent="TabContainer/Daily/ListArea/HeaderRow"]
+custom_minimum_size = Vector2(128, 0)
 layout_mode = 2
-text = "Region"
-
-[node name="DurationLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
-layout_mode = 2
+theme_override_colors/font_color = Color(0.30980393, 0.28235295, 0.41960785, 1)
 text = "Duration"
+horizontal_alignment = 1
 
-[node name="WeightLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
+[node name="RestLabel" type="Label" parent="TabContainer/Daily/ListArea/HeaderRow"]
+custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
-text = "Weight"
-
-[node name="RestLabel" type="Label" parent="TabContainer/Daily/HeaderRow"]
-layout_mode = 2
+theme_override_colors/font_color = Color(0.30980393, 0.28235295, 0.41960785, 1)
 text = "Rest"
+horizontal_alignment = 1
+
+[node name="WeightLabel" type="Label" parent="TabContainer/Daily/ListArea/HeaderRow"]
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.30980393, 0.28235295, 0.41960785, 1)
+text = "Weight"
+horizontal_alignment = 1
+
+[node name="RegionLabel" type="Label" parent="TabContainer/Daily/ListArea/HeaderRow"]
+custom_minimum_size = Vector2(175, 0)
+layout_mode = 2
+size_flags_stretch_ratio = 2.0
+theme_override_colors/font_color = Color(0.30980393, 0.28235295, 0.41960785, 1)
+text = "Region"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Label" parent="TabContainer/Daily/ListArea/HeaderRow"]
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="TabContainer/Daily/ListArea"]
+custom_minimum_size = Vector2(1073, 1.3)
+layout_mode = 2
+size_flags_horizontal = 8
+color = Color(0.39708546, 0.2981006, 0.42885175, 1)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Daily/ListArea"]
+custom_minimum_size = Vector2(1084, 400)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ContentList" type="VBoxContainer" parent="TabContainer/Daily/ListArea/ScrollContainer"]
+layout_mode = 2
 
 [node name="AddButton" type="Button" parent="TabContainer/Daily"]
 layout_mode = 0
-offset_left = 566.0
-offset_top = 103.0
-offset_right = 660.0
-offset_bottom = 148.0
+offset_left = 1111.0
+offset_top = 371.0
+offset_right = 1196.0
+offset_bottom = 417.0
+text = "ADD"
 
 [node name="SaveButton" type="Button" parent="TabContainer/Daily"]
 layout_mode = 0
-offset_left = 54.0
-offset_top = 37.0
-offset_right = 182.0
-offset_bottom = 83.0
-
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Daily"]
-layout_mode = 0
-offset_left = 671.0
-offset_top = 95.0
-offset_right = 711.0
-offset_bottom = 135.0
-
-[node name="ContentList" type="VBoxContainer" parent="TabContainer/Daily/ScrollContainer"]
-layout_mode = 2
+offset_left = 1103.0
+offset_top = 426.0
+offset_right = 1207.0
+offset_bottom = 472.0
+text = "SAVE"
 
 [node name="Weekly" type="Control" parent="TabContainer"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="MondayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="DayLabel" type="Label" parent="TabContainer/Weekly/MondayRow"]
-layout_mode = 2
-text = "Monday"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/MondayRow"]
-layout_mode = 2
-
-[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/MondayRow/ScrollContainer"]
-layout_mode = 2
-
-[node name="TuesdayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="DayLabel" type="Label" parent="TabContainer/Weekly/TuesdayRow"]
-layout_mode = 2
-text = "Tuesday"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/TuesdayRow"]
-layout_mode = 2
-
-[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/TuesdayRow/ScrollContainer"]
-layout_mode = 2
-
-[node name="WednesdayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="DayLabel" type="Label" parent="TabContainer/Weekly/WednesdayRow"]
-layout_mode = 2
-text = "Wednesday"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/WednesdayRow"]
-layout_mode = 2
-
-[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/WednesdayRow/ScrollContainer"]
-layout_mode = 2
-
-[node name="ThursdayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="DayLabel" type="Label" parent="TabContainer/Weekly/ThursdayRow"]
-layout_mode = 2
-text = "Thursday"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/ThursdayRow"]
-layout_mode = 2
-
-[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/ThursdayRow/ScrollContainer"]
-layout_mode = 2
-
-[node name="FridayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="DayLabel" type="Label" parent="TabContainer/Weekly/FridayRow"]
-layout_mode = 2
-text = "Friday"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/FridayRow"]
-layout_mode = 2
-
-[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/FridayRow/ScrollContainer"]
-layout_mode = 2
-
-[node name="SaturdayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="DayLabel" type="Label" parent="TabContainer/Weekly/SaturdayRow"]
-layout_mode = 2
-text = "Saturday"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/SaturdayRow"]
-layout_mode = 2
-
-[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/SaturdayRow/ScrollContainer"]
-layout_mode = 2
-
-[node name="SundayRow" type="HBoxContainer" parent="TabContainer/Weekly"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="DayLabel" type="Label" parent="TabContainer/Weekly/SundayRow"]
-layout_mode = 2
-text = "Sunday"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/SundayRow"]
-layout_mode = 2
-
-[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/SundayRow/ScrollContainer"]
-layout_mode = 2
-
 [node name="Legends" type="HBoxContainer" parent="TabContainer/Weekly"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/Weekly"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="MondayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
+layout_mode = 2
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/VBoxContainer/MondayRow"]
+layout_mode = 2
+text = "Monday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/MondayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/MondayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="TuesdayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
+layout_mode = 2
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/VBoxContainer/TuesdayRow"]
+layout_mode = 2
+text = "Tuesday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/TuesdayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/TuesdayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="WednesdayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
+layout_mode = 2
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/VBoxContainer/WednesdayRow"]
+layout_mode = 2
+text = "Wednesday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/WednesdayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/WednesdayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="ThursdayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
+layout_mode = 2
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/VBoxContainer/ThursdayRow"]
+layout_mode = 2
+text = "Thursday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/ThursdayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/ThursdayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="FridayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
+layout_mode = 2
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/VBoxContainer/FridayRow"]
+layout_mode = 2
+text = "Friday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/FridayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/FridayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="SaturdayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
+layout_mode = 2
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/VBoxContainer/SaturdayRow"]
+visible = false
+layout_mode = 2
+text = "Saturday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/SaturdayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/SaturdayRow/ScrollContainer"]
+layout_mode = 2
+
+[node name="SundayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
+layout_mode = 2
+
+[node name="DayLabel" type="Label" parent="TabContainer/Weekly/VBoxContainer/SundayRow"]
+layout_mode = 2
+text = "Sunday"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/SundayRow"]
+layout_mode = 2
+
+[node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/SundayRow/ScrollContainer"]
+layout_mode = 2
 
 [node name="Monthly" type="Control" parent="TabContainer"]
 visible = false
@@ -272,9 +300,9 @@ metadata/_tab_index = 2
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1008.0
-offset_top = 15.0
-offset_right = 1270.7262
-offset_bottom = 142.0
+offset_left = 1000.0
+offset_top = 560.0
+offset_right = 1285.1334
+offset_bottom = 699.0
 texture = ExtResource("3_v4x2c")
 expand_mode = 3
