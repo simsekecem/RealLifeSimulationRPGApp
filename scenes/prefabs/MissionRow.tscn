@@ -25,6 +25,7 @@ anchors_preset = -1
 anchor_right = 0.94166666
 anchor_bottom = 1.0
 offset_right = 6.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 5
@@ -47,6 +48,13 @@ theme_override_fonts/normal_font = ExtResource("1_jnupj")
 theme_override_font_sizes/normal_font_size = 12
 text = "sadasdasd"
 metadata/_edit_use_anchors_ = true
+
+[node name="XPLabel" type="Label" parent="MissionList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2627451, 0.13725491, 0.11764706, 1)
+theme_override_fonts/font = ExtResource("1_jnupj")
+theme_override_font_sizes/font_size = 13
+text = "asdasda"
 
 [node name="Separator" type="ColorRect" parent="."]
 custom_minimum_size = Vector2(2, 0)

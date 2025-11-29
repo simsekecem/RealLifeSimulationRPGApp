@@ -55,11 +55,18 @@ theme = SubResource("Theme_v4x2c")
 metadata/_tab_index = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Daily"]
-layout_mode = 0
-offset_left = 102.0
-offset_top = 512.0
-offset_right = 255.0
-offset_bottom = 552.0
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = 8.0
+offset_right = 346.0
+offset_bottom = 42.0
+grow_vertical = 0
+
+[node name="TodayButton" type="Button" parent="TabContainer/Daily/HBoxContainer"]
+layout_mode = 2
+text = "TODAY"
 
 [node name="DaySelect" type="OptionButton" parent="TabContainer/Daily/HBoxContainer"]
 layout_mode = 2
@@ -71,10 +78,6 @@ layout_mode = 2
 layout_mode = 2
 item_count = 1
 popup/item_0/id = 0
-
-[node name="TodayButton" type="Button" parent="TabContainer/Daily/HBoxContainer"]
-layout_mode = 2
-text = "TODAY"
 
 [node name="TomorrowButton" type="Button" parent="TabContainer/Daily/HBoxContainer"]
 layout_mode = 2
