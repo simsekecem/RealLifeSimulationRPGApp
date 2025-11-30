@@ -1,0 +1,75 @@
+[gd_resource type="Theme" load_steps=15 format=3 uid="uid://conk5286ea1du"]
+
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="1_xooke"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mbnxb"]
+bg_color = Color(1, 0.7921569, 0.8, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d6ix0"]
+bg_color = Color(1, 0.7921569, 0.8, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u2dsg"]
+bg_color = Color(1, 0.7921569, 0.8, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_egofp"]
+bg_color = Color(1, 0.7921569, 0.8, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xooke"]
+bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pji8h"]
+bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u40tq"]
+bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vxixj"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yevp8"]
+bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c1s7f"]
+bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8yshe"]
+bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4lab7"]
+bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_20pg6"]
+bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
+
+[resource]
+default_font = ExtResource("1_xooke")
+Button/colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+Button/fonts/font = ExtResource("1_xooke")
+Button/styles/focus = SubResource("StyleBoxFlat_mbnxb")
+Button/styles/hover = SubResource("StyleBoxFlat_d6ix0")
+Button/styles/normal = SubResource("StyleBoxFlat_u2dsg")
+Button/styles/pressed = SubResource("StyleBoxFlat_egofp")
+HScrollBar/styles/grabber = SubResource("StyleBoxFlat_xooke")
+HScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_pji8h")
+HScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_u40tq")
+ScrollContainer/styles/focus = SubResource("StyleBoxFlat_vxixj")
+ScrollContainer/styles/normal = SubResource("StyleBoxFlat_yevp8")
+VScrollBar/styles/grabber = SubResource("StyleBoxFlat_c1s7f")
+VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_8yshe")
+VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_4lab7")
+VScrollBar/styles/normal = SubResource("StyleBoxFlat_20pg6")

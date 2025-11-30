@@ -1,6 +1,6 @@
 extends Control
 
-# 7 gün butonları (senin node isimlerine göre)
+# --- Gün Butonları ---
 @onready var day_buttons := {
 	"Monday": $M_Button,
 	"Tuesday": $TU_Button,
@@ -11,7 +11,7 @@ extends Control
 	"Sunday": $S_Button
 }
 
-# 7 gün panelleri (senin node isimlerine göre)
+# --- Gün Panelleri ---
 @onready var day_panels := {
 	"Monday": $DaysContent/MondayPanel,
 	"Tuesday": $DaysContent/TuesdayPanel,
@@ -22,37 +22,53 @@ extends Control
 	"Sunday": $DaysContent/SundayPanel
 }
 
-var current_day: String = ""   # şu anda açık olan panel
+# Açık olan gün
+var current_day: String = ""
+
 
 func _ready():
-	# başlangıçta tüm panelleri kapat
-	for p in day_panels.values():
-		p.visible = false
 
-	# butonlara sinyal bağla
+	# --- 1) Başlangıçta tüm paneller kapalı ---
+	for p in day_panels.values():
+		if p != null:
+			p.visible = false
+
+	# --- 2) Tüm butonlara toggle sinyali bağlanıyor ---
 	for day in day_buttons.keys():
 		var btn: Button = day_buttons[day]
+		btn.toggle_mode = true
 		btn.toggled.connect(_on_day_toggled.bind(day))
-		
+
+
+
+# --- T O G G L E   F O N K S İ Y O N U ---
 func _on_day_toggled(pressed: bool, day: String):
+
 	var panel = day_panels[day]
-	var btn = day_buttons[day]
+
+	# Eğer panel bulunamazsa hata vermesin
+	if panel == null:
+		print("HATA → Panel bulunamadı:", day)
+		return
 
 	if pressed:
-		# Başka bir gün açıksa kapat
+
+		# Başka bir gün açıksa önce onu kapat
 		if current_day != "" and current_day != day:
 			var old_btn = day_buttons[current_day]
 			var old_panel = day_panels[current_day]
 
-			old_btn.button_pressed = false
-			old_panel.visible = false
+			if old_btn:
+				old_btn.button_pressed = false
+			if old_panel:
+				old_panel.visible = false
 
-		# Yeni günü aktif yap
+		# Yeni günü aç
 		panel.visible = true
 		current_day = day
 
 	else:
-		# Aynı güne tekrar basınca kapatma
+		# Aynı butona tekrar basılırsa kapat
 		if current_day == day:
 			panel.visible = false
 			current_day = ""

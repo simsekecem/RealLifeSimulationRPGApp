@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cd5swl0nqiup6"]
+[gd_scene load_steps=15 format=3 uid="uid://cd5swl0nqiup6"]
 
 [ext_resource type="Texture2D" uid="uid://1r6d4qjhnbcr" path="res://assets/backgrounds/library.png" id="1_kwsf8"]
 [ext_resource type="Script" uid="uid://35k5ed4pxeom" path="res://scenes/LibraryScreen.gd" id="1_rlh3e"]
@@ -35,14 +35,8 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o6s3j"]
-bg_color = Color(0.6666667, 0.62352943, 0.7921569, 1)
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 7
-corner_radius_top_right = 7
-corner_radius_bottom_right = 7
-corner_radius_bottom_left = 7
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w80t8"]
+bg_color = Color(0.6901961, 0.654902, 0.8235294, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2yf15"]
 bg_color = Color(0.4117647, 0.3647059, 0.54509807, 1)
@@ -53,6 +47,15 @@ corner_radius_bottom_left = 7
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rlh3e"]
 bg_color = Color(0.8235294, 0.8, 0.9254902, 1)
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o6s3j"]
+bg_color = Color(0.6666667, 0.62352943, 0.7921569, 1)
 border_width_right = 2
 border_width_bottom = 2
 corner_radius_top_left = 7
@@ -181,13 +184,14 @@ offset_bottom = 170.0
 custom_minimum_size = Vector2(110, 45)
 layout_mode = 2
 size_flags_horizontal = 0
+theme = ExtResource("4_juet4")
 theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
 theme_override_colors/font_focus_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
 theme_override_colors/font_pressed_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
 theme_override_colors/font_hover_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
 theme_override_fonts/font = ExtResource("2_o6s3j")
 theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxFlat_o6s3j")
+theme_override_styles/normal = SubResource("StyleBoxFlat_w80t8")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_2yf15")
 theme_override_styles/hover = SubResource("StyleBoxFlat_rlh3e")
 toggle_mode = true

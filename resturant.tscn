@@ -1,0 +1,1397 @@
+[gd_scene load_steps=13 format=3 uid="uid://ctsiv3uhedeok"]
+
+[ext_resource type="Script" uid="uid://beps51rmvgvle" path="res://resturant.gd" id="1_d6ix0"]
+[ext_resource type="Texture2D" uid="uid://ccqwsnc4t1nwu" path="res://assets/backgrounds/unnamed (8).jpg" id="1_ghdar"]
+[ext_resource type="Texture2D" uid="uid://w1oy22xskssh" path="res://assets/ui/rsw.png" id="2_mbnxb"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_d6ix0"]
+[ext_resource type="Theme" uid="uid://conk5286ea1du" path="res://resturant.tres" id="3_mbnxb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rvna5"]
+bg_color = Color(0.9607843, 0.79607844, 0.79607844, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ghdar"]
+bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mbnxb"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d6ix0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mbnxb"]
+bg_color = Color(1, 0.7921569, 0.8, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d6ix0"]
+bg_color = Color(1, 0.7921569, 0.8, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rvna5"]
+
+[node name="Resturant" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_d6ix0")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+custom_minimum_size = Vector2(1280, 720)
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_ghdar")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="NinePatchRect"]
+custom_minimum_size = Vector2(1280, 720)
+layout_mode = 0
+offset_left = -1.0
+offset_top = 3.0
+offset_right = 1279.0
+offset_bottom = 723.0
+
+[node name="TextureRect" type="TextureRect" parent="NinePatchRect"]
+custom_minimum_size = Vector2(10, 20)
+layout_direction = 1
+layout_mode = 0
+offset_left = 23.0
+offset_top = 110.0
+offset_right = 385.0
+offset_bottom = 355.0
+texture = ExtResource("2_mbnxb")
+expand_mode = 1
+
+[node name="TextEdit" type="TextEdit" parent="NinePatchRect"]
+layout_direction = 1
+layout_mode = 0
+offset_left = 59.0
+offset_top = 334.0
+offset_right = 345.0
+offset_bottom = 585.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/search_result_border_color = Color(0.3483062, 0.300645, 0.10095414, 0.4)
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_fonts/font = ExtResource("3_d6ix0")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_rvna5")
+theme_override_styles/focus = SubResource("StyleBoxFlat_ghdar")
+
+[node name="Label" type="Label" parent="NinePatchRect/TextEdit"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 4.0
+offset_right = 265.0
+offset_bottom = 54.0
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "
+REMINDER NOTES"
+horizontal_alignment = 1
+
+[node name="DaysContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 340.0
+offset_top = 173.0
+offset_right = 1226.0
+offset_bottom = 218.0
+
+[node name="TU_Button" type="Button" parent="."]
+custom_minimum_size = Vector2(35, 45)
+layout_mode = 0
+offset_left = 460.0
+offset_top = 172.0
+offset_right = 587.0
+offset_bottom = 217.0
+theme = ExtResource("3_mbnxb")
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+text = "TUESDAY"
+
+[node name="W_Button" type="Button" parent="."]
+custom_minimum_size = Vector2(35, 45)
+layout_mode = 0
+offset_left = 596.0
+offset_top = 173.0
+offset_right = 735.0
+offset_bottom = 218.0
+theme = ExtResource("3_mbnxb")
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+text = "WEDNESDAY
+"
+
+[node name="M_Button" type="Button" parent="."]
+custom_minimum_size = Vector2(35, 45)
+layout_mode = 0
+offset_left = 342.0
+offset_top = 173.0
+offset_right = 456.0
+offset_bottom = 218.0
+theme = ExtResource("3_mbnxb")
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+text = "MONDAY
+"
+
+[node name="T_Button" type="Button" parent="."]
+custom_minimum_size = Vector2(35, 45)
+layout_mode = 0
+offset_left = 741.0
+offset_top = 175.0
+offset_right = 866.0
+offset_bottom = 220.0
+theme = ExtResource("3_mbnxb")
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+text = "THURSDAY"
+
+[node name="F_Button" type="Button" parent="."]
+custom_minimum_size = Vector2(35, 40)
+layout_mode = 0
+offset_left = 874.0
+offset_top = 175.0
+offset_right = 976.0
+offset_bottom = 221.0
+theme = ExtResource("3_mbnxb")
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+text = "FRIDAY"
+
+[node name="SA_Button" type="Button" parent="."]
+custom_minimum_size = Vector2(35, 40)
+layout_mode = 0
+offset_left = 984.0
+offset_top = 175.0
+offset_right = 1112.0
+offset_bottom = 221.0
+theme = ExtResource("3_mbnxb")
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+text = "SATURDAY"
+
+[node name="S_Button" type="Button" parent="."]
+custom_minimum_size = Vector2(35, 40)
+layout_mode = 0
+offset_left = 1116.0
+offset_top = 175.0
+offset_right = 1224.0
+offset_bottom = 222.0
+theme = ExtResource("3_mbnxb")
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+text = "SUNDAY"
+
+[node name="MealPanel" type="Panel" parent="."]
+visible = false
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 0
+offset_left = 353.0
+offset_top = 248.0
+offset_right = 1219.0
+offset_bottom = 582.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mbnxb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MealPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 850.0
+offset_bottom = 332.0
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_d6ix0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_mbnxb")
+
+[node name="MealList" type="VBoxContainer" parent="MealPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Breakfast_Panel" type="Panel" parent="MealPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="MealPanel/ScrollContainer/MealList/Breakfast_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Breakfast: "
+
+[node name="TextEdit" type="TextEdit" parent="MealPanel/ScrollContainer/MealList/Breakfast_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Lunch_Panel" type="Panel" parent="MealPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="MealPanel/ScrollContainer/MealList/Lunch_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Lunch: "
+
+[node name="TextEdit" type="TextEdit" parent="MealPanel/ScrollContainer/MealList/Lunch_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Dinner_Panel" type="Panel" parent="MealPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="MealPanel/ScrollContainer/MealList/Dinner_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Dinner: "
+
+[node name="TextEdit" type="TextEdit" parent="MealPanel/ScrollContainer/MealList/Dinner_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Snakcs_Panel" type="Panel" parent="MealPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="MealPanel/ScrollContainer/MealList/Snakcs_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Snakcs: "
+
+[node name="TextEdit" type="TextEdit" parent="MealPanel/ScrollContainer/MealList/Snakcs_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="MealPanel" type="Panel" parent="MealPanel"]
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 0
+offset_left = 353.0
+offset_top = 248.0
+offset_right = 1219.0
+offset_bottom = 582.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mbnxb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MealPanel/MealPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 850.0
+offset_bottom = 332.0
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_d6ix0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_mbnxb")
+
+[node name="MealList" type="VBoxContainer" parent="MealPanel/MealPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Breakfast_Panel" type="Panel" parent="MealPanel/MealPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="MealPanel/MealPanel/ScrollContainer/MealList/Breakfast_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Breakfast: "
+
+[node name="TextEdit" type="TextEdit" parent="MealPanel/MealPanel/ScrollContainer/MealList/Breakfast_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Lunch_Panel" type="Panel" parent="MealPanel/MealPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="MealPanel/MealPanel/ScrollContainer/MealList/Lunch_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Lunch: "
+
+[node name="TextEdit" type="TextEdit" parent="MealPanel/MealPanel/ScrollContainer/MealList/Lunch_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Dinner_Panel" type="Panel" parent="MealPanel/MealPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="MealPanel/MealPanel/ScrollContainer/MealList/Dinner_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Dinner: "
+
+[node name="TextEdit" type="TextEdit" parent="MealPanel/MealPanel/ScrollContainer/MealList/Dinner_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Snakcs_Panel" type="Panel" parent="MealPanel/MealPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="MealPanel/MealPanel/ScrollContainer/MealList/Snakcs_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Snakcs: "
+
+[node name="TextEdit" type="TextEdit" parent="MealPanel/MealPanel/ScrollContainer/MealList/Snakcs_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="DaysContent" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="MondayPanel" type="Panel" parent="DaysContent"]
+visible = false
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 0
+offset_left = 353.0
+offset_top = 248.0
+offset_right = 1219.0
+offset_bottom = 582.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mbnxb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="DaysContent/MondayPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 850.0
+offset_bottom = 332.0
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_d6ix0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_mbnxb")
+
+[node name="MealList" type="VBoxContainer" parent="DaysContent/MondayPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Breakfast_Panel" type="Panel" parent="DaysContent/MondayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/MondayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Breakfast: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/MondayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Lunch_Panel" type="Panel" parent="DaysContent/MondayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/MondayPanel/ScrollContainer/MealList/Lunch_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Lunch: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/MondayPanel/ScrollContainer/MealList/Lunch_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Dinner_Panel" type="Panel" parent="DaysContent/MondayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/MondayPanel/ScrollContainer/MealList/Dinner_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Dinner: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/MondayPanel/ScrollContainer/MealList/Dinner_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Snakcs_Panel" type="Panel" parent="DaysContent/MondayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/MondayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Snakcs: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/MondayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="TuesdayPanel" type="Panel" parent="DaysContent"]
+visible = false
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 0
+offset_left = 353.0
+offset_top = 248.0
+offset_right = 1219.0
+offset_bottom = 582.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mbnxb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="DaysContent/TuesdayPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 850.0
+offset_bottom = 332.0
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_d6ix0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_mbnxb")
+
+[node name="MealList" type="VBoxContainer" parent="DaysContent/TuesdayPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Breakfast_Panel" type="Panel" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Breakfast: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Lunch_Panel" type="Panel" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList/Lunch_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Lunch: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList/Lunch_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Dinner_Panel" type="Panel" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList/Dinner_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Dinner: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList/Dinner_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Snakcs_Panel" type="Panel" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Snakcs: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/TuesdayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="WednesdayPanel" type="Panel" parent="DaysContent"]
+visible = false
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 0
+offset_left = 353.0
+offset_top = 248.0
+offset_right = 1219.0
+offset_bottom = 582.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mbnxb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="DaysContent/WednesdayPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 850.0
+offset_bottom = 332.0
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_d6ix0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_mbnxb")
+
+[node name="MealList" type="VBoxContainer" parent="DaysContent/WednesdayPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Breakfast_Panel" type="Panel" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Breakfast: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Lunch_Panel" type="Panel" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList/Lunch_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Lunch: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList/Lunch_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Dinner_Panel" type="Panel" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList/Dinner_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Dinner: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList/Dinner_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Snakcs_Panel" type="Panel" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Snakcs: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/WednesdayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="ThursdayPanel" type="Panel" parent="DaysContent"]
+visible = false
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 0
+offset_left = 353.0
+offset_top = 248.0
+offset_right = 1219.0
+offset_bottom = 582.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mbnxb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="DaysContent/ThursdayPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 850.0
+offset_bottom = 332.0
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_d6ix0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_mbnxb")
+
+[node name="MealList" type="VBoxContainer" parent="DaysContent/ThursdayPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Breakfast_Panel" type="Panel" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Breakfast: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Lunch_Panel" type="Panel" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList/Lunch_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Lunch: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList/Lunch_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Dinner_Panel" type="Panel" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList/Dinner_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Dinner: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList/Dinner_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Snakcs_Panel" type="Panel" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Snakcs: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/ThursdayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="FridayPanel" type="Panel" parent="DaysContent"]
+visible = false
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 0
+offset_left = 353.0
+offset_top = 248.0
+offset_right = 1219.0
+offset_bottom = 582.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mbnxb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="DaysContent/FridayPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 850.0
+offset_bottom = 332.0
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_d6ix0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_mbnxb")
+
+[node name="MealList" type="VBoxContainer" parent="DaysContent/FridayPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Breakfast_Panel" type="Panel" parent="DaysContent/FridayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/FridayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Breakfast: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/FridayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Lunch_Panel" type="Panel" parent="DaysContent/FridayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/FridayPanel/ScrollContainer/MealList/Lunch_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Lunch: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/FridayPanel/ScrollContainer/MealList/Lunch_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Dinner_Panel" type="Panel" parent="DaysContent/FridayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/FridayPanel/ScrollContainer/MealList/Dinner_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Dinner: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/FridayPanel/ScrollContainer/MealList/Dinner_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Snakcs_Panel" type="Panel" parent="DaysContent/FridayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/FridayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Snakcs: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/FridayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="SaturdayPanel" type="Panel" parent="DaysContent"]
+visible = false
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 0
+offset_left = 353.0
+offset_top = 248.0
+offset_right = 1219.0
+offset_bottom = 582.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mbnxb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="DaysContent/SaturdayPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 850.0
+offset_bottom = 332.0
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_d6ix0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_mbnxb")
+
+[node name="MealList" type="VBoxContainer" parent="DaysContent/SaturdayPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Breakfast_Panel" type="Panel" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Breakfast: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Lunch_Panel" type="Panel" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList/Lunch_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Lunch: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList/Lunch_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Dinner_Panel" type="Panel" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList/Dinner_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Dinner: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList/Dinner_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Snakcs_Panel" type="Panel" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Snakcs: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/SaturdayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="SundayPanel" type="Panel" parent="DaysContent"]
+visible = false
+custom_minimum_size = Vector2(120, 200)
+layout_mode = 0
+offset_left = 353.0
+offset_top = 248.0
+offset_right = 1219.0
+offset_bottom = 582.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mbnxb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="DaysContent/SundayPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 850.0
+offset_bottom = 332.0
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_d6ix0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_mbnxb")
+
+[node name="MealList" type="VBoxContainer" parent="DaysContent/SundayPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Breakfast_Panel" type="Panel" parent="DaysContent/SundayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/SundayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Breakfast: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/SundayPanel/ScrollContainer/MealList/Breakfast_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Lunch_Panel" type="Panel" parent="DaysContent/SundayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/SundayPanel/ScrollContainer/MealList/Lunch_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Lunch: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/SundayPanel/ScrollContainer/MealList/Lunch_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Dinner_Panel" type="Panel" parent="DaysContent/SundayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/SundayPanel/ScrollContainer/MealList/Dinner_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Dinner: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/SundayPanel/ScrollContainer/MealList/Dinner_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Snakcs_Panel" type="Panel" parent="DaysContent/SundayPanel/ScrollContainer/MealList"]
+custom_minimum_size = Vector2(860, 100)
+layout_mode = 2
+theme = ExtResource("3_mbnxb")
+theme_override_styles/panel = SubResource("StyleBoxFlat_d6ix0")
+
+[node name="Label" type="Label" parent="DaysContent/SundayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 11.0
+offset_right = 182.0
+offset_bottom = 30.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+text = "Snakcs: "
+
+[node name="TextEdit" type="TextEdit" parent="DaysContent/SundayPanel/ScrollContainer/MealList/Snakcs_Panel"]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+offset_left = 6.0
+offset_top = 31.0
+offset_right = 828.0
+offset_bottom = 92.0
+theme = ExtResource("3_mbnxb")
+theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
