@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://cy8ixdnbn2rsw"]
+[gd_scene load_steps=4 format=3 uid="uid://cy8ixdnbn2rsw"]
 
 [ext_resource type="Texture2D" uid="uid://c5awquilclqxl" path="res://assets/backgrounds/unnamed (7).jpg" id="1_qy6h4"]
 [ext_resource type="Texture2D" uid="uid://674dah6vialp" path="res://assets/ui/unnamed 17.png" id="2_n5ih4"]
+[ext_resource type="Theme" uid="uid://cm6rmp65gf4vj" path="res://market.tres" id="3_xtoqr"]
 
 [node name="Market" type="Control"]
 layout_mode = 3
@@ -21,16 +22,52 @@ texture = ExtResource("1_qy6h4")
 [node name="VBoxContainer" type="VBoxContainer" parent="NinePatchRect"]
 custom_minimum_size = Vector2(1280, 720)
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -2.0
+offset_top = 8.0
+offset_right = 1280.0
+offset_bottom = 728.0
 
 [node name="TextureRect" type="TextureRect" parent="NinePatchRect"]
 custom_minimum_size = Vector2(30, 20)
 layout_direction = 4
 layout_mode = 0
-offset_left = 492.0
-offset_top = 94.0
-offset_right = 754.0
-offset_bottom = 268.0
+offset_left = 417.0
+offset_top = 49.0
+offset_right = 824.0
+offset_bottom = 290.0
 texture = ExtResource("2_n5ih4")
 expand_mode = 1
+
+[node name="VBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 165.0
+offset_top = 329.0
+offset_right = 1219.0
+offset_bottom = 382.0
+
+[node name="G_Button" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_xtoqr")
+text = " Grociers "
+
+[node name="HG_Button" type="Button" parent="VBoxContainer"]
+layout_direction = 1
+layout_mode = 2
+theme = ExtResource("3_xtoqr")
+text = "  Home Goods  "
+
+[node name="C_Button" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_xtoqr")
+text = " Clothing "
+
+[node name="PC_Button" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("3_xtoqr")
+text = " Personal Care "
+
+[node name="HE_Button" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme = ExtResource("3_xtoqr")
+text = "  Household Essantials  "
