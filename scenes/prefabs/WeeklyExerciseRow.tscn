@@ -1,11 +1,20 @@
-[gd_scene format=3 uid="uid://bsbp2gyrwgqtg"]
+[gd_scene load_steps=2 format=3 uid="uid://bsbp2gyrwgqtg"]
 
-[node name="WeeklyExerciseRow" type="HBoxContainer"]
+[ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="1_a1cyc"]
+
+[node name="WeeklyExerciseRow" type="VBoxContainer"]
 offset_right = 467.0
-offset_bottom = 169.0
+offset_bottom = 176.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = ExtResource("1_a1cyc")
 
 [node name="ExerciseName" type="Label" parent="."]
 layout_mode = 2
+size_flags_horizontal = 4
+text = "sasdasdas"
 
 [node name="Duration" type="Label" parent="."]
 layout_mode = 2
+size_flags_horizontal = 4
+text = "asdasda"

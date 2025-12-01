@@ -10,11 +10,23 @@ extends Control
 @onready var exercise_list: VBoxContainer = $TabContainer/Daily/ListArea/ScrollContainer/ContentList
 @export var exercise_row_scene: PackedScene = preload("res://scenes/prefabs/DailyExerciseRow.tscn")
 
+@export var weekly_exercise_row_scene: PackedScene = preload("res://scenes/prefabs/WeeklyExerciseRow.tscn")
+@onready var monday_exercises_list: HBoxContainer = $TabContainer/Weekly/VBoxContainer/MondayRow/ScrollContainer/ExercisesRow
+
+var weekly_data = {
+	"Monday": [
+		{"name":"Push Ups", "duration":"10 min"},
+		{"name":"Squats", "duration":"15 min"},
+		{"name":"Plank", "duration":"5 min"}
+	]
+}
+
 
 func _ready():
 	fill_years()
 	fill_months()
 	update_days()
+	load_weekly_day("Monday")
 
 	month_select.item_selected.connect(_on_month_changed)
 	year_select.item_selected.connect(_on_year_changed)
@@ -100,3 +112,15 @@ func get_days_in_month(month: int, year: int) -> int:
 
 func is_leap_year(year: int) -> bool:
 	return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+func load_weekly_day(day_name: String):
+	var list_container: HBoxContainer = monday_exercises_list  # veya match ile diğer günleri seç
+	# Önce eski satırları temizle
+	for child in list_container.get_children():
+		child.queue_free()
+	# Yeni satırları ekle
+	if weekly_data.has(day_name):
+		for ex in weekly_data[day_name]:
+			var row = weekly_exercise_row_scene.instantiate()
+			row.get_node("ExerciseName").text = ex["name"]
+			row.get_node("Duration").text = ex["duration"]
+			list_container.add_child(row)
