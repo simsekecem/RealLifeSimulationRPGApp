@@ -394,5 +394,6 @@ offset_top = 666.0
 offset_right = 57.0
 offset_bottom = 704.0
 theme = ExtResource("2_qlnuv")
+theme_override_colors/font_color = Color(0.30200332, 0.2666, 0.43, 1)
 theme_override_font_sizes/font_size = 18
 text = "<"
