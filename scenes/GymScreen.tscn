@@ -387,7 +387,7 @@ offset_bottom = 699.0
 texture = ExtResource("3_v4x2c")
 expand_mode = 3
 
-[node name="Button" type="Button" parent="."]
+[node name="BackButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 666.0
