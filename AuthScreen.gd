@@ -1,6 +1,6 @@
 extends Control
 
-# 🔑 Senin Supabase bilgilerin
+
 const SUPABASE_URL = "https://rzsndtstonztfuayodmg.supabase.co"
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6c25kdHN0b256dGZ1YXlvZG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyOTg4OTQsImV4cCI6MjA3NTg3NDg5NH0.UPDS44mZl-YP0UNGqnpPzIedyphNptgnXehax5tUi50"
 
@@ -29,7 +29,7 @@ func _on_login() -> void:
 	}
 	http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))
 
-# 🔹 SIGNUP
+
 func _on_signup() -> void:
 	pending_action = "signup"
 	var url = SUPABASE_URL + "/auth/v1/signup"
@@ -43,7 +43,7 @@ func _on_signup() -> void:
 	}
 	http.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))
 
-# 🔹 YANIT İŞLEME
+
 func _on_request_completed(result: int, code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
 	var data = JSON.parse_string(body.get_string_from_utf8())
 
@@ -79,8 +79,7 @@ func _on_request_completed(result: int, code: int, headers: PackedStringArray, b
 	print("User ID:", user_id)
 	print("Token:", token)
 
-	# Başarılı giriş sonrası sahne geçişi örneği:
-	# get_tree().change_scene_to_file("res://Main.tscn")
+	
 
 
 func _on_acc_button_pressed() -> void:

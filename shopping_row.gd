@@ -14,8 +14,7 @@ func _on_submit(text: String) -> void:
 
 func _on_check_toggled(checked: bool) -> void:
 	if checked:
-		# CHECK → yazı rengi 496580
+		
 		name_field.set("theme_override_colors/font_color", Color("#496580"))
 	else:
-		# UNCHECK → beyaz
 		name_field.set("theme_override_colors/font_color", Color.WHITE)
