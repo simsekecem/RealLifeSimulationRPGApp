@@ -37,9 +37,17 @@ corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w80t8"]
 bg_color = Color(0.6901961, 0.654902, 0.8235294, 1)
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2yf15"]
 bg_color = Color(0.4117647, 0.3647059, 0.54509807, 1)
+border_width_right = 2
+border_width_bottom = 2
 corner_radius_top_left = 7
 corner_radius_top_right = 7
 corner_radius_bottom_right = 7
@@ -303,3 +311,24 @@ offset_right = 327.0
 offset_bottom = 290.0
 texture = ExtResource("4_2yf15")
 expand_mode = 1
+
+[node name="BackButton" type="Button" parent="."]
+custom_minimum_size = Vector2(47, 38)
+layout_mode = 0
+offset_left = 20.0
+offset_top = 674.0
+offset_right = 67.0
+offset_bottom = 712.0
+size_flags_horizontal = 0
+theme = ExtResource("4_juet4")
+theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_focus_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_pressed_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_hover_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_fonts/font = ExtResource("2_o6s3j")
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_w80t8")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_2yf15")
+theme_override_styles/hover = SubResource("StyleBoxFlat_rlh3e")
+toggle_mode = true
+text = "<"

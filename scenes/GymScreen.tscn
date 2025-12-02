@@ -386,3 +386,13 @@ offset_right = 1285.1334
 offset_bottom = 699.0
 texture = ExtResource("3_v4x2c")
 expand_mode = 3
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 666.0
+offset_right = 57.0
+offset_bottom = 704.0
+theme = ExtResource("2_qlnuv")
+theme_override_font_sizes/font_size = 18
+text = "<"
