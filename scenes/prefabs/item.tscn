@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=3 uid="uid://bekhvpk1iqu82"]
+
+[ext_resource type="Script" uid="uid://bm1e1ruokacun" path="res://shopping_row.gd" id="1_7amdk"]
+[ext_resource type="Theme" uid="uid://cm6rmp65gf4vj" path="res://market.tres" id="2_cmvpw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7amdk"]
+bg_color = Color(0.70980394, 0.78039217, 0.92156863, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cmvpw"]
+bg_color = Color(0.70980394, 0.78039217, 0.92156863, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qguwu"]
+bg_color = Color(0.70980394, 0.78039217, 0.92156863, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qguwu"]
+
+[node name="ShoppingRow" type="HBoxContainer"]
+custom_minimum_size = Vector2(527, 30)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = 30.0
+offset_right = -635.0
+offset_bottom = -650.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+script = ExtResource("1_7amdk")
+
+[node name="ItemCheck" type="CheckBox" parent="."]
+layout_mode = 2
+theme = ExtResource("2_cmvpw")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_7amdk")
+theme_override_styles/hover = SubResource("StyleBoxFlat_cmvpw")
+theme_override_styles/focus = SubResource("StyleBoxFlat_qguwu")
+
+[node name="ItemEdit" type="LineEdit" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("2_cmvpw")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_qguwu")
+max_length = 30

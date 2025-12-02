@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=13 format=3 uid="uid://cm6rmp65gf4vj"]
+[gd_resource type="Theme" load_steps=14 format=3 uid="uid://cm6rmp65gf4vj"]
 
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="1_k0o18"]
 
@@ -33,27 +33,50 @@ corner_radius_bottom_left = 15
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_trd8k"]
 bg_color = Color(0.5803922, 0.68235296, 0.8901961, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2pf0u"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k0o18"]
 bg_color = Color(0.5803922, 0.68235296, 0.8901961, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sfmpn"]
+bg_color = Color(0.067712694, 0.1415818, 0.22088397, 1)
 corner_radius_top_left = 15
 corner_radius_top_right = 15
 corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lis8a"]
-bg_color = Color(0.28627452, 0.39607844, 0.5019608, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1bcrd"]
+bg_color = Color(0.23365933, 0.39483193, 0.56872934, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o0piy"]
-bg_color = Color(0.28627452, 0.39607844, 0.5019608, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6o5t5"]
+bg_color = Color(0.23365933, 0.39483193, 0.56872934, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidwd"]
-bg_color = Color(0.28627452, 0.39607844, 0.5019608, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l0sn6"]
+bg_color = Color(0.067712694, 0.1415818, 0.22088397, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aq1fn"]
-bg_color = Color(0.28627452, 0.39607844, 0.5019608, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8koos"]
+bg_color = Color(0.23365933, 0.39483193, 0.56872934, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p7fto"]
-bg_color = Color(0.28627452, 0.39607844, 0.5019608, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_smsh0"]
+bg_color = Color(0.23365933, 0.39483193, 0.56872934, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 
 [resource]
 default_font = ExtResource("1_k0o18")
@@ -65,9 +88,10 @@ Button/styles/hover = SubResource("StyleBoxFlat_ujdo4")
 Button/styles/normal = SubResource("StyleBoxFlat_7j2r1")
 Button/styles/pressed = SubResource("StyleBoxFlat_wxot4")
 CheckBox/styles/focus = SubResource("StyleBoxFlat_trd8k")
-Panel/styles/panel = SubResource("StyleBoxFlat_2pf0u")
-VScrollBar/styles/grabber = SubResource("StyleBoxFlat_lis8a")
-VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_o0piy")
-VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_sidwd")
-VScrollBar/styles/scroll = SubResource("StyleBoxFlat_aq1fn")
-VScrollBar/styles/scroll_focus = SubResource("StyleBoxFlat_p7fto")
+CheckBox/styles/pressed = SubResource("StyleBoxFlat_k0o18")
+HScrollBar/styles/grabber = SubResource("StyleBoxFlat_sfmpn")
+HScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_1bcrd")
+HScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_6o5t5")
+VScrollBar/styles/grabber = SubResource("StyleBoxFlat_l0sn6")
+VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_8koos")
+VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_smsh0")

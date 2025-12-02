@@ -1,8 +1,16 @@
-[gd_scene load_steps=4 format=3 uid="uid://cy8ixdnbn2rsw"]
+[gd_scene load_steps=8 format=3 uid="uid://cy8ixdnbn2rsw"]
 
 [ext_resource type="Texture2D" uid="uid://c5awquilclqxl" path="res://assets/backgrounds/unnamed (7).jpg" id="1_qy6h4"]
+[ext_resource type="Script" uid="uid://bfd5bdnt0l714" path="res://market.gd" id="1_ujdo4"]
 [ext_resource type="Texture2D" uid="uid://674dah6vialp" path="res://assets/ui/unnamed 17.png" id="2_n5ih4"]
 [ext_resource type="Theme" uid="uid://cm6rmp65gf4vj" path="res://market.tres" id="3_xtoqr"]
+[ext_resource type="Script" uid="uid://dgden8jw1iqjt" path="res://panel.gd" id="4_qd2tk"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qd2tk"]
+bg_color = Color(0.70980394, 0.78039217, 0.92156863, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ujdo4"]
+bg_color = Color(0.70980394, 0.78039217, 0.92156863, 1)
 
 [node name="Market" type="Control"]
 layout_mode = 3
@@ -11,6 +19,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_ujdo4")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="."]
 custom_minimum_size = Vector2(1280, 720)
@@ -38,36 +47,74 @@ offset_bottom = 290.0
 texture = ExtResource("2_n5ih4")
 expand_mode = 1
 
-[node name="VBoxContainer" type="HBoxContainer" parent="."]
+[node name="Panel" type="Panel" parent="."]
+visible = false
 layout_mode = 0
-offset_left = 165.0
-offset_top = 329.0
-offset_right = 1219.0
-offset_bottom = 382.0
+offset_left = 463.0
+offset_top = 318.0
+offset_right = 987.0
+offset_bottom = 617.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_qd2tk")
+script = ExtResource("4_qd2tk")
 
-[node name="G_Button" type="Button" parent="VBoxContainer"]
+[node name="ItemsScroll" type="ScrollContainer" parent="Panel"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 524.0
+offset_bottom = 300.0
+theme = ExtResource("3_xtoqr")
+theme_override_styles/focus = SubResource("StyleBoxFlat_ujdo4")
+
+[node name="ItemsVBox" type="VBoxContainer" parent="Panel/ItemsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 367.0
+offset_right = 402.0
+offset_bottom = 583.0
+
+[node name="G_Button" type="Button" parent="VBoxContainer2"]
+custom_minimum_size = Vector2(25, 40)
 layout_mode = 2
 theme = ExtResource("3_xtoqr")
 text = " Grociers "
 
-[node name="HG_Button" type="Button" parent="VBoxContainer"]
+[node name="HG_Button" type="Button" parent="VBoxContainer2"]
+custom_minimum_size = Vector2(0, 40)
 layout_direction = 1
 layout_mode = 2
 theme = ExtResource("3_xtoqr")
 text = "  Home Goods  "
 
-[node name="C_Button" type="Button" parent="VBoxContainer"]
+[node name="C_Button" type="Button" parent="VBoxContainer2"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme = ExtResource("3_xtoqr")
 text = " Clothing "
 
-[node name="PC_Button" type="Button" parent="VBoxContainer"]
+[node name="PC_Button" type="Button" parent="VBoxContainer2"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme = ExtResource("3_xtoqr")
 text = " Personal Care "
 
-[node name="HE_Button" type="Button" parent="VBoxContainer"]
-custom_minimum_size = Vector2(30, 0)
+[node name="HE_Button" type="Button" parent="VBoxContainer2"]
+custom_minimum_size = Vector2(30, 40)
 layout_mode = 2
 theme = ExtResource("3_xtoqr")
 text = "  Household Essantials  "
+
+[node name="Back_Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 48.0
+offset_right = 109.0
+offset_bottom = 95.0
+theme = ExtResource("3_xtoqr")
+text = "<"

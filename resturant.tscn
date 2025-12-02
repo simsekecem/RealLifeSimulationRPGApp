@@ -1395,3 +1395,12 @@ theme = ExtResource("3_mbnxb")
 theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
 theme_override_font_sizes/font_size = 13
 theme_override_styles/normal = SubResource("StyleBoxEmpty_rvna5")
+
+[node name="Back_Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 46.0
+offset_top = 36.0
+offset_right = 106.0
+offset_bottom = 86.0
+theme = ExtResource("3_mbnxb")
+text = "<"
