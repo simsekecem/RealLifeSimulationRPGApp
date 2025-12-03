@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://cfvygcqwkg8yb"]
+[gd_scene load_steps=12 format=3 uid="uid://cfvygcqwkg8yb"]
 
 [ext_resource type="Texture2D" uid="uid://blbtmadk6t0n4" path="res://assets/ui/GUI/Equipment.png" id="1_lochu"]
 [ext_resource type="Texture2D" uid="uid://csepbew64lyh1" path="res://assets/ui/GUI/Settings.png" id="1_obayw"]
+[ext_resource type="Script" uid="uid://07dp3lakufxq" path="res://scenes/UserInterface/AvatarWindow.gd" id="1_oh5fi"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_378xl"]
 [ext_resource type="FontFile" uid="uid://b63qvrxir6pmy" path="res://assets/fonts/CherrySwash-Regular.ttf" id="4_xix68"]
 
@@ -36,6 +37,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_oh5fi")
 
 [node name="Background" type="NinePatchRect" parent="."]
 layout_mode = 1

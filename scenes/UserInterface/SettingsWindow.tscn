@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://dw7ipw30a2pk5"]
+[gd_scene load_steps=7 format=3 uid="uid://dw7ipw30a2pk5"]
 
 [ext_resource type="Texture2D" uid="uid://csepbew64lyh1" path="res://assets/ui/GUI/Settings.png" id="1_g7hd6"]
+[ext_resource type="Script" uid="uid://bx30f3x38od16" path="res://scenes/UserInterface/SettingsWindow.gd" id="1_q40td"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_in2ko"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_in2ko"]
@@ -22,6 +23,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_q40td")
 
 [node name="Background" type="NinePatchRect" parent="."]
 layout_mode = 1

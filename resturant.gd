@@ -27,6 +27,7 @@ var current_day: String = ""
 
 
 func _ready():
+	UI.get_node("UIRoot").show_only_top_right_buttons()
 
 	
 	for p in day_panels.values():

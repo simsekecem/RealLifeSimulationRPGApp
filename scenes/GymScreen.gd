@@ -4,6 +4,7 @@ extends Control
 @onready var year_select: OptionButton = $TabContainer/Daily/HBoxContainer/YearSelect 
 @onready var month_select: OptionButton = $TabContainer/Daily/HBoxContainer/MonthSelect
 @onready var day_select: OptionButton = $TabContainer/Daily/HBoxContainer/DaySelect
+@onready var back_button = $BackButton
 
 # Gym alanı
 @onready var add_button: Button = $TabContainer/Daily/AddButton
@@ -23,6 +24,8 @@ var weekly_data = {
 
 
 func _ready():
+	UI.get_node("UIRoot").show_only_top_right_buttons()
+	back_button.pressed.connect(_on_back_button_pressed)
 	fill_years()
 	fill_months()
 	update_days()
@@ -48,7 +51,10 @@ func _on_add_button_pressed():
 
 	exercise_list.add_child(row)
 
-
+func _on_back_button_pressed():
+	# Global UI Autoload'u kullanarak sahne değiştirme fonksiyonunu çağırın.
+	# Buraya Kasaba sahnesinin dosya yolunu yazın:
+	UI.get_node("UIRoot").change_scene_to("res://town.tscn")
 
 # --------------------------
 # Tarih Kodların (Senin Kodun)

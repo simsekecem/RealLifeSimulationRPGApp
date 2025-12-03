@@ -2,8 +2,13 @@ extends Control
 
 @export var mission_row_scene: PackedScene = preload("res://scenes/prefabs/MissionRow.tscn")
 @onready var missions_list = $ScrollContainer/MissionsPanel
+# CloseButton'a erişim
+@onready var close_button = $Background/CloseButton 
 
 func _ready():
+	# CloseButton'a basılınca pencereyi kapatma fonksiyonunu bağla
+	close_button.pressed.connect(hide_missions_window)
+	
 	# Örnek 10 mission
 	var example_missions = [
 		{"name":"Mission 1", "detail":"Detail for mission 1", "XP":"10 XP"},
@@ -18,6 +23,8 @@ func _ready():
 		{"name":"Mission 10", "detail":"Detail for missiondsfsdfdsfdsffffffdkjsakjjKDKJLASJLFKJSDKLFKJSDJGKSKJLDFKJFSJGKSDKJFDSFKJUEIKJSDFK SFOJSAKJD SJDFJKDSJKF SDJFJDSKKJF SDKJFKJDSF ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff 10", "XP":"1120"}
 	]
 	load_missions(example_missions)
+	print("MissionsWindow bağlantıları ve içerik yüklendi.")
+
 
 func load_missions(missions: Array):
 	# Önce eski missionları temizle
@@ -30,3 +37,9 @@ func load_missions(missions: Array):
 		row.get_node("MissionList/MissionDetail").text = mission.detail
 		row.get_node("MissionList/XPLabel").text = mission.XP
 		missions_list.add_child(row)
+
+func hide_missions_window():
+	"""MissionsWindow'u tamamen gizler."""
+	# Bu düğümün kendisini (MissionsWindow'u) gizler.
+	self.visible = false
+	print("MissionsWindow kapandı.")

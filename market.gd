@@ -10,6 +10,7 @@ extends Control
 @onready var panel: Panel = $Panel   # panel node adı "Panel"
 
 func _ready():
+	UI.get_node("UIRoot").show_only_top_right_buttons()
 	# Bütün butonları reset-panel fonksiyonuna bağla
 	btn_g.pressed.connect(_on_button_pressed)
 	btn_hg.pressed.connect(_on_button_pressed)

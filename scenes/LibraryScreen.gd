@@ -14,11 +14,14 @@ extends Control
 ]
 
 @onready var hours_list = $HoursPanel/ScrollContainer/HoursList
+@onready var back_button = $BackButton
 
 # Halihazırda seçili olan butonu takip etmek için bir değişken
 var current_selected_button: Button = null
 
 func _ready():
+	back_button.pressed.connect(_on_back_button_pressed)
+	UI.get_node("UIRoot").show_only_top_right_buttons()
 	# Tüm gün butonlarını döngüye al ve sinyalleri bağla
 	for button in day_buttons:
 		# ÖNEMLİ: Butonun Godot Editor'da "Toggle Mode"unun açık olduğundan emin olun.
@@ -74,3 +77,8 @@ func load_hours_for_day(_day: String):
 func clear_hours():
 	for child in hours_list.get_children():
 		child.queue_free()
+		
+func _on_back_button_pressed():
+	# Global UI Autoload'u kullanarak sahne değiştirme fonksiyonunu çağırın.
+	# Buraya Kasaba sahnesinin dosya yolunu yazın:
+	UI.get_node("UIRoot").change_scene_to("res://town.tscn")

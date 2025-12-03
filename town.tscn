@@ -1,6 +1,5 @@
-[gd_scene load_steps=14 format=4 uid="uid://cjipdmgwcnglk"]
+[gd_scene load_steps=13 format=4 uid="uid://cjipdmgwcnglk"]
 
-[ext_resource type="Texture2D" uid="uid://biessqgjq6p3l" path="res://assets/make it big/map1.png" id="2_nki3b"]
 [ext_resource type="Texture2D" uid="uid://bbj36e1yde74l" path="res://assets/town/Houses Sprite Sheet 1-5.png" id="5_mqebe"]
 [ext_resource type="Texture2D" uid="uid://7rewch3eiu4n" path="res://assets/town/Houses Sprite Sheet large.png" id="6_kjw1v"]
 [ext_resource type="Texture2D" uid="uid://biessqgjq6p3l" path="res://assets/town/TilesetGrass/map1.png" id="7_525j1"]
@@ -897,7 +896,7 @@ tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_gwqsq")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nki3b"]
-texture = ExtResource("2_nki3b")
+texture = ExtResource("7_525j1")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 1:0/0 = 0
