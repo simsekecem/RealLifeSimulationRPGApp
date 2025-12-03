@@ -202,5 +202,3 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("8_rbwta")
 expand_mode = 1
-
-[connection signal="pressed" from="UIRoot/TopLeftButtons/Frame/AvatarIcon" to="UIRoot" method="show_avatar"]

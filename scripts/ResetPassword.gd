@@ -6,6 +6,7 @@ extends "res://scripts/AuthBase.gd"
 @onready var http = $HTTPRequest
 
 func _ready():
+	UI.get_node("UIRoot").hide_all_ui()
 	reset_button.pressed.connect(_on_reset_pressed)
 	http.request_completed.connect(_on_request_completed)
 	message_label.visible = false

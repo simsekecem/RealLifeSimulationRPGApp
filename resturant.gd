@@ -1,5 +1,6 @@
 extends Control
 
+@onready var back_button = $Back_Button
 
 @onready var day_buttons := {
 	"Monday": $M_Button,
@@ -28,6 +29,7 @@ var current_day: String = ""
 
 func _ready():
 	UI.get_node("UIRoot").show_only_top_right_buttons()
+	back_button.pressed.connect(_on_back_button_pressed)
 
 	
 	for p in day_panels.values():
@@ -73,3 +75,6 @@ func _on_day_toggled(pressed: bool, day: String):
 		if current_day == day:
 			panel.visible = false
 			current_day = ""
+
+func _on_back_button_pressed():
+	UI.get_node("UIRoot").change_scene_to("res://town.tscn")
