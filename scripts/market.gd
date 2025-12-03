@@ -6,11 +6,13 @@ extends Control
 @onready var btn_c = $VBoxContainer2/C_Button
 @onready var btn_pc = $VBoxContainer2/PC_Button
 @onready var btn_he = $VBoxContainer2/HE_Button
+@onready var back_button = $Back_Button
 
 @onready var panel: Panel = $Panel   # panel node adı "Panel"
 
 func _ready():
 	UI.get_node("UIRoot").show_only_top_right_buttons()
+	back_button.pressed.connect(_on_back_button_pressed)
 	# Bütün butonları reset-panel fonksiyonuna bağla
 	btn_g.pressed.connect(_on_button_pressed)
 	btn_hg.pressed.connect(_on_button_pressed)
@@ -40,3 +42,8 @@ func _on_button_pressed() -> void:
 
 func _on_close_panel() -> void:
 	panel.visible = false
+
+func _on_back_button_pressed():
+
+	UI.get_node("UIRoot").change_scene_to("res://town.tscn")
+	UI.get_node("UIRoot").show_full_ui()

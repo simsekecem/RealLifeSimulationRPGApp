@@ -2,7 +2,7 @@ extends Control
 
 
 @onready var windows = $Windows
-var TownScene = preload("res://town.tscn")
+var TownScene = preload("res://scenes/town.tscn")
 
 func _ready():
 	# AvatarIcon, Frame altında yer alıyor.
@@ -82,3 +82,12 @@ func change_scene_to(scene_path: String):
 		print("Lütfen sahne yolunu kontrol edin: ", scene_path)
 	else:
 		print("✅ Sahne başarıyla değiştirildi: ", scene_path)
+
+func show_full_ui():
+	"""Town sahnesine dönüldüğünde tüm ana UI elemanlarını görünür yapar."""
+	# $TopLeftButtons ve $TopRightButtons'ı gösterir
+	$TopLeftButtons.visible = true
+	$TopRightButtons.visible = true
+	$Joystick.visible = true # Joystick'i de geri aç
+	hide_all_windows() # Her ihtimale karşı tüm pencereleri kapat
+	print("✅ Tam UI (Avatar dahil) görünür hale geldi.")

@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://bekhvpk1iqu82"]
 
-[ext_resource type="Script" uid="uid://bm1e1ruokacun" path="res://shopping_row.gd" id="1_7amdk"]
+[ext_resource type="Script" uid="uid://bm1e1ruokacun" path="res://scripts/shopping_row.gd" id="1_7amdk"]
 [ext_resource type="Theme" uid="uid://cm6rmp65gf4vj" path="res://market.tres" id="2_cmvpw"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7amdk"]

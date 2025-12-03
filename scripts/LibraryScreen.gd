@@ -82,3 +82,4 @@ func _on_back_button_pressed():
 	# Global UI Autoload'u kullanarak sahne değiştirme fonksiyonunu çağırın.
 	# Buraya Kasaba sahnesinin dosya yolunu yazın:
 	UI.get_node("UIRoot").change_scene_to("res://town.tscn")
+	UI.get_node("UIRoot").show_full_ui()

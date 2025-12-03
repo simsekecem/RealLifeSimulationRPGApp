@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://dm8yea7kjvrhm"]
 
-[ext_resource type="Script" uid="uid://dm6agftvum4vd" path="res://scenes/GymScreen.gd" id="1_jyrom"]
+[ext_resource type="Script" uid="uid://dm6agftvum4vd" path="res://scripts/GymScreen.gd" id="1_jyrom"]
 [ext_resource type="Texture2D" uid="uid://bods6euoxuh5l" path="res://assets/backgrounds/gym2.png" id="1_nmixc"]
 [ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="2_qlnuv"]
 [ext_resource type="Texture2D" uid="uid://c4614rpjrbwnx" path="res://assets/gym_sign.png" id="3_v4x2c"]

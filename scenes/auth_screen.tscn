@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://b7umth30q5yfa" path="res://scripts/Login.gd" id="1_opysn"]
 [ext_resource type="Texture2D" uid="uid://bspd8qni1fnc" path="res://assets/backgrounds/login.png" id="2_rtkoj"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_teljs"]
-[ext_resource type="Script" uid="uid://dohbukxsjemtd" path="res://forgot_password_label.gd" id="4_jq82d"]
+[ext_resource type="Script" uid="uid://dohbukxsjemtd" path="res://scripts/forgot_password_label.gd" id="4_jq82d"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0k8l5"]
 bg_color = Color(0.85674167, 0.6555, 0.95, 1)
