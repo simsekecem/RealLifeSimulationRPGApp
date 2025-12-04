@@ -1,0 +1,32 @@
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://cqkohvcnpongo"]
+
+[ext_resource type="Texture2D" uid="uid://s7ta8x2mbsc7" path="res://assets/ticked.png" id="1_rubt1"]
+[ext_resource type="Texture2D" uid="uid://cxa66hyyxkboa" path="res://assets/tick.png" id="2_dy6dk"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1ymgi"]
+bg_color = Color(0.3137255, 0.6627451, 0.47058824, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8uhjw"]
+bg_color = Color(0.57335925, 0.38246742, 0.2315217, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rubt1"]
+bg_color = Color(0.22340405, 0.49983197, 0.34870866, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[resource]
+CheckBox/icons/checked = ExtResource("1_rubt1")
+CheckBox/icons/unchecked = ExtResource("2_dy6dk")
+VScrollBar/styles/grabber = SubResource("StyleBoxFlat_1ymgi")
+VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_8uhjw")
+VScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_rubt1")

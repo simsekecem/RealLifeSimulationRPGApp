@@ -35,7 +35,7 @@ func load_missions(missions: Array):
 		var row = mission_row_scene.instantiate()
 		row.get_node("MissionList/MissionName").text = mission.name
 		row.get_node("MissionList/MissionDetail").text = mission.detail
-		row.get_node("MissionList/XPLabel").text = mission.XP
+		row.get_node("MissionList/HBoxContainer/XP").text = mission.XP
 		missions_list.add_child(row)
 
 func hide_missions_window():
