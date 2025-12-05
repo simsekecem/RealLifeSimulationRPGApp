@@ -53,11 +53,10 @@ anchor_bottom = 0.7847222
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_qlnuv")
-current_tab = 1
+current_tab = 0
 metadata/_edit_use_anchors_ = true
 
 [node name="Daily" type="Control" parent="TabContainer"]
-visible = false
 layout_mode = 2
 theme = SubResource("Theme_v4x2c")
 metadata/_tab_index = 0
@@ -198,6 +197,7 @@ offset_bottom = 472.0
 text = "SAVE"
 
 [node name="Weekly" type="Control" parent="TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
