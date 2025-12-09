@@ -7,6 +7,7 @@ extends PopupPanel
 var current_date
 
 func _ready():
+	self.set_exclusive(true)
 	exit_button.pressed.connect(_on_exit_pressed)
 
 func open_for_date(date):

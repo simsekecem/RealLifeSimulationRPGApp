@@ -20,6 +20,7 @@ var note_popup: Node
 # -------------------------------------------------------
 
 func _ready() -> void:
+	UI.get_node("UIRoot").show_only_top_right_buttons()
 	cal.set_first_weekday(Time.WEEKDAY_MONDAY)
 	cal.week_number_system = Calendar.WeekNumberSystem.WEEK_NUMBER_FOUR_DAY
 	
@@ -238,3 +239,5 @@ class CalendarLabel:
 	
 	func set_font_size(font_size: int = 12):
 		label_settings.font_size = font_size
+func _on_back_button_pressed():
+	UI.get_node("UIRoot").change_scene_to("res://town.tscn")

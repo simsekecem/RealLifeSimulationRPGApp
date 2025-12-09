@@ -118,6 +118,7 @@ vertical_alignment = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(900, 0)
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/h_separation = 30
 theme_override_constants/v_separation = 26
 columns = 4
