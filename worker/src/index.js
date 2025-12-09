@@ -4,216 +4,88 @@ export default {
         const path = url.pathname;
         const method = request.method;
 
-        // Pages uygulamanızın CORS için kabul edilen URL'si
-        const ALLOWED_ORIGIN = "https://life-sim.pages.dev"; 
-        
-        // Şifre Sıfırlama için varsayılan URL (Artık kullanılmıyor ama durabilir)
-        const REDIRECT_URL_RESET = "https://life-sim.pages.dev/reset-password";
-        // 🔥 YENİ: Kayıt Onayı sonrası yönlendirme URL'si
-        const REDIRECT_URL_SIGNUP = "https://life-sim.pages.dev/signup-confirmed"; 
-        
-        // Tüm yanıtlara CORS başlıklarını ekleyen yardımcı fonksiyon
-        const addCorsHeaders = (response) => {
-            response.headers.set("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+        // Mobil APK + itch.io + browser hepsinde çalışsın diye wildcard yerine dinamik origin
+        const origin = request.headers.get("Origin") || "*";
+
+        const addCors = (response) => {
+            response.headers.set("Access-Control-Allow-Origin", origin);
             response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
             response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-            response.headers.set("Access-Control-Max-Age", "86400"); // 24 saat
+            response.headers.set("Access-Control-Allow-Credentials", "true");
             return response;
         };
-        
-        // ====================================================================
-        // 1. HERKESE AÇIK ENDPOINT'LER ve CORS PRE-FLIGHT (ÖN KONTROL)
-        // ====================================================================
 
-        // CORS Pre-flight (OPTIONS) İsteğini Yönet
-        // OPTIONS kontrolüne /api/signup endpoint'i de eklendi
-        if (
-            (path === "/api/update-password" ||
-            path === "/api/password-recover" ||
-            path === "/api/signup" ||
-            path === "/api/save_user_data") 
-            && method === "OPTIONS"
-        ) {
-            return addCorsHeaders(new Response(null, { status: 204 }));
+        // Preflight
+        if (method === "OPTIONS") {
+            return addCors(new Response(null, { status: 204 }));
         }
 
-        
-        /**
-         * YENİ ENDPOINT: Kullanıcı Kaydı (Sign-up)
-         * POST /api/signup
-         */
+        // =====================================================
+        // PUBLIC ENDPOINTS
+        // =====================================================
+
+        // ---------- SIGNUP ----------
         if (path === "/api/signup" && method === "POST") {
-            try {
-                const { email, password } = await request.json();
+            const body = await request.json();
+            const res = await fetch(`${env.SUPABASE_URL}/auth/v1/signup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": env.SUPABASE_ANON_KEY,
+                },
+                body: JSON.stringify({
+                    email: body.email,
+                    password: body.password,
+                    email_redirect_to: "https://life-sim.pages.dev/signup-confirmed",
+                }),
+            });
 
-                if (!email || !password) {
-                    const response = new Response(JSON.stringify({ error: "Email ve şifre gereklidir." }), {
-                        status: 400, headers: { "Content-Type": "application/json" }
-                    });
-                    return addCorsHeaders(response);
-                }
-
-                // Supabase /auth/v1/signup endpoint'ine isteği gönder
-                const signupRes = await fetch(`${env.SUPABASE_URL}/auth/v1/signup`, {
-                    method: "POST",
-                    headers: {
-                        "apikey": env.SUPABASE_ANON_KEY,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password,
-                        // Kayıt onay linki tıklandığında buraya yönlendirilir.
-                        email_redirect_to: REDIRECT_URL_SIGNUP 
-                    })
-                });
-
-                if (signupRes.ok || signupRes.status === 200) {
-                    const response = new Response(JSON.stringify({ message: "Kayıt başarılı! Onay maili gönderildi. Lütfen e-posta kutunuzu kontrol edin." }), {
-                        status: 200, headers: { "Content-Type": "application/json" }
-                    });
-                    return addCorsHeaders(response);
-                } else {
-                    const errorData = await signupRes.json();
-                    const response = new Response(JSON.stringify({ error: errorData.msg || "Kayıt hatası." }), {
-                        status: signupRes.status, headers: { "Content-Type": "application/json" }
-                    });
-                    return addCorsHeaders(response);
-                }
-
-            } catch (e) {
-                const response = new Response(JSON.stringify({ error: "Sunucu hatası: Kayıt sırasında bir sorun oluştu." }), {
-                    status: 500, headers: { "Content-Type": "application/json" }
-                });
-                return addCorsHeaders(response);
-            }
+            return addCors(new Response(await res.text(), { status: res.status }));
         }
-        
-        /**
-         * ENDPOINT: Şifre Sıfırlama Mailini Gönderme
-         * POST /api/password-recover
-         */
+
+        // ---------- PASSWORD RECOVER ----------
         if (path === "/api/password-recover" && method === "POST") {
-            try {
-                const { email } = await request.json();
+            const body = await request.json();
+            const res = await fetch(`${env.SUPABASE_URL}/auth/v1/recover`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": env.SUPABASE_ANON_KEY,
+                },
+                body: JSON.stringify({ email: body.email }),
+            });
 
-                if (!email) {
-                    const response = new Response(JSON.stringify({ error: "Email adresi gereklidir." }), {
-                        status: 400, headers: { "Content-Type": "application/json" }
-                    });
-                    return addCorsHeaders(response);
-                }
-
-                // Supabase /auth/v1/recover endpoint'ine isteği gönder
-                const recoverRes = await fetch(`${env.SUPABASE_URL}/auth/v1/recover`, {
-                    method: "POST",
-                    headers: {
-                        "apikey": env.SUPABASE_ANON_KEY,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        // Şifre sıfırlama için artık redirect_to kullanılmıyor.
-                    })
-                });
-
-                if (recoverRes.ok || recoverRes.status === 200) {
-                    const response = new Response(JSON.stringify({ message: "Şifre sıfırlama maili gönderildi. Lütfen e-posta kutunuzu kontrol edin." }), {
-                        status: 200, headers: { "Content-Type": "application/json" }
-                    });
-                    return addCorsHeaders(response);
-                } else {
-                    const errorData = await recoverRes.json();
-                    const response = new Response(JSON.stringify({ error: errorData.msg || "Supabase hatası: Mail gönderilemedi." }), {
-                        status: recoverRes.status, headers: { "Content-Type": "application/json" }
-                    });
-                    return addCorsHeaders(response);
-                }
-
-            } catch (e) {
-                const response = new Response(JSON.stringify({ error: "Sunucu hatası: İşlem sırasında bir sorun oluştu." }), {
-                    status: 500, headers: { "Content-Type": "application/json" }
-                });
-                return addCorsHeaders(response);
-            }
+            return addCors(new Response(await res.text(), { status: res.status }));
         }
-        
-        /**
-         * ENDPOINT: Yeni Şifreyi Güncelleme
-         * POST /api/update-password
-         */
+
+        // ---------- UPDATE PASSWORD ----------
         if (path === "/api/update-password" && method === "POST") {
-             try {
-                 const { access_token, new_password } = await request.json();
+            const body = await request.json();
+            const res = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${body.access_token}`,
+                    "apikey": env.SUPABASE_ANON_KEY,
+                },
+                body: JSON.stringify({ password: body.new_password }),
+            });
 
-                 if (!access_token || !new_password) {
-                     const response = new Response(JSON.stringify({ error: "Token ve yeni şifre gerekli" }), {
-                         status: 400,
-                         headers: { "Content-Type": "application/json" }
-                     });
-                     return addCorsHeaders(response);
-                 }
-
-                 // Supabase'e şifreyi güncelleme komutu gönder
-                 const updateRes = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
-                     method: "PUT",
-                     headers: {
-                         "Authorization": `Bearer ${access_token}`,
-                         "apikey": env.SUPABASE_ANON_KEY,
-                         "Content-Type": "application/json"
-                     },
-                     body: JSON.stringify({
-                         password: new_password
-                     })
-                 });
-
-                 if (!updateRes.ok) {
-                     const errorText = await updateRes.text();
-                     let errorMessage = "Şifre güncellenirken bir hata oluştu.";
-                     try {
-                         const errorData = JSON.parse(errorText);
-                         errorMessage = errorData.msg || errorData.error_description || errorMessage;
-                     } catch (e) {
-                         errorMessage = errorText;
-                     }
-
-                     const response = new Response(JSON.stringify({ error: errorMessage }), {
-                         status: updateRes.status,
-                         headers: { "Content-Type": "application/json" }
-                     });
-                     return addCorsHeaders(response);
-                 }
-
-                 // Başarılı Yanıt
-                 const response = new Response(JSON.stringify({ message: "Şifreniz başarıyla güncellendi." }), {
-                     status: 200, headers: { "Content-Type": "application/json" }
-                 });
-                 return addCorsHeaders(response);
-
-             } catch (e) {
-                 const response = new Response(JSON.stringify({ error: "Sunucu hatası: İşlem sırasında bir sorun oluştu." }), {
-                     status: 500,
-                     headers: { "Content-Type": "application/json" }
-                 });
-                 return addCorsHeaders(response);
-             }
+            return addCors(new Response(await res.text(), { status: res.status }));
         }
 
-        // ====================================================================
-        // 2. KİMLİK DOĞRULAMASI GEREKEN (PRIVATE) ENDPOINT'LER
-        // ====================================================================
+        // =====================================================
+        // AUTH CHECK (Protected Routes)
+        // =====================================================
 
         const authHeader = request.headers.get("Authorization");
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            const response = new Response(JSON.stringify({ error: "Unauthorized" }), { 
-                status: 401, 
-                headers: { "Content-Type": "application/json" } 
-            });
-            return addCorsHeaders(response);
+            return addCors(new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 }));
         }
-        const token = authHeader.substring(7);
 
-        // Supabase'den token'ı doğrula ve kullanıcı ID'sini al
+        const token = authHeader.slice(7);
+
+        // Validate token
         const userRes = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -222,81 +94,151 @@ export default {
         });
 
         if (!userRes.ok) {
-            const response = new Response(JSON.stringify({ error: "Invalid token" }), { 
-                status: 401, 
-                headers: { "Content-Type": "application/json" } 
-            });
-            return addCorsHeaders(response);
+            return addCors(new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 }));
         }
 
         const user = await userRes.json();
         const userId = user.id;
 
-                // ================================================================
-        // 🔥  SAVE USER DATA (CACHE’TEN GELEN JSON’U D1’E KAYDETME)
-        //     POST /api/save_user_data
-        // ================================================================
-        if (path === "/api/save_user_data" && method === "POST") {
-            try {
-                const body = await request.json();
+        // =====================================================
+        // LOAD ALL DATA
+        // =====================================================
+        if (path === "/api/load_all" && method === "GET") {
 
-                // data JSON formatında gelmeli
-                if (!body || typeof body !== "object" || !body.data) {
-                    const response = new Response(
-                        JSON.stringify({ error: "Geçersiz veri formatı. 'data' alanı gerekli." }),
-                        { status: 400, headers: { "Content-Type": "application/json" } }
-                    );
-                    return addCorsHeaders(response);
-                }
+            const result = {
+                user: await env.DB.prepare(`SELECT name, birthdate FROM users WHERE user_id=?`)
+                    .bind(userId).first(),
 
-                // D1'e kaydet
-                await env.DB.prepare(`
-                    INSERT INTO user_custom_data (user_id, data)
-                    VALUES (?, ?)
-                    ON CONFLICT(user_id) DO UPDATE SET data = excluded.data;
-                `)
-                .bind(userId, JSON.stringify(body.data))
-                .run();
+                preferences: await env.DB.prepare(`SELECT music_volume FROM user_preferences WHERE user_id=?`)
+                    .bind(userId).first(),
 
-                const response = new Response(
-                    JSON.stringify({ success: true }),
-                    { status: 200, headers: { "Content-Type": "application/json" } }
-                );
-                return addCorsHeaders(response);
+                library: await env.DB.prepare(`SELECT title, status FROM library_books WHERE user_id=?`)
+                    .bind(userId).all(),
 
-            } catch (err) {
-                const response = new Response(
-                    JSON.stringify({ error: "Sunucu hatası: Veri kaydedilemedi." }),
-                    { status: 500, headers: { "Content-Type": "application/json" } }
-                );
-                return addCorsHeaders(response);
-            }
+                study_log: await env.DB.prepare(`SELECT date, start_time, end_time, subject FROM study_log WHERE user_id=?`)
+                    .bind(userId).all(),
+
+                gym_log: await env.DB.prepare(`SELECT date, exercise_name, sets, reps, duration, rest, weight, region, completed 
+                                                  FROM gym_log WHERE user_id=?`)
+                    .bind(userId).all(),
+
+                market_items: await env.DB.prepare(`SELECT category, item_name, planned, bought, date
+                                                      FROM market_items WHERE user_id=?`)
+                    .bind(userId).all(),
+
+                restaurant: await env.DB.prepare(`SELECT date, breakfast, lunch, dinner, snacks, notes
+                                                    FROM restaurant_log WHERE user_id=?`)
+                    .bind(userId).all(),
+
+                calendar_notes: await env.DB.prepare(`SELECT date, note FROM calendar_notes WHERE user_id=?`)
+                    .bind(userId).all()
+            };
+
+            return addCors(new Response(JSON.stringify(result), { status: 200 }));
         }
 
-        // --- Preferences (Tercihler) Mantığı --- 🔥 GERİ EKLENDİ!
-
-        if (path === "/prefs/get" && method === "GET") {
-            const { results } = await env.DB.prepare(
-                "SELECT prefs FROM preferences WHERE user_id = ?"
-            ).bind(userId).all();
-            const response = new Response(results[0]?.prefs || "{}", { headers: { "Content-Type": "application/json" } });
-            return addCorsHeaders(response);
-        }
-
-        if (path === "/prefs/set" && method === "POST") {
+        // =====================================================
+        // SAVE ALL
+        // =====================================================
+        if (path === "/api/save_all" && method === "POST") {
             const body = await request.json();
-            // JSON verisini stringify yapıp veritabanına kaydet
-            await env.DB.prepare(`
-                INSERT INTO preferences (user_id, prefs)
-                VALUES (?, ?)
-                ON CONFLICT(user_id) DO UPDATE SET prefs = excluded.prefs
-            `).bind(userId, JSON.stringify(body)).run();
-            const response = new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
-            return addCorsHeaders(response);
+
+            async function insertOrUpdate(insertQ, insertParams, updateQ, updateParams) {
+                try {
+                    await env.DB.prepare(insertQ).bind(...insertParams).run();
+                } catch (e) {
+                    await env.DB.prepare(updateQ).bind(...updateParams).run();
+                }
+            }
+
+            // USER
+            await insertOrUpdate(
+                `INSERT INTO users (user_id, name, birthdate) VALUES (?, ?, ?)`,
+                [userId, body.user.name, body.user.birthdate],
+                `UPDATE users SET name=?, birthdate=? WHERE user_id=?`,
+                [body.user.name, body.user.birthdate, userId]
+            );
+
+            // PREFERENCES
+            await insertOrUpdate(
+                `INSERT INTO user_preferences (user_id, music_volume) VALUES (?, ?)`,
+                [userId, body.preferences.music_volume],
+                `UPDATE user_preferences SET music_volume=? WHERE user_id=?`,
+                [body.preferences.music_volume, userId]
+            );
+
+            // LIBRARY
+            for (const b of body.library) {
+                await insertOrUpdate(
+                    `INSERT INTO library_books (user_id, title, status) VALUES (?, ?, ?)`,
+                    [userId, b.title, b.status],
+                    `UPDATE library_books SET status=? WHERE user_id=? AND title=?`,
+                    [b.status, userId, b.title]
+                );
+            }
+
+            // STUDY LOG
+            for (const s of body.study_log) {
+                await insertOrUpdate(
+                    `INSERT INTO study_log (user_id, date, start_time, end_time, subject)
+                     VALUES (?, ?, ?, ?, ?)`,
+                    [userId, s.date, s.start_time, s.end_time, s.subject],
+                    `UPDATE study_log SET subject=? WHERE user_id=? AND date=? AND start_time=? AND end_time=?`,
+                    [s.subject, userId, s.date, s.start_time, s.end_time]
+                );
+            }
+
+            // GYM LOG
+            for (const g of body.gym_log) {
+                await insertOrUpdate(
+                    `INSERT INTO gym_log (user_id, date, exercise_name, sets, reps, duration, rest, weight, region, completed)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [userId, g.date, g.exercise_name, g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed],
+                    `UPDATE gym_log SET sets=?, reps=?, duration=?, rest=?, weight=?, region=?, completed=?
+                     WHERE user_id=? AND date=? AND exercise_name=?`,
+                    [g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed, userId, g.date, g.exercise_name]
+                );
+            }
+
+            // MARKET
+            for (const m of body.market_items) {
+                await insertOrUpdate(
+                    `INSERT INTO market_items (user_id, category, item_name, planned, bought, date)
+                     VALUES (?, ?, ?, ?, ?, ?)`,
+                    [userId, m.category, m.item_name, m.planned, m.bought, m.date],
+                    `UPDATE market_items SET planned=?, bought=?, date=?
+                     WHERE user_id=? AND category=? AND item_name=?`,
+                    [m.planned, m.bought, m.date, userId, m.category, m.item_name]
+                );
+            }
+
+            // RESTAURANT
+            for (const r of body.restaurant) {
+                await insertOrUpdate(
+                    `INSERT INTO restaurant_log (user_id, date, breakfast, lunch, dinner, snacks, notes)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [userId, r.date, r.breakfast, r.lunch, r.dinner, r.snacks, r.notes],
+                    `UPDATE restaurant_log SET breakfast=?, lunch=?, dinner=?, snacks=?, notes=?
+                     WHERE user_id=? AND date=?`,
+                    [r.breakfast, r.lunch, r.dinner, r.snacks, r.notes, userId, r.date]
+                );
+            }
+
+            // CALENDAR
+            for (const c of body.calendar_notes) {
+                await insertOrUpdate(
+                    `INSERT INTO calendar_notes (user_id, date, note)
+                     VALUES (?, ?, ?)`,
+                    [userId, c.date, c.note],
+                    `UPDATE calendar_notes SET note=? WHERE user_id=? AND date=?`,
+                    [c.note, userId, c.date]
+                );
+            }
+
+            return addCors(new Response(JSON.stringify({ ok: true }), { status: 200 }));
         }
-        
-        // Eşleşen başka hiçbir endpoint yoksa
-        const response = new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: { "Content-Type": "application/json" } });
-        return addCorsHeaders(response);
+
+        // Not found
+        return addCors(new Response(JSON.stringify({ error: "Not Found" }), { status: 404 }));
     }
 };

@@ -68,7 +68,8 @@ func show_only_top_right_buttons():
 	
 func change_scene_to(scene_path: String):
 	# SAHNE DEĞİŞMEDEN ÖNCE CACHE KAYDEDİLİR
-	Globals.finalize_save()
+	Globals.safe_local_save()
+
 
 	var error := OK 
 
@@ -92,3 +93,8 @@ func show_full_ui():
 	$Joystick.visible = true # Joystick'i de geri aç
 	hide_all_windows() # Her ihtimale karşı tüm pencereleri kapat
 	print("✅ Tam UI (Avatar dahil) görünür hale geldi.")
+	
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
+		print("🔄 Oyun kapanırken veriler kaydediliyor...")
+		Globals.finalize_save()

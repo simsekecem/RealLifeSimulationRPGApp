@@ -10,24 +10,18 @@ func _ready():
 	signup_button.pressed.connect(_on_signup_pressed)
 	http.request_completed.connect(_on_request_completed)
 
-# 🔹 Kayıt isteği
 func _on_signup_pressed() -> void:
-	var url = SUPABASE_URL + "/auth/v1/signup"
 	var body = {
 		"email": email_field.text,
 		"password": password_field.text
 	}
-	send_request(http, url, body)
+	send_request(http, "/api/signup", body)
 
-# 🔹 Kayıt cevabı
-func _on_request_completed(result: int, code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+func _on_request_completed(_result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	var data = JSON.parse_string(body.get_string_from_utf8())
-	if data == null:
-		print("❌ Geçersiz yanıt")
-		return
 
-	if data.has("user"):
-		print("✅ Kayıt başarılı! E-postanı kontrol et, onay maili gönderildi.")
+	if code == 200:
+		print("✅ Signup successful. Check your email for confirmation.")
 		get_tree().change_scene_to_file("res://scenes/authscreen_login.tscn")
 	else:
-		print("⚠️ Kayıt başarısız:", data)
+		print("❌ Signup failed:", data)

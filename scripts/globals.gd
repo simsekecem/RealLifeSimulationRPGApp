@@ -1,95 +1,243 @@
 extends Node
 
-# Supabase auth bilgileri
+# ============================================================
+#  GLOBAL STATE
+# ============================================================
 var auth_token: String = ""
 var user_id: String = ""
 
-# -------------------------
-# CACHE SİSTEMİ DEĞİŞKENLERİ
-# -------------------------
-var data_cache := {}               # RAM cache
-var is_dirty := false              # değişiklik var mı?
-var debounce_timer := 0.0
-var debounce_interval := 60.0      # 1 dakika debounce
+var cache := {
+	"user": { "name": "", "birthdate": "" },
+	"preferences": { "music_volume": 50 },
+	"gym_log": [],
+	"library": [],
+	"study_log": [],
+	"market_items": [],
+	"restaurant": [],
+	"calendar_notes": []
+}
 
-var cache_file_path := "user://user_cache.json"
+var save_timer := 0.0
+var debounce_seconds := 60.0
 
+var cache_path := "user://user_cache.json"
+var WEEK_RESET_DAYS := 7
 
+# ============================================================
+#  READY
+# ============================================================
 func _ready():
-	load_local_cache()
+	load_cache()
+	reset_if_week_passed()
 
+# ============================================================
+#  SAVE DEBOUNCE
+# ============================================================
+func mark_dirty():
+	save_timer = debounce_seconds
 
 func _process(delta):
-	if is_dirty:
-		debounce_timer += delta
-		if debounce_timer >= debounce_interval:
-			save_to_local_cache()
-			debounce_timer = 0.0
+	if save_timer > 0:
+		save_timer -= delta
+		if save_timer <= 0:
+			save_cache()
 
-
-# -------------------------
-# 1. RAM CACHE WRITE
-# -------------------------
-func set_cached_value(key: String, value):
-	data_cache[key] = value
-	is_dirty = true
-
-
-# -------------------------
-# 2. LOAD LOCAL CACHE
-# -------------------------
-func load_local_cache():
-	if FileAccess.file_exists(cache_file_path):
-		var file := FileAccess.open(cache_file_path, FileAccess.READ)
-		var text := file.get_as_text()
-		if text != "":
-			data_cache = JSON.parse_string(text)
-		else:
-			data_cache = {}
-	else:
-		data_cache = {}
-
-
-# -------------------------
-# 3. SAVE LOCAL CACHE (debounce)
-# -------------------------
-func save_to_local_cache():
-	var file := FileAccess.open(cache_file_path, FileAccess.WRITE)
-	file.store_string(JSON.stringify(data_cache))
-	print("[CACHE] Local cache saved to file.")
-	is_dirty = false
-
-
-# -------------------------
-# 4. SAVE TO SERVER (Worker)
-# -------------------------
-func save_to_server():
-	if data_cache.size() == 0:
-		print("[SERVER] No data to send.")
+# ============================================================
+#  LOAD CACHE (LOCAL JSON)
+# ============================================================
+func load_cache():
+	if not FileAccess.file_exists(cache_path):
+		save_cache()
 		return
 
-	var http := HTTPRequest.new()
+	var file = FileAccess.open(cache_path, FileAccess.READ)
+	if not file:
+		return
+
+	var text := file.get_as_text()
+	var data := {}
+
+	if text != "":
+		data = JSON.parse_string(text)
+
+	if typeof(data) == TYPE_DICTIONARY:
+		cache = data
+
+
+# ============================================================
+#  SAVE CACHE (LOCAL JSON)
+# ============================================================
+func save_cache():
+	var file = FileAccess.open(cache_path, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(cache))
+
+# ============================================================
+#  WEEKLY RESET
+# ============================================================
+func reset_if_week_passed():
+	var meta_path = "user://cache_meta.json"
+
+	if not FileAccess.file_exists(meta_path):
+		var file = FileAccess.open(meta_path, FileAccess.WRITE)
+		file.store_string(JSON.stringify({ "last_reset": Time.get_unix_time_from_system() }))
+		return
+
+	var file = FileAccess.open(meta_path, FileAccess.READ)
+	var data = JSON.parse_string(file.get_as_text())
+
+	var last_reset = data.get("last_reset", 0)
+	var now = Time.get_unix_time_from_system()
+
+	if now - last_reset > WEEK_RESET_DAYS * 24 * 3600:
+		print("Weekly reset triggered")
+		weekly_reset()
+
+		var f = FileAccess.open(meta_path, FileAccess.WRITE)
+		f.store_string(JSON.stringify({ "last_reset": now }))
+
+func weekly_reset():
+	cache["gym_log"].clear()
+	cache["study_log"].clear()
+	cache["restaurant"].clear()
+	cache["calendar_notes"].clear()
+	save_cache()
+
+# ============================================================
+#  WRITE HELPERS
+# ============================================================
+func set_user_info(name: String, birthdate: String):
+	cache["user"]["name"] = name
+	cache["user"]["birthdate"] = birthdate
+	mark_dirty()
+
+func set_music_volume(vol: int):
+	cache["preferences"]["music_volume"] = vol
+	mark_dirty()
+
+func add_gym_entry(entry: Dictionary):
+	for i in range(cache["gym_log"].size()):
+		var e = cache["gym_log"][i]
+		if e["date"] == entry["date"] and e["exercise_name"] == entry["exercise_name"]:
+			cache["gym_log"][i] = entry
+			mark_dirty()
+			return
+
+	cache["gym_log"].append(entry)
+	mark_dirty()
+
+func add_market_item(item: Dictionary):
+	for i in range(cache["market_items"].size()):
+		var e = cache["market_items"][i]
+		if e["category"] == item["category"] and e["item_name"] == item["item_name"]:
+			cache["market_items"][i] = item
+			mark_dirty()
+			return
+
+	cache["market_items"].append(item)
+	mark_dirty()
+
+func add_calendar_note(note: Dictionary):
+	for i in range(cache["calendar_notes"].size()):
+		var e = cache["calendar_notes"][i]
+		if e["date"] == note["date"]:
+			cache["calendar_notes"][i] = note
+			mark_dirty()
+			return
+
+	cache["calendar_notes"].append(note)
+	mark_dirty()
+
+# ============================================================
+#  SYNC FROM SERVER (LOGIN SONRASI)
+# ============================================================
+func load_from_server():
+	if auth_token == "":
+		print("Cannot load — no auth token.")
+		return
+
+	print("Requesting user data from server...")
+
+	var headers = [
+		"Authorization: Bearer " + auth_token
+	]
+
+	var http = HTTPRequest.new()
 	add_child(http)
 
-	var url = "https://life-sim-worker.life-simulation.workers.dev/api/save_user_data"
+	http.request_completed.connect(_on_load_complete)
+
+	http.request(
+		"https://life-sim-worker.life-simulation.workers.dev/api/load_all",
+		headers,
+		HTTPClient.METHOD_GET
+	)
+
+func _on_load_complete(_res, code, _headers, body):
+	if code != 200:
+		print("❌ Failed to load user data:", code)
+		return
+
+	var data = JSON.parse_string(body.get_string_from_utf8())
+
+	if typeof(data) != TYPE_DICTIONARY:
+		print("❌ Invalid load response", data)
+		return
+
+	# D1 → Local Cache Mapping
+	cache["user"] = data.get("user", { "name": "", "birthdate": "" })
+	cache["preferences"] = data.get("preferences", { "music_volume": 50 })
+	cache["library"] = data.get("library", [])
+	cache["study_log"] = data.get("study_log", [])
+	cache["gym_log"] = data.get("gym_log", [])
+	cache["market_items"] = data.get("market_items", [])
+	cache["restaurant"] = data.get("restaurant", [])
+	cache["calendar_notes"] = data.get("calendar_notes", [])
+
+	save_cache()
+
+	print("✅ User data synchronized from server.")
+
+# ============================================================
+#  SEND TO SERVER (KAPANIŞTA)
+# ============================================================
+func send_to_server():
+	if auth_token == "":
+		print("No auth token — skipping save.")
+		return
 
 	var headers = [
 		"Content-Type: application/json",
 		"Authorization: Bearer " + auth_token
 	]
 
-	var body = JSON.stringify({
-		"user_id": user_id,
-		"data": data_cache
-	})
+	var http = HTTPRequest.new()
+	add_child(http)
 
-	http.request(url, headers, HTTPClient.METHOD_POST, body)
-	print("[SERVER] Data sent to backend.")
+	http.request(
+		"https://life-sim-worker.life-simulation.workers.dev/api/save_all",
+		headers,
+		HTTPClient.METHOD_POST,
+		JSON.stringify(cache)
+	)
 
+	print("Cache sent to server.")
 
-# -------------------------
-# 5. OYUN KAPANIRKEN VE SAHNE DEĞİŞİNCE ÇAĞIR
-# -------------------------
+# ============================================================
+#  EXIT
+# ============================================================
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_cache()
+		send_to_server()
+		get_tree().quit()
+
+# ============================================================
+#  SAFE LOCAL SAVE (SCENE CHANGE)
+# ============================================================
+func safe_local_save():
+	save_cache()
+
 func finalize_save():
-	save_to_local_cache()
-	save_to_server()
+	save_cache()
+	send_to_server()

@@ -11,14 +11,11 @@ func _ready():
 	http.request_completed.connect(_on_request_completed)
 	message_label.visible = false
 
-# 🔹 Şifre sıfırlama isteği
 func _on_reset_pressed() -> void:
-	var url = SUPABASE_URL + "/auth/v1/recover"
 	var body = { "email": email_field.text }
-	send_request(http, url, body)
+	send_request(http, "/api/password-recover", body)
 
-# 🔹 Cevap geldiğinde
-func _on_request_completed(result: int, code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+func _on_request_completed(_result: int, code: int, _headers: PackedStringArray, _body: PackedByteArray) -> void:
 	if code == 200:
 		message_label.visible = true
 	else:
