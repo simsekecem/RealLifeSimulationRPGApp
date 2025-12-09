@@ -1,10 +1,10 @@
-[gd_scene load_steps=17 format=4 uid="uid://cjipdmgwcnglk"]
+[gd_scene load_steps=17 format=4 uid="uid://cf0esf5mhdq2q"]
 
 [ext_resource type="Texture2D" uid="uid://bawus3d7gq60s" path="res://assets/make it big/map2.png" id="2_tkreh"]
-[ext_resource type="Texture2D" uid="uid://bs5t5ieve7nea" path="res://assets/make it big/overworld_tileset_grass.png" id="3_525j1"]
+[ext_resource type="Texture2D" uid="uid://bs5t5ieve7nea" path="res://assets/town/TilesetGrass/overworld_tileset_grass.png" id="3_525j1"]
 [ext_resource type="Texture2D" uid="uid://bbj36e1yde74l" path="res://assets/town/Houses Sprite Sheet 1-5.png" id="5_mqebe"]
 [ext_resource type="Texture2D" uid="uid://7rewch3eiu4n" path="res://assets/town/Houses Sprite Sheet large.png" id="6_kjw1v"]
-[ext_resource type="Texture2D" uid="uid://biessqgjq6p3l" path="res://assets/town/TilesetGrass/map1.png" id="7_525j1"]
+[ext_resource type="Texture2D" uid="uid://biessqgjq6p3l" path="res://assets/make it big/map1.png" id="7_525j1"]
 [ext_resource type="Texture2D" uid="uid://bd4nokbl8py0p" path="res://assets/town/Tiled_files/exterior.png" id="7_gttat"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gwqsq"]

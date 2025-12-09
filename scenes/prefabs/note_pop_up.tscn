@@ -57,6 +57,7 @@ theme_override_fonts/font = ExtResource("1_7f3ak")
 
 [node name="TextEdit" type="TextEdit" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.57254905, 0.24705882, 0.8117647, 1)
 theme_override_fonts/font = ExtResource("1_7f3ak")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_kp8v7")
