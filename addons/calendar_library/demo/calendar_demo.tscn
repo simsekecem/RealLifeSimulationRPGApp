@@ -1,12 +1,44 @@
-[gd_scene load_steps=4 format=3 uid="uid://bt72ebrhuikpt"]
+[gd_scene load_steps=15 format=3 uid="uid://bt72ebrhuikpt"]
 
 [ext_resource type="Script" uid="uid://dw0eeknmwd05k" path="res://addons/calendar_library/demo/calendar_demo.gd" id="1_qxlq3"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_ycdnr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nmk0q"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_15vha"]
 font_size = 30
 font_color = Color(0.254902, 0.282353, 0.32549, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c4nor"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mxi3i"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ycdnr"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_41fhj"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_03b1n"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6vhd5"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rnbfg"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ubfdl"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5tyyl"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jjuse"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
 
 [node name="CalendarDemo" type="Control"]
 layout_mode = 3
@@ -55,25 +87,31 @@ theme_override_constants/separation = 30
 [node name="YearMinus" type="Button" parent="Padding/CalendarComponents/YearCalendarContainer/HBoxContainer"]
 custom_minimum_size = Vector2(38, 0)
 layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_nmk0q")
 text = "⬅"
 
 [node name="YearLabel" type="Label" parent="Padding/CalendarComponents/YearCalendarContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 1
-text = "2024"
+theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
+text = "2025"
 label_settings = SubResource("LabelSettings_15vha")
 vertical_alignment = 2
 
 [node name="YearPlus" type="Button" parent="Padding/CalendarComponents/YearCalendarContainer/HBoxContainer"]
 custom_minimum_size = Vector2(38, 0)
 layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_c4nor")
 text = "⮕"
 
 [node name="DateLabel" type="Label" parent="Padding/CalendarComponents/YearCalendarContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
 vertical_alignment = 2
 
 [node name="YearCalendar" type="GridContainer" parent="Padding/CalendarComponents/YearCalendarContainer"]
@@ -91,16 +129,22 @@ theme_override_constants/separation = 50
 
 [node name="Language" type="Label" parent="Padding/CalendarComponents/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
 text = "Demo languages"
 
 [node name="LanguageOptionButton" type="OptionButton" parent="Padding/CalendarComponents/VBoxContainer/Language"]
 layout_mode = 0
 offset_top = 27.0
-offset_right = 256.0
+offset_right = 288.0
 offset_bottom = 58.0
-grow_horizontal = 2
-grow_vertical = 2
 tooltip_text = "Choose any of the available demo languages."
+theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_mxi3i")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ycdnr")
+theme_override_styles/hover = SubResource("StyleBoxFlat_41fhj")
 selected = 0
 item_count = 5
 popup/item_0/text = "English"
@@ -117,6 +161,7 @@ popup/item_4/id = 4
 [node name="FirstWeekday" type="Label" parent="Padding/CalendarComponents/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
 text = "First weekday"
 
 [node name="FirstWeekdayOptionButton" type="OptionButton" parent="Padding/CalendarComponents/VBoxContainer/FirstWeekday"]
@@ -127,6 +172,12 @@ offset_bottom = 58.0
 grow_horizontal = 2
 grow_vertical = 2
 tooltip_text = "Set the first weekday of the week."
+theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_03b1n")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6vhd5")
+theme_override_styles/hover = SubResource("StyleBoxFlat_rnbfg")
 selected = 0
 item_count = 7
 popup/item_0/text = "Monday"
@@ -147,6 +198,8 @@ popup/item_6/id = 6
 [node name="WeekNumberSystem" type="Label" parent="Padding/CalendarComponents/VBoxContainer"]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
 text = "Week Number System"
 
 [node name="WeekNumberSystemOptionButton" type="OptionButton" parent="Padding/CalendarComponents/VBoxContainer/WeekNumberSystem"]
@@ -162,7 +215,12 @@ This is aligned with the ISO8601 standard.
 
 Traditional (WEEK_NUMBER_TRADITIONAL)
 The week with January 1 is always considered to be week 1."
+theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
+theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("StyleBoxFlat_ubfdl")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_5tyyl")
+theme_override_styles/hover = SubResource("StyleBoxFlat_jjuse")
 selected = 0
 item_count = 2
 popup/item_0/text = "First four day week"
@@ -173,28 +231,18 @@ popup/item_1/id = 1
 [node name="WeekNumbersCheckButton" type="CheckButton" parent="Padding/CalendarComponents/VBoxContainer/WeekNumberSystem"]
 layout_mode = 0
 offset_top = 66.0
-offset_right = 256.0
-offset_bottom = 97.0
+offset_right = 274.0
+offset_bottom = 109.0
+theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_colors/font_focus_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_colors/font_pressed_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
+theme_override_font_sizes/font_size = 13
 button_pressed = true
 text = "Show week numbers"
 
 [node name="HSeparator" type="HSeparator" parent="Padding/CalendarComponents/VBoxContainer"]
 layout_mode = 2
-
-[node name="DatePicker" type="Button" parent="Padding/CalendarComponents/VBoxContainer"]
-layout_mode = 2
-toggle_mode = true
-text = "Select date"
-alignment = 0
-
-[node name="PopupPanel" type="Panel" parent="Padding/CalendarComponents/VBoxContainer/DatePicker"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 0
-offset_top = 39.0
-offset_right = 266.0
-offset_bottom = 240.0
-grow_horizontal = 2
 
 [connection signal="pressed" from="Padding/CalendarComponents/YearCalendarContainer/HBoxContainer/YearMinus" to="." method="_on_year_minus_pressed"]
 [connection signal="pressed" from="Padding/CalendarComponents/YearCalendarContainer/HBoxContainer/YearPlus" to="." method="_on_year_plus_pressed"]
@@ -202,4 +250,3 @@ grow_horizontal = 2
 [connection signal="item_selected" from="Padding/CalendarComponents/VBoxContainer/FirstWeekday/FirstWeekdayOptionButton" to="." method="_on_first_weekday_option_button_item_selected"]
 [connection signal="item_selected" from="Padding/CalendarComponents/VBoxContainer/WeekNumberSystem/WeekNumberSystemOptionButton" to="." method="_on_week_number_system_option_button_item_selected"]
 [connection signal="toggled" from="Padding/CalendarComponents/VBoxContainer/WeekNumberSystem/WeekNumbersCheckButton" to="." method="_on_week_numbers_check_button_toggled"]
-[connection signal="toggled" from="Padding/CalendarComponents/VBoxContainer/DatePicker" to="." method="_on_date_picker_toggled"]
