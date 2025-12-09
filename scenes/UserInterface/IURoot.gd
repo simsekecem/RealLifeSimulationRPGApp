@@ -67,14 +67,14 @@ func show_only_top_right_buttons():
 	$TopRightButtons.visible = true
 	
 func change_scene_to(scene_path: String):
+	# SAHNE DEĞİŞMEDEN ÖNCE CACHE KAYDEDİLİR
+	Globals.finalize_save()
+
 	var error := OK 
 
-
-	if scene_path == "res://town.tscn":
-
+	if scene_path == "res://scenes/town.tscn":
 		error = get_tree().change_scene_to_packed(TownScene)
 	else:
-
 		error = get_tree().change_scene_to_file(scene_path)
 
 	if error != OK:
@@ -82,6 +82,7 @@ func change_scene_to(scene_path: String):
 		print("Lütfen sahne yolunu kontrol edin: ", scene_path)
 	else:
 		print("✅ Sahne başarıyla değiştirildi: ", scene_path)
+
 
 func show_full_ui():
 	"""Town sahnesine dönüldüğünde tüm ana UI elemanlarını görünür yapar."""

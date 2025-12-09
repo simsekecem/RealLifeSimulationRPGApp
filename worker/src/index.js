@@ -27,9 +27,16 @@ export default {
 
         // CORS Pre-flight (OPTIONS) İsteğini Yönet
         // OPTIONS kontrolüne /api/signup endpoint'i de eklendi
-        if ((path === "/api/update-password" || path === "/api/password-recover" || path === "/api/signup") && method === "OPTIONS") {
-             return addCorsHeaders(new Response(null, { status: 204 }));
+        if (
+            (path === "/api/update-password" ||
+            path === "/api/password-recover" ||
+            path === "/api/signup" ||
+            path === "/api/save_user_data") 
+            && method === "OPTIONS"
+        ) {
+            return addCorsHeaders(new Response(null, { status: 204 }));
         }
+
         
         /**
          * YENİ ENDPOINT: Kullanıcı Kaydı (Sign-up)
@@ -224,6 +231,47 @@ export default {
 
         const user = await userRes.json();
         const userId = user.id;
+
+                // ================================================================
+        // 🔥  SAVE USER DATA (CACHE’TEN GELEN JSON’U D1’E KAYDETME)
+        //     POST /api/save_user_data
+        // ================================================================
+        if (path === "/api/save_user_data" && method === "POST") {
+            try {
+                const body = await request.json();
+
+                // data JSON formatında gelmeli
+                if (!body || typeof body !== "object" || !body.data) {
+                    const response = new Response(
+                        JSON.stringify({ error: "Geçersiz veri formatı. 'data' alanı gerekli." }),
+                        { status: 400, headers: { "Content-Type": "application/json" } }
+                    );
+                    return addCorsHeaders(response);
+                }
+
+                // D1'e kaydet
+                await env.DB.prepare(`
+                    INSERT INTO user_custom_data (user_id, data)
+                    VALUES (?, ?)
+                    ON CONFLICT(user_id) DO UPDATE SET data = excluded.data;
+                `)
+                .bind(userId, JSON.stringify(body.data))
+                .run();
+
+                const response = new Response(
+                    JSON.stringify({ success: true }),
+                    { status: 200, headers: { "Content-Type": "application/json" } }
+                );
+                return addCorsHeaders(response);
+
+            } catch (err) {
+                const response = new Response(
+                    JSON.stringify({ error: "Sunucu hatası: Veri kaydedilemedi." }),
+                    { status: 500, headers: { "Content-Type": "application/json" } }
+                );
+                return addCorsHeaders(response);
+            }
+        }
 
         // --- Preferences (Tercihler) Mantığı --- 🔥 GERİ EKLENDİ!
 
