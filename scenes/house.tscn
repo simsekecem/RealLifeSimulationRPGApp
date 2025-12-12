@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=4 uid="uid://chaxn0raj3mjl"]
+[gd_scene load_steps=37 format=4 uid="uid://chaxn0raj3mjl"]
 
 [ext_resource type="Texture2D" uid="uid://m11ysxjaask1" path="res://assets/new/Interior.png" id="1_se78b"]
 [ext_resource type="Texture2D" uid="uid://c533tl4h4gkuv" path="res://assets/new/house_details.png" id="2_3bgk5"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://b6a3hwlmxjd7t" path="res://assets/new/Pixel Interiors 64x64pxl.png" id="6_ptc3g"]
 [ext_resource type="Texture2D" uid="uid://bj0bw2vjwk5ec" path="res://assets/new/fancy_mansion_furnitureset.png" id="7_wcu0q"]
 [ext_resource type="Texture2D" uid="uid://dio5g50fvoyqu" path="res://assets/new/coastal_furnitureset.png" id="8_bwc8c"]
+[ext_resource type="Texture2D" uid="uid://hnh3etflcvmd" path="res://assets/takvim32x32.png" id="9_bwc8c"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wcu0q"]
 texture = ExtResource("1_se78b")
@@ -3074,10 +3075,16 @@ texture_region_size = Vector2i(32, 32)
 2:14/0 = 0
 3:14/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lamap"]
+texture = ExtResource("9_bwc8c")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
 [sub_resource type="TileSet" id="TileSet_lamap"]
 tile_size = Vector2i(32, 32)
 sources/0 = SubResource("TileSetAtlasSource_57tf3")
 sources/1 = SubResource("TileSetAtlasSource_3kuml")
+sources/2 = SubResource("TileSetAtlasSource_lamap")
 
 [node name="House" type="Node2D"]
 
@@ -3102,7 +3109,7 @@ tile_map_data = PackedByteArray("AAAWAAIAAAAMAAYAAAAVAAIAAAALAAcAAAATAAIAAAAFAAc
 tile_set = SubResource("TileSet_0fn05")
 
 [node name="TileMapLayer4" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAEAAYAAAAGAAAAAAAHAAUAAAAHAAAAAAAHAAYAAAAHAAEAAAAGAAUAAAAJAAAAAAAGAAYAAAAJAAEAAAADAAYAAAAFAAAAAAADAAcAAAAFAAEAAAAGAAgAAAAOAAEAAAAEAAgAAAANAAEAAAAFAAgAAAAGAAIAAAANAAEAAAANAAUAAAANAAIAAAANAAYAAAAOAAcAAAAGAAEAAAAQAAcAAAAGAAEAAAANAAcAAAANAAQAAAARAAcAAAANAAQAAAA=")
+tile_map_data = PackedByteArray("AAAEAAYAAAAGAAAAAAAHAAUAAAAHAAAAAAAHAAYAAAAHAAEAAAAGAAUAAAAJAAAAAAAGAAYAAAAJAAEAAAADAAYAAAAFAAAAAAADAAcAAAAFAAEAAAAGAAgAAAAOAAEAAAAEAAgAAAANAAEAAAAFAAgAAAAGAAIAAAANAAEAAAANAAUAAAANAAIAAAANAAYAAAAOAAcAAAAGAAEAAAAQAAcAAAAGAAEAAAANAAcAAAANAAQAAAA=")
 tile_set = SubResource("TileSet_e5ov4")
 
 [node name="TileMapLayer5" type="TileMapLayer" parent="."]
@@ -3110,5 +3117,5 @@ tile_map_data = PackedByteArray("AAAdAA0AAAABABcAAAAdAA4AAAABABgAAAAgAA0AAAABABc
 tile_set = SubResource("TileSet_57tf3")
 
 [node name="TileMapLayer6" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("AAAFAAQAAQACAAEAAAAFAAUAAQACAAEAAAAkABEAAQAAAAEAAAAkABIAAQAAAAEAAAAkAAMAAQAAAAEAAAAkAAQAAQAAAAEAAAAoAAMAAQAAAAEAAAAoAAQAAQAAAAEAAAAUAAcAAAABAAoAAAAUAAgAAAABAAsAAAA=")
+tile_map_data = PackedByteArray("AAAFAAQAAQACAAEAAAAFAAUAAQACAAEAAAAkABEAAQAAAAEAAAAkABIAAQAAAAEAAAAkAAMAAQAAAAEAAAAkAAQAAQAAAAEAAAAoAAMAAQAAAAEAAAAoAAQAAQAAAAEAAAAUAAcAAAABAAoAAAAUAAgAAAABAAsAAAAjAA0AAgAAAAAAAAA=")
 tile_set = SubResource("TileSet_lamap")
