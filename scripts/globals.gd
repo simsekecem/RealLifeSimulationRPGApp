@@ -38,11 +38,10 @@ func _ready():
 	reset_if_week_passed()
 	
 	# ÖNEMLİ: Otomatik çıkışı kapatıyoruz.
-	# Kullanıcı X'e bastığında kontrolü biz alacağız (_notification fonksiyonunda).
 	get_tree().set_auto_accept_quit(false)
 
 # ============================================================
-#  YEREL KAYIT (LOCAL SAVE) - Her dakika çalışır
+#  YEREL KAYIT (LOCAL SAVE)
 # ============================================================
 func mark_dirty():
 	save_timer = debounce_seconds
@@ -54,30 +53,52 @@ func _process(delta):
 			save_cache()
 
 # ============================================================
-#  ÇIKIŞ SİNYALİNİ YAKALAMA (KAPATMA İSTEĞİ)
+#  HELPER FONKSİYONLAR (YENİ EKLENEN KISIM) 🛠️
+#  Tüm ekranlar (Library, Gym, Market) bunları kullanacak!
+# ============================================================
+
+# 1. Kutuyu açar ve temiz bir Liste verir (Eski unwrap_d1_data yerine)
+func ensure_list(data) -> Array:
+	# Eğer veri { "results": [...] } şeklindeyse içini al (D1 Wrapper)
+	if typeof(data) == TYPE_DICTIONARY and data.has("results"):
+		return data["results"]
+	# Zaten listeyse direkt ver
+	elif typeof(data) == TYPE_ARRAY:
+		return data
+	# Bozuksa veya null ise boş liste ver
+	return []
+
+# 2. "9.0", 9.0 veya "9" gelen veriyi güvenli INT yapar
+# Veritabanı bazen Float gönderiyor, bunu Int'e çevirip eşitliği sağlar.
+func safe_int(value) -> int:
+	return int(float(str(value)))
+
+# 3. String veriyi temizler (boşlukları siler)
+func safe_str(value) -> String:
+	return str(value).strip_edges()
+
+# ============================================================
+#  ÇIKIŞ SİNYALİNİ YAKALAMA
 # ============================================================
 func _notification(what):
-	# Kullanıcı oyunu kapatmak istediğinde (X tuşu, Alt+F4, Mobil Geri Tuşu)
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		
-		# Eğer zaten çıkış sürecindeysek tekrar işlem yapma
 		if is_quitting:
 			return
 			
 		print("🛑 Çıkış isteği algılandı. Veriler sunucuya gönderiliyor...")
 		is_quitting = true
 		
-		# 1. Önce yerel dosyaya kaydet (Garanti olsun)
+		# 1. Önce yerel dosyaya kaydet
 		save_cache()
 		
 		# 2. Sunucuya veriyi gönder ve CEVABI BEKLE
 		send_to_server_and_quit()
 
 # ============================================================
-#  SUNUCUYA GÖNDER VE ÇIK (ASYNC)
+#  SUNUCUYA GÖNDER VE ÇIK
 # ============================================================
 func send_to_server_and_quit():
-	# Token yoksa (Login olunmamışsa) beklemeden çık
 	if auth_token == "":
 		print("⚠️ Token yok, direkt çıkılıyor.")
 		get_tree().quit()
@@ -86,44 +107,29 @@ func send_to_server_and_quit():
 	var http = HTTPRequest.new()
 	add_child(http)
 	
-	# İstek bittiğinde çalışacak fonksiyonu bağla
 	http.request_completed.connect(_on_exit_save_completed)
 	
-	# ZAMAN AŞIMI KORUMASI:
-	# Sunucu 3 saniye içinde cevap vermezse oyunu zorla kapat.
+	# ZAMAN AŞIMI: 3 saniye
 	get_tree().create_timer(3.0).timeout.connect(force_quit)
 
-	var headers = [
-		"Content-Type: application/json",
-		"Authorization: Bearer " + auth_token
-	]
+	var headers = ["Content-Type: application/json", "Authorization: Bearer " + auth_token]
 	
 	print("📡 Kapanış verisi gönderiliyor...")
-	var error = http.request(
-		"https://life-sim-worker.life-simulation.workers.dev/api/save_all",
-		headers,
-		HTTPClient.METHOD_POST,
-		JSON.stringify(cache)
-	)
+	var error = http.request("https://life-sim-worker.life-simulation.workers.dev/api/save_all", headers, HTTPClient.METHOD_POST, JSON.stringify(cache))
 	
-	# Eğer HTTP isteği bile oluşturulamazsa (İnternet yoksa vs.)
 	if error != OK:
-		print("❌ İstek hatası! Direkt çıkılıyor.")
 		get_tree().quit()
 
-# Sunucudan cevap gelince burası çalışır
 func _on_exit_save_completed(result, response_code, headers, body):
 	if response_code == 200:
 		print("✅ Kapanış kaydı BAŞARILI! Oyun kapatılıyor.")
 	else:
 		print("❌ Kapanış kaydı BAŞARISIZ (Kod: " + str(response_code) + ").")
-		# --- HATA MESAJINI OKUMA ---
-		var error_msg = body.get_string_from_utf8()
-		print("🔥 SUNUCU HATASI DETAYI: ", error_msg)
+		if body:
+			print("🔥 SUNUCU HATASI DETAYI: ", body.get_string_from_utf8())
 	
 	get_tree().quit()
 
-# 3 saniye dolarsa burası çalışır
 func force_quit():
 	if is_quitting:
 		print("⏰ Zaman aşımı! Zorla kapatılıyor.")
@@ -189,9 +195,6 @@ func load_from_server():
 	var headers = ["Authorization: Bearer " + auth_token]
 	http.request("https://life-sim-worker.life-simulation.workers.dev/api/load_all", headers, HTTPClient.METHOD_GET)
 
-# ============================================================
-#  SUNUCUDAN YÜKLEME (DATA CLEANER EKLENDİ)
-# ============================================================
 func _on_load_complete(_res, code, _headers, body):
 	if code == 200:
 		var json = JSON.new()
@@ -204,47 +207,29 @@ func _on_load_complete(_res, code, _headers, body):
 		var data = json.get_data()
 
 		if typeof(data) == TYPE_DICTIONARY:
-			# --- VERİ TEMİZLEME (UNWRAP) İŞLEMİ ---
-			# Cloudflare D1 veriyi { "results": [...] } içine sarıp gönderiyor.
-			# Biz sadece içindeki listeyi alacağız.
+			# --- VERİ TEMİZLEME (YENİ SİSTEM) ---
+			# Artık 'ensure_list' helper'ını kullanıyoruz.
 			
-			if data.has("user"): cache["user"] = data["user"] # User genelde düz gelir
+			if data.has("user"): cache["user"] = data["user"]
 			if data.has("preferences"): cache["preferences"] = data["preferences"]
 			
-			# Listeler için "unwrap_d1_data" fonksiyonunu kullanıyoruz
-			if data.has("study_log"): cache["study_log"] = unwrap_d1_data(data["study_log"])
-			if data.has("gym_log"): cache["gym_log"] = unwrap_d1_data(data["gym_log"])
-			if data.has("library"): cache["library"] = unwrap_d1_data(data["library"]) # library_books olabilir, kontrol et
-			if data.has("market_items"): cache["market_items"] = unwrap_d1_data(data["market_items"])
-			if data.has("calendar_notes"): cache["calendar_notes"] = unwrap_d1_data(data["calendar_notes"])
-			if data.has("restaurant"): cache["restaurant"] = unwrap_d1_data(data["restaurant"])
+			# Listeleri temizleyerek alıyoruz
+			if data.has("study_log"): cache["study_log"] = ensure_list(data["study_log"])
+			if data.has("gym_log"): cache["gym_log"] = ensure_list(data["gym_log"])
+			if data.has("library"): cache["library"] = ensure_list(data["library"])
+			if data.has("market_items"): cache["market_items"] = ensure_list(data["market_items"])
+			if data.has("calendar_notes"): cache["calendar_notes"] = ensure_list(data["calendar_notes"])
+			if data.has("restaurant"): cache["restaurant"] = ensure_list(data["restaurant"])
 			
 			save_cache()
-			print("✅ Veriler kutudan çıkarıldı ve senkronize edildi.")
-			# Debug için temizlenmiş halini görelim
-			# print("TEMİZ STUDY LOG: ", cache["study_log"])
+			print("✅ Veriler kutudan çıkarıldı, temizlendi ve senkronize edildi.")
 	else:
 		print("❌ Veri çekme hatası: ", code)
-
-# --- YARDIMCI FONKSİYON (Bunu _on_load_complete'in altına yapıştır) ---
-func unwrap_d1_data(incoming_data):
-	# 1. Eğer veri { "results": [...] } şeklindeyse, içini al
-	if typeof(incoming_data) == TYPE_DICTIONARY and incoming_data.has("results"):
-		return incoming_data["results"]
-	
-	# 2. Eğer zaten direkt Listeyse ([...]) olduğu gibi kullan
-	if typeof(incoming_data) == TYPE_ARRAY:
-		return incoming_data
-		
-	# 3. Eğer boşsa veya bozuksa, boş liste dön (Crash önleyici)
-	return []
 
 # ============================================================
 #  SAHNE GEÇİŞİ (LOADING SCREEN)
 # ============================================================
 func change_scene_with_loading(target_path: String):
-	# Geçiş yapmadan önce yerel kaydet
 	save_cache()
-	
 	next_scene_path = target_path
 	get_tree().change_scene_to_file("res://scenes/UserInterface/LoadingScreen.tscn")
