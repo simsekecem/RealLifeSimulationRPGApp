@@ -158,105 +158,117 @@ export default {
             return addCors(new Response(JSON.stringify(result), { status: 200 }));
         }
 
-        // =====================================================
-        // SAVE ALL
+// =====================================================
+        // SAVE ALL (TYPE SAFE & CRASH PROOF VERSION)
         // =====================================================
         if (path === "/api/save_all" && method === "POST") {
-            const body = await request.json();
+            try {
+                const body = await request.json();
 
-            async function insertOrUpdate(insertQ, insertParams, updateQ, updateParams) {
-                try {
-                    await env.DB.prepare(insertQ).bind(...insertParams).run();
-                } catch (e) {
-                    await env.DB.prepare(updateQ).bind(...updateParams).run();
+                async function insertOrUpdate(insertQ, insertParams, updateQ, updateParams) {
+                    try {
+                        await env.DB.prepare(insertQ).bind(...insertParams).run();
+                    } catch (e) {
+                        await env.DB.prepare(updateQ).bind(...updateParams).run();
+                    }
                 }
-            }
 
-            // USER
-            await insertOrUpdate(
-                `INSERT INTO users (user_id, name, birthdate) VALUES (?, ?, ?)`,
-                [userId, body.user.name, body.user.birthdate],
-                `UPDATE users SET name=?, birthdate=? WHERE user_id=?`,
-                [body.user.name, body.user.birthdate, userId]
-            );
+                // --- HELPER: Gelen veri kesinlikle Array olsun ---
+                // Eğer "null" gelirse veya yanlışlıkla "{}" (Object) gelirse boş dizi [] yap.
+                const safeList = (data) => Array.isArray(data) ? data : [];
 
-            // PREFERENCES
-            await insertOrUpdate(
-                `INSERT INTO user_preferences (user_id, music_volume) VALUES (?, ?)`,
-                [userId, body.preferences.music_volume],
-                `UPDATE user_preferences SET music_volume=? WHERE user_id=?`,
-                [body.preferences.music_volume, userId]
-            );
+                // 1. USER
+                const userBox = body.user || {}; 
+                const userName = userBox.name || ""; 
+                const userBirth = userBox.birthdate || "";
 
-            // LIBRARY
-            for (const b of body.library) {
                 await insertOrUpdate(
-                    `INSERT INTO library_books (user_id, title, status) VALUES (?, ?, ?)`,
-                    [userId, b.title, b.status],
-                    `UPDATE library_books SET status=? WHERE user_id=? AND title=?`,
-                    [b.status, userId, b.title]
+                    `INSERT INTO users (user_id, name, birthdate) VALUES (?, ?, ?)`,
+                    [userId, userName, userBirth],
+                    `UPDATE users SET name=?, birthdate=? WHERE user_id=?`,
+                    [userName, userBirth, userId]
                 );
-            }
 
-            // STUDY LOG
-            for (const s of body.study_log) {
+                // 2. PREFERENCES
+                const prefsBox = body.preferences || {};
                 await insertOrUpdate(
-                    `INSERT INTO study_log (user_id, date, start_time, end_time, subject)
-                     VALUES (?, ?, ?, ?, ?)`,
-                    [userId, s.date, s.start_time, s.end_time, s.subject],
-                    `UPDATE study_log SET subject=? WHERE user_id=? AND date=? AND start_time=? AND end_time=?`,
-                    [s.subject, userId, s.date, s.start_time, s.end_time]
+                    `INSERT INTO user_preferences (user_id, music_volume) VALUES (?, ?)`,
+                    [userId, prefsBox.music_volume || 50],
+                    `UPDATE user_preferences SET music_volume=? WHERE user_id=?`,
+                    [prefsBox.music_volume || 50, userId]
                 );
-            }
 
-            // GYM LOG
-            for (const g of body.gym_log) {
-                await insertOrUpdate(
-                    `INSERT INTO gym_log (user_id, date, exercise_name, sets, reps, duration, rest, weight, region, completed)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [userId, g.date, g.exercise_name, g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed],
-                    `UPDATE gym_log SET sets=?, reps=?, duration=?, rest=?, weight=?, region=?, completed=?
-                     WHERE user_id=? AND date=? AND exercise_name=?`,
-                    [g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed, userId, g.date, g.exercise_name]
-                );
-            }
+                // 3. LIBRARY (HATA BURADAYDI -> DÜZELTİLDİ)
+                const library = safeList(body.library);
+                for (const b of library) {
+                    await insertOrUpdate(
+                        `INSERT INTO library_books (user_id, title, status) VALUES (?, ?, ?)`,
+                        [userId, b.title, b.status],
+                        `UPDATE library_books SET status=? WHERE user_id=? AND title=?`,
+                        [b.status, userId, b.title]
+                    );
+                }
 
-            // MARKET
-            for (const m of body.market_items) {
-                await insertOrUpdate(
-                    `INSERT INTO market_items (user_id, category, item_name, planned, bought, date)
-                     VALUES (?, ?, ?, ?, ?, ?)`,
-                    [userId, m.category, m.item_name, m.planned, m.bought, m.date],
-                    `UPDATE market_items SET planned=?, bought=?, date=?
-                     WHERE user_id=? AND category=? AND item_name=?`,
-                    [m.planned, m.bought, m.date, userId, m.category, m.item_name]
-                );
-            }
+                // 4. STUDY LOG
+                const study_log = safeList(body.study_log);
+                for (const s of study_log) {
+                    await insertOrUpdate(
+                        `INSERT INTO study_log (user_id, date, start_time, end_time, subject) VALUES (?, ?, ?, ?, ?)`,
+                        [userId, s.date, s.start_time, s.end_time, s.subject],
+                        `UPDATE study_log SET subject=? WHERE user_id=? AND date=? AND start_time=? AND end_time=?`,
+                        [s.subject, userId, s.date, s.start_time, s.end_time]
+                    );
+                }
 
-            // RESTAURANT
-            for (const r of body.restaurant) {
-                await insertOrUpdate(
-                    `INSERT INTO restaurant_log (user_id, date, breakfast, lunch, dinner, snacks, notes)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                    [userId, r.date, r.breakfast, r.lunch, r.dinner, r.snacks, r.notes],
-                    `UPDATE restaurant_log SET breakfast=?, lunch=?, dinner=?, snacks=?, notes=?
-                     WHERE user_id=? AND date=?`,
-                    [r.breakfast, r.lunch, r.dinner, r.snacks, r.notes, userId, r.date]
-                );
-            }
+                // 5. GYM LOG
+                const gym_log = safeList(body.gym_log);
+                for (const g of gym_log) {
+                    await insertOrUpdate(
+                        `INSERT INTO gym_log (user_id, date, exercise_name, sets, reps, duration, rest, weight, region, completed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [userId, g.date, g.exercise_name, g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed],
+                        `UPDATE gym_log SET sets=?, reps=?, duration=?, rest=?, weight=?, region=?, completed=? WHERE user_id=? AND date=? AND exercise_name=?`,
+                        [g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed, userId, g.date, g.exercise_name]
+                    );
+                }
 
-            // CALENDAR
-            for (const c of body.calendar_notes) {
-                await insertOrUpdate(
-                    `INSERT INTO calendar_notes (user_id, date, note)
-                     VALUES (?, ?, ?)`,
-                    [userId, c.date, c.note],
-                    `UPDATE calendar_notes SET note=? WHERE user_id=? AND date=?`,
-                    [c.note, userId, c.date]
-                );
-            }
+                // 6. MARKET ITEMS
+                const market_items = safeList(body.market_items);
+                for (const m of market_items) {
+                    await insertOrUpdate(
+                        `INSERT INTO market_items (user_id, category, item_name, planned, bought, date) VALUES (?, ?, ?, ?, ?, ?)`,
+                        [userId, m.category, m.item_name, m.planned, m.bought, m.date],
+                        `UPDATE market_items SET planned=?, bought=?, date=? WHERE user_id=? AND category=? AND item_name=?`,
+                        [m.planned, m.bought, m.date, userId, m.category, m.item_name]
+                    );
+                }
 
-            return addCors(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+                // 7. RESTAURANT LOG
+                const restaurant = safeList(body.restaurant);
+                for (const r of restaurant) {
+                    await insertOrUpdate(
+                        `INSERT INTO restaurant_log (user_id, date, breakfast, lunch, dinner, snacks, notes) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        [userId, r.date, r.breakfast, r.lunch, r.dinner, r.snacks, r.notes],
+                        `UPDATE restaurant_log SET breakfast=?, lunch=?, dinner=?, snacks=?, notes=? WHERE user_id=? AND date=?`,
+                        [r.breakfast, r.lunch, r.dinner, r.snacks, r.notes, userId, r.date]
+                    );
+                }
+
+                // 8. CALENDAR NOTES
+                const calendar_notes = safeList(body.calendar_notes);
+                for (const c of calendar_notes) {
+                    await insertOrUpdate(
+                        `INSERT INTO calendar_notes (user_id, date, note) VALUES (?, ?, ?)`,
+                        [userId, c.date, c.note],
+                        `UPDATE calendar_notes SET note=? WHERE user_id=? AND date=?`,
+                        [c.note, userId, c.date]
+                    );
+                }
+
+                return addCors(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+            } catch (err) {
+                return addCors(new Response(JSON.stringify({ error: err.message, stack: err.stack }), { status: 500 }));
+            }
         }
 
         // Not found

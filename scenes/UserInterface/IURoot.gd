@@ -33,7 +33,7 @@ func hide_all_ui():
 	$TopRightButtons.visible = false
 	hide_all_windows()
 	
-	# Joystick varsa gizle
+	# Joystick varsa gizle (User isteği üzerine buraya dokunmadım)
 	if has_node("Joystick"):
 		$Joystick.visible = false
 		
@@ -71,14 +71,13 @@ func show_only_top_right_buttons():
 func change_scene_to(scene_path: String):
 	"""
 	Genel Sahne Değiştirici.
-	UYARI: Bu fonksiyon artık 'MainGame' içindeki ev değişimleri için değil,
-	Login -> Oyun veya Oyun -> Login gibi KÖKLÜ değişiklikler içindir.
+	Login -> Oyun geçişleri için kullanılır.
 	"""
 	
-	# 1. Verileri kaydet
-	Globals.safe_local_save()
+	# 1. Verileri yerel olarak kaydet (Garanti olsun)
+	Globals.save_cache()
 
-	# 2. Loading Screen sistemini kullan (Yeni Sistem)
+	# 2. Loading Screen sistemini kullan
 	print("🔄 Sahne değiştiriliyor (Loading ile): ", scene_path)
 	Globals.change_scene_with_loading(scene_path)
 
@@ -92,12 +91,10 @@ func show_full_ui():
 		
 	hide_all_windows() 
 	print("✅ Tam UI görünür hale geldi.")
-	
-func _notification(what):
-	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
-		print("🔄 Oyun kapanırken veriler kaydediliyor...")
-		Globals.finalize_save()
 
+# --- DÜZELTME: _notification FONKSİYONU SİLİNDİ ---
+# Artık çıkış işlemlerini ve veri kaydını Globals.gd tek başına yönetiyor.
+# Buradaki kod çakışma yaratıyordu.
 
 func return_to_town():
 	print("🔙 Town'a dönülüyor...")
@@ -119,7 +116,6 @@ func return_to_town():
 
 	# 2. YÖNTEM: Test Modu (MainGame yok)
 	print("⚠️ Test Modu: Direkt Town sahnesi yükleniyor...")
-	# Town sahnesinin yolunu buraya doğru yazdığından emin ol
 	get_tree().change_scene_to_file("res://scenes/town.tscn")
 	
 	# UI'ı tekrar açalım ki joystick gelsin
