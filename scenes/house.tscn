@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=4 uid="uid://chaxn0raj3mjl"]
+[gd_scene load_steps=41 format=4 uid="uid://chaxn0raj3mjl"]
 
 [ext_resource type="PackedScene" uid="uid://pwbdgrhl5obe" path="res://scenes/player.tscn" id="1_mhx8p"]
 [ext_resource type="Texture2D" uid="uid://m11ysxjaask1" path="res://assets/new/Interior.png" id="1_se78b"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://dio5g50fvoyqu" path="res://assets/new/coastal_furnitureset.png" id="8_bwc8c"]
 [ext_resource type="Texture2D" uid="uid://hnh3etflcvmd" path="res://assets/takvim32x32.png" id="9_bwc8c"]
 [ext_resource type="PackedScene" uid="uid://lh65tk4ob14n" path="res://scenes/prefabs/Door.tscn" id="11_65la3"]
+[ext_resource type="Script" uid="uid://bgq2ay7rk72hc" path="res://scripts/Interactable.gd" id="12_qcuhb"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wcu0q"]
 texture = ExtResource("1_se78b")
@@ -3088,6 +3089,9 @@ sources/0 = SubResource("TileSetAtlasSource_57tf3")
 sources/1 = SubResource("TileSetAtlasSource_3kuml")
 sources/2 = SubResource("TileSetAtlasSource_lamap")
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7685u"]
+size = Vector2(29, 70.75)
+
 [node name="House" type="Node2D"]
 
 [node name="TileMapLayerFloor" type="TileMapLayer" parent="."]
@@ -3129,3 +3133,10 @@ position = Vector2(993, 501)
 position = Vector2(991, 449.00003)
 scale = Vector2(-1.9753234, -1.8874065)
 is_exit_door = true
+
+[node name="CalendarZone" type="Area2D" parent="."]
+script = ExtResource("12_qcuhb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CalendarZone"]
+position = Vector2(1136, 455.625)
+shape = SubResource("RectangleShape2D_7685u")
