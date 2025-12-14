@@ -100,21 +100,27 @@ func _notification(what):
 
 
 func return_to_town():
-	"""
-	Herhangi bir evden veya menüden Town'a geri dönmek için bunu çağır.
-	Otomatik olarak MainGame'i bulur ve exit_house() çalıştırır.
-	"""
 	print("🔙 Town'a dönülüyor...")
 	
-	# Şu anki ana sahneyi (MainGame) bul
-	var main_game = get_tree().current_scene
+	# 1. YÖNTEM: Normal Oyun Modu (MainGame var mı?)
+	var current_scene = get_tree().current_scene
 	
-	if main_game.has_method("exit_house"):
-		main_game.exit_house()
-	else:
-		# Eğer MainGame yoksa (Sadece sahneyi test ediyorsan) hata vermesin diye:
-		print("⚠️ Hata: MainGame bulunamadı! (Test modunda olabilirsin)")
-		# Test için açtıysan kendini kapatsın:
-		var current_node = get_viewport().gui_get_focus_owner()
-		if current_node:
-			current_node.owner.queue_free()
+	# Eğer sahnenin kendisi MainGame ise veya MainGame'i bulabiliyorsak
+	if current_scene.has_method("exit_house"):
+		current_scene.exit_house()
+		return
+	
+	# MainGame ağacın tepesinde olabilir mi?
+	if get_tree().root.has_node("MainGame"):
+		var main_node = get_tree().root.get_node("MainGame")
+		if main_node.has_method("exit_house"):
+			main_node.exit_house()
+			return
+
+	# 2. YÖNTEM: Test Modu (MainGame yok)
+	print("⚠️ Test Modu: Direkt Town sahnesi yükleniyor...")
+	# Town sahnesinin yolunu buraya doğru yazdığından emin ol
+	get_tree().change_scene_to_file("res://scenes/town.tscn")
+	
+	# UI'ı tekrar açalım ki joystick gelsin
+	show_full_ui()

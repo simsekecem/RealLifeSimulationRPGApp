@@ -23,16 +23,15 @@ func _ready():
 		print("❌ HATA: Town sahne yolu boş!")
 
 	# ---------------------------------------------------------
-	# 2. GLOBAL UI ERİŞİMİ (DÜZELTİLDİ)
+	# 2. GLOBAL UI ERİŞİMİ
 	# ---------------------------------------------------------
-	# Global 'UI' sahnesinin içindeki 'UIRoot' node'una güvenli erişim
 	if UI.has_node("UIRoot"):
 		var ui_root = UI.get_node("UIRoot")
 		
 		# Joystick ve butonları göster
 		if ui_root.has_method("show_full_ui"):
 			ui_root.show_full_ui()
-			ui_root.set_process_input(true) # Inputları aç
+			ui_root.set_process_input(true) 
 			print("✅ UI aktif edildi.")
 	else:
 		print("⚠️ UYARI: Global UI içinde 'UIRoot' bulunamadı!")
@@ -43,7 +42,7 @@ func _ready():
 func enter_house(house_path: String):
 	print("🚪 Mekana giriliyor: ", house_path)
 	
-	# 1. Town'u gizle ve dondur (Silmiyoruz, sadece durduruyoruz)
+	# 1. Town'u gizle ve dondur
 	town_container.visible = false
 	town_container.process_mode = Node.PROCESS_MODE_DISABLED
 	
@@ -52,16 +51,12 @@ func enter_house(house_path: String):
 	
 	# 3. Sahnenin türüne göre doğru kutuya koy
 	if new_scene is Control:
-		# Market, Banka gibi Arayüzler -> CanvasLayer içine (OthersContainer)
-		# Böylece karakter nerede olursa olsun ekranın ortasına gelir.
+		# Market, Banka gibi Arayüzler
 		print("   -> Tip: Control (Arayüz). OthersContainer'a ekleniyor.")
 		others_container.add_child(new_scene)
 		
-		# (Opsiyonel) Eğer tam ekran bir menü açtıysan Joystick'i gizlemek isteyebilirsin:
-		# UI.get_node("UIRoot").hide_all_ui() 
-		
 	elif new_scene is Node2D:
-		# Ev içi, Mağara gibi yürünebilir alanlar -> Node2D içine (HomeContainer)
+		# Ev içi, Mağara gibi yürünebilir alanlar
 		print("   -> Tip: Node2D (Mekan). HomeContainer'a ekleniyor.")
 		home_container.add_child(new_scene)
 
@@ -83,6 +78,25 @@ func exit_house():
 	town_container.visible = true
 	town_container.process_mode = Node.PROCESS_MODE_INHERIT
 	
-	# 4. UI'ı (Joystick vb.) garanti olsun diye tekrar göster
+	# --- 4. KRİTİK AYAR: KARAKTERİ KAPIDAN UZAKLAŞTIR ---
+	# TownContainer'ın içindeki Town haritasını bul
+	if town_container.get_child_count() > 0:
+		var town_instance = town_container.get_child(0)
+		
+		# Town'daki Player node'unu bul (İsmi "Player" olmalı)
+		if town_instance.has_node("Player"):
+			var player = town_instance.get_node("Player")
+			
+			# Karakteri 40 piksel aşağı itiyoruz (Kapıdan kurtarıyoruz)
+			player.position.y += 40
+			
+			# (Opsiyonel) Yüzünü aşağı çevirip durduruyoruz
+			if player.has_method("play_animation"):
+				player.last_direction = Vector2.DOWN
+				player.play_animation("idle")
+			
+			print("📍 Karakter kapının önünden uzaklaştırıldı (y += 40).")
+
+	# 5. UI'ı tekrar göster
 	if UI.has_node("UIRoot"):
 		UI.get_node("UIRoot").show_full_ui()
