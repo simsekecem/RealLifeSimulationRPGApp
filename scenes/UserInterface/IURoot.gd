@@ -1,100 +1,120 @@
 extends Control
 
-
 @onready var windows = $Windows
-var TownScene = preload("res://scenes/town.tscn")
+
+# ARTIK PRELOAD YOK! (Donma sebebi buydu, sildik)
+# Town yükleme işini artık MainGame ve LoadingScreen yapıyor.
 
 func _ready():
 	# AvatarIcon, Frame altında yer alıyor.
-	$TopLeftButtons/Frame/AvatarIcon.pressed.connect(show_avatar)
+	if has_node("TopLeftButtons/Frame/AvatarIcon"):
+		$TopLeftButtons/Frame/AvatarIcon.pressed.connect(show_avatar)
 	
 	# TopRightButtons altındaki diğer butonlar
-	$TopRightButtons/MissionsButton.pressed.connect(show_missions)
-	$TopRightButtons/SettingsButton.pressed.connect(show_settings)
+	if has_node("TopRightButtons/MissionsButton"):
+		$TopRightButtons/MissionsButton.pressed.connect(show_missions)
+	if has_node("TopRightButtons/SettingsButton"):
+		$TopRightButtons/SettingsButton.pressed.connect(show_settings)
 
-	print("UI bağlantıları başarıyla kuruldu.")
+	print("✅ UI bağlantıları başarıyla kuruldu.")
 
 ### --- Pencere Yönetim Fonksiyonları --- ###
 
 func hide_all_windows():
 	"""Windows düğümünün altındaki tüm çocukları (pencereleri) gizler."""
+	if windows:
+		for w in windows.get_children():
+			w.visible = false
+	print("Tüm pencereler gizlendi.")
 
-	for w in windows.get_children():
-		w.visible = false
-		print("Tüm pencereler gizlendi.") 
-		
 func hide_all_ui():
-	"""Tüm UI öğelerini gizler (login/signup/forgotpassword için)."""
+	"""Tüm UI öğelerini gizler (login/signup/forgotpassword/cutscene için)."""
 	$TopLeftButtons.visible = false
 	$TopRightButtons.visible = false
 	hide_all_windows()
-	$Joystick.visible = false
+	
+	# Joystick varsa gizle
+	if has_node("Joystick"):
+		$Joystick.visible = false
+		
 	print("UI öğeleri tamamen gizlendi.")
 
 func show_avatar():
 	"""AvatarWindow'u gösterir."""
 	hide_all_windows()
-
-	$Windows/AvatarWindow.visible = true
-	print("🟢 AvatarWindow açıldı.")
+	if has_node("Windows/AvatarWindow"):
+		$Windows/AvatarWindow.visible = true
+		print("🟢 AvatarWindow açıldı.")
 
 func show_missions():
 	"""MissionsWindow'u gösterir."""
 	hide_all_windows()
-
-	$Windows/MissionsWindow.visible = true
-	print("🟢 MissionsWindow açıldı.")
+	if has_node("Windows/MissionsWindow"):
+		$Windows/MissionsWindow.visible = true
+		print("🟢 MissionsWindow açıldı.")
 
 func show_settings():
 	"""SettingsWindow'u gösterir."""
 	hide_all_windows()
-
-	$Windows/SettingsWindow.visible = true
-	print("🟢 SettingsWindow açıldı.")
+	if has_node("Windows/SettingsWindow"):
+		$Windows/SettingsWindow.visible = true
+		print("🟢 SettingsWindow açıldı.")
 	
 func show_only_top_right_buttons():
-	"""Sadece TopRightButtons görünür, diğer her şey gizlenir (TopLeftButtons ve Joystick dahil)."""
-	# TopLeftButtons'u gizle
+	"""Sadece TopRightButtons görünür, diğer her şey gizlenir."""
 	$TopLeftButtons.visible = false
-	
-	# Windows altındaki tüm pencereleri gizle
 	hide_all_windows()
-	
-	# Joystick'i gizle
-	$Joystick.visible = false
-	
-	# TopRightButtons'u göster
+	if has_node("Joystick"):
+		$Joystick.visible = false
 	$TopRightButtons.visible = true
 	
 func change_scene_to(scene_path: String):
-	# SAHNE DEĞİŞMEDEN ÖNCE CACHE KAYDEDİLİR
+	"""
+	Genel Sahne Değiştirici.
+	UYARI: Bu fonksiyon artık 'MainGame' içindeki ev değişimleri için değil,
+	Login -> Oyun veya Oyun -> Login gibi KÖKLÜ değişiklikler içindir.
+	"""
+	
+	# 1. Verileri kaydet
 	Globals.safe_local_save()
 
-
-	var error := OK 
-
-	if scene_path == "res://scenes/town.tscn":
-		error = get_tree().change_scene_to_packed(TownScene)
-	else:
-		error = get_tree().change_scene_to_file(scene_path)
-
-	if error != OK:
-		print("❌ GLOBAL SAHNE DEĞİŞİKLİĞİ HATASI (ERROR:", error, ")")
-		print("Lütfen sahne yolunu kontrol edin: ", scene_path)
-	else:
-		print("✅ Sahne başarıyla değiştirildi: ", scene_path)
-
+	# 2. Loading Screen sistemini kullan (Yeni Sistem)
+	print("🔄 Sahne değiştiriliyor (Loading ile): ", scene_path)
+	Globals.change_scene_with_loading(scene_path)
 
 func show_full_ui():
-	"""Town sahnesine dönüldüğünde tüm ana UI elemanlarını görünür yapar."""
-	# $TopLeftButtons ve $TopRightButtons'ı gösterir
+	"""Town veya MainGame açıldığında UI elemanlarını görünür yapar."""
 	$TopLeftButtons.visible = true
 	$TopRightButtons.visible = true
-	$Joystick.visible = true # Joystick'i de geri aç
-	hide_all_windows() # Her ihtimale karşı tüm pencereleri kapat
-	print("✅ Tam UI (Avatar dahil) görünür hale geldi.")
+	
+	if has_node("Joystick"):
+		$Joystick.visible = true 
+		
+	hide_all_windows() 
+	print("✅ Tam UI görünür hale geldi.")
 	
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
 		print("🔄 Oyun kapanırken veriler kaydediliyor...")
 		Globals.finalize_save()
+
+
+func return_to_town():
+	"""
+	Herhangi bir evden veya menüden Town'a geri dönmek için bunu çağır.
+	Otomatik olarak MainGame'i bulur ve exit_house() çalıştırır.
+	"""
+	print("🔙 Town'a dönülüyor...")
+	
+	# Şu anki ana sahneyi (MainGame) bul
+	var main_game = get_tree().current_scene
+	
+	if main_game.has_method("exit_house"):
+		main_game.exit_house()
+	else:
+		# Eğer MainGame yoksa (Sadece sahneyi test ediyorsan) hata vermesin diye:
+		print("⚠️ Hata: MainGame bulunamadı! (Test modunda olabilirsin)")
+		# Test için açtıysan kendini kapatsın:
+		var current_node = get_viewport().gui_get_focus_owner()
+		if current_node:
+			current_node.owner.queue_free()

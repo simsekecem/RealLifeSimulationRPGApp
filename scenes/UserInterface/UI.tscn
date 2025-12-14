@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://fr47ehb8faon"]
+[gd_scene load_steps=18 format=3 uid="uid://fr47ehb8faon"]
 
 [ext_resource type="Script" uid="uid://bwtdcuxn10p1g" path="res://scenes/UserInterface/IURoot.gd" id="1_06gou"]
 [ext_resource type="Texture2D" uid="uid://dlm3mtwrkycbc" path="res://assets/ui/GUI/Icons.png" id="1_bng0l"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://dik0vhc2fgqpk" path="res://assets/joystick/joystick_base.png" id="7_4g11r"]
 [ext_resource type="PackedScene" uid="uid://dib3gl0v0vrfs" path="res://scenes/UserInterface/MissionsWindow.tscn" id="7_olpf3"]
 [ext_resource type="Texture2D" uid="uid://wpytollh2xvl" path="res://assets/joystick/joystick_handle.png" id="8_rbwta"]
+[ext_resource type="Script" uid="uid://cpgphqx4g77j8" path="res://scenes/UserInterface/Joystick.gd" id="9_es0yp"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4g11r"]
 atlas = ExtResource("2_m6eke")
@@ -155,19 +156,21 @@ layout_mode = 1
 mouse_filter = 2
 
 [node name="Joystick" type="Control" parent="UIRoot"]
+custom_minimum_size = Vector2(220, 220)
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -203.0
-offset_top = -195.0
-offset_right = -32.0
-offset_bottom = -31.0
+offset_left = -215.0
+offset_top = -214.0
+offset_right = 5.0
+offset_bottom = 6.0
 grow_horizontal = 0
 grow_vertical = 0
-mouse_filter = 2
+mouse_force_pass_scroll_events = false
+script = ExtResource("9_es0yp")
 
 [node name="BG" type="TextureRect" parent="UIRoot/Joystick"]
 layout_mode = 1

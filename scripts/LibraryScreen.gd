@@ -79,7 +79,5 @@ func clear_hours():
 		child.queue_free()
 		
 func _on_back_button_pressed():
-	# Global UI Autoload'u kullanarak sahne değiştirme fonksiyonunu çağırın.
-	# Buraya Kasaba sahnesinin dosya yolunu yazın:
-	UI.get_node("UIRoot").change_scene_to("res://scenes/town.tscn")
-	UI.get_node("UIRoot").show_full_ui()
+	
+	UI.get_node("UIRoot").return_to_town()

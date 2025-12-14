@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://cxg6mio2madr6"]
+
+[ext_resource type="Script" uid="uid://dg1uioqiseb8p" path="res://scenes/MainGame.gd" id="1_hat22"]
+
+[node name="MainGame" type="Node2D"]
+script = ExtResource("1_hat22")
+
+[node name="TownContainer" type="Node2D" parent="."]
+
+[node name="HomeContainer" type="Node2D" parent="."]
+
+[node name="OthersContainer" type="CanvasLayer" parent="."]

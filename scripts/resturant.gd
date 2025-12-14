@@ -77,4 +77,5 @@ func _on_day_toggled(pressed: bool, day: String):
 			current_day = ""
 
 func _on_back_button_pressed():
-	UI.get_node("UIRoot").change_scene_to("res://scenes/town.tscn")
+	
+	UI.get_node("UIRoot").return_to_town()

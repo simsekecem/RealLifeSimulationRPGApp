@@ -44,6 +44,5 @@ func _on_close_panel() -> void:
 	panel.visible = false
 
 func _on_back_button_pressed():
-
-	UI.get_node("UIRoot").change_scene_to("res://town.tscn")
-	UI.get_node("UIRoot").show_full_ui()
+	
+	UI.get_node("UIRoot").return_to_town()

@@ -6,6 +6,9 @@ extends Node
 var auth_token: String = ""
 var user_id: String = ""
 
+# --- LOADING SCREEN İÇİN GEREKLİ DEĞİŞKEN ---
+var next_scene_path: String = "" # <--- YENİ EKLENDİ: Sırada hangi sahne var?
+
 var cache := {
 	"user": { "name": "", "birthdate": "" },
 	"preferences": { "music_volume": 50 },
@@ -224,20 +227,36 @@ func send_to_server():
 	print("Cache sent to server.")
 
 # ============================================================
-#  EXIT
+#  EXIT & SCENE MANAGEMENT
 # ============================================================
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		save_cache()
 		send_to_server()
+		# Not: send_to_server asenkron olduğu için quit hemen çalışırsa 
+		# veri gitmeyebilir. İdeal dünyada 'request_completed' beklemek lazım
+		# ama şimdilik böyle kalsın.
 		get_tree().quit()
 
-# ============================================================
-#  SAFE LOCAL SAVE (SCENE CHANGE)
-# ============================================================
 func safe_local_save():
 	save_cache()
 
 func finalize_save():
 	save_cache()
 	send_to_server()
+
+# --- YENİ EKLENDİ: SAHNE DEĞİŞTİRME FONKSİYONU ---
+func change_scene_with_loading(target_scene_path: String):
+	"""
+	Bu fonksiyonu herhangi bir yerden çağırarak Loading Screen ile 
+	sahne değiştirebilirsin.
+	Örn: Globals.change_scene_with_loading("res://scenes/MainGame.tscn")
+	"""
+	# 1. Önce mevcut verileri kaydet (Garanti olsun)
+	safe_local_save()
+	
+	# 2. Hedef sahneyi ayarla
+	next_scene_path = target_scene_path
+	
+	# 3. Loading ekranına git
+	get_tree().change_scene_to_file("res://scenes/loading_screen.tscn")

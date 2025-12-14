@@ -1,0 +1,65 @@
+[gd_scene load_steps=8 format=3 uid="uid://d3s78s1balk5t"]
+
+[ext_resource type="Theme" uid="uid://cqkohvcnpongo" path="res://scenes/UserInterface/maintheme.tres" id="1_rmyj8"]
+[ext_resource type="Script" uid="uid://ddphpavoc7dsi" path="res://scripts/LoadingScreen.gd" id="2_ljsuq"]
+[ext_resource type="Texture2D" uid="uid://dx00q0ea7t20b" path="res://assets/backgrounds/loading.png" id="2_q1108"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_2f6l4"]
+[ext_resource type="Texture2D" uid="uid://cxcltvn1no1vi" path="res://assets/loadingprogressbar.png" id="4_h20nk"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h20nk"]
+bg_color = Color(0.14901961, 0.2627451, 0.48235294, 1)
+corner_radius_top_left = 60
+corner_radius_top_right = 60
+corner_radius_bottom_right = 60
+corner_radius_bottom_left = 60
+corner_detail = 20
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ljsuq"]
+texture = ExtResource("4_h20nk")
+texture_margin_right = 40.0
+
+[node name="LoadingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_rmyj8")
+script = ExtResource("2_ljsuq")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_q1108")
+
+[node name="ProgressBar" type="ProgressBar" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 68.0
+offset_top = -93.0
+offset_right = -57.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_fonts/font = ExtResource("3_2f6l4")
+theme_override_styles/background = SubResource("StyleBoxFlat_h20nk")
+theme_override_styles/fill = SubResource("StyleBoxTexture_ljsuq")
+value = 20.0
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 570.0
+offset_right = 458.0
+offset_bottom = 642.0
+theme = ExtResource("1_rmyj8")
+theme_override_font_sizes/font_size = 35
+text = "Loading..."
