@@ -3122,7 +3122,7 @@ tile_set = SubResource("TileSet_57tf3")
 tile_map_data = PackedByteArray("AAAFAAQAAQACAAEAAAAFAAUAAQACAAEAAAAkABEAAQAAAAEAAAAkABIAAQAAAAEAAAAkAAMAAQAAAAEAAAAkAAQAAQAAAAEAAAAoAAMAAQAAAAEAAAAoAAQAAQAAAAEAAAAUAAcAAAABAAoAAAAUAAgAAAABAAsAAAAjAA0AAgAAAAAAAAA=")
 tile_set = SubResource("TileSet_lamap")
 
-[node name="CharacterBody2D" parent="." instance=ExtResource("1_mhx8p")]
+[node name="Player" parent="." instance=ExtResource("1_mhx8p")]
 position = Vector2(993, 501)
 
 [node name="Door" parent="." instance=ExtResource("11_65la3")]

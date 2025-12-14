@@ -42,6 +42,27 @@ export default {
 
             return addCors(new Response(await res.text(), { status: res.status }));
         }
+        // ---------- LOGIN ----------
+        if (path === "/api/login" && method === "POST") {
+            const body = await request.json();
+            
+            // Supabase'e giriş isteği atıyoruz (Email + Şifre ile)
+            const res = await fetch(`${env.SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": env.SUPABASE_ANON_KEY,
+                },
+                body: JSON.stringify({
+                    email: body.email,
+                    password: body.password,
+                }),
+            });
+
+            // Supabase'den gelen cevabı (Token'ı) Godot'ya iletiyoruz
+            return addCors(new Response(await res.text(), { status: res.status }));
+        }
+
 
         // ---------- PASSWORD RECOVER ----------
         if (path === "/api/password-recover" && method === "POST") {

@@ -5,6 +5,7 @@ extends Node
 # ============================================================
 var auth_token: String = ""
 var user_id: String = ""
+var door_locked: bool = false
 
 # --- LOADING SCREEN İÇİN GEREKLİ DEĞİŞKEN ---
 var next_scene_path: String = "" # <--- YENİ EKLENDİ: Sırada hangi sahne var?
@@ -259,4 +260,4 @@ func change_scene_with_loading(target_scene_path: String):
 	next_scene_path = target_scene_path
 	
 	# 3. Loading ekranına git
-	get_tree().change_scene_to_file("res://scenes/loading_screen.tscn")
+	get_tree().change_scene_to_file("res://scenes/UserInterface/LoadingScreen.tscn")

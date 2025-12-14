@@ -81592,5 +81592,5 @@ tile_set = SubResource("TileSet_by33p")
 tile_map_data = PackedByteArray("AAASAA4AAQAIAAoAAFA=")
 tile_set = SubResource("TileSet_pwx13")
 
-[node name="CharacterBody2D" parent="." instance=ExtResource("10_5q1rr")]
+[node name="Player" parent="." instance=ExtResource("10_5q1rr")]
 position = Vector2(655, 346)

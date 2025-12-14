@@ -6,63 +6,54 @@ extends CharacterBody2D
 
 @onready var anim = $AnimatedSprite2D 
 
-# Karakter durduğunda en son baktığı yöne baksın diye bir değişken
+# --- YENİ EKLENEN KISIM 1: KAMERAYA ERİŞİM ---
+# Player sahnesinin içindeki "Camera2D" isimli node'u bulur.
+# Eğer ismini değiştirdiysen burayı da değiştir.
+@onready var camera = $Camera2D 
+
 var last_direction = Vector2.DOWN 
+
+# --- YENİ EKLENEN KISIM 2: KAMERAYI ZORLA AKTİF ETME ---
+func _ready():
+	# Karakter sahneye girdiği an (ister Town, ister Ev olsun)
+	# kamerayı kendine çeker. Zoom ayarların yüklenir.
+	if camera:
+		camera.make_current()
 
 func _physics_process(delta):
 	var direction = Vector2.ZERO
 
-	# ---------------------------------------------------------
-	# 1. JOYSTICK KONTROLÜ (GÜNCELLENDİ)
-	# ---------------------------------------------------------
+	# 1. JOYSTICK KONTROLÜ
 	if UI.has_node("UIRoot/Joystick"):
 		var joystick = UI.get_node("UIRoot/Joystick")
 		
 		if "direction" in joystick and joystick.direction.length() > 0:
-			# DÜZELTME BURADA YAPILDI:
-			# Joystick yönünü 1.5 ile çarpıyoruz (Hassasiyeti artırıyoruz).
-			# limit_length(1.0) ile de hızın tavanı delmesini engelliyoruz.
 			direction = (joystick.direction * 1.5).limit_length(1.0)
 
-	# ---------------------------------------------------------
-	# 2. KLAVYE KONTROLÜ (WASD ve OK TUŞLARI)
-	# ---------------------------------------------------------
-	# Eğer joystick kullanılmıyorsa klavyeye bak
+	# 2. KLAVYE KONTROLÜ
 	if direction == Vector2.ZERO:
 		direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 
-	# ---------------------------------------------------------
 	# 3. HAREKET VE ANİMASYON
-	# ---------------------------------------------------------
 	if direction != Vector2.ZERO:
-		# Hareket var: Hızlan
 		velocity = velocity.lerp(direction * speed, accel * delta)
-		
-		# Son yönü kaydet
 		last_direction = direction
-		
-		# Yürüme animasyonunu oynat
 		play_animation("walk")
 	else:
-		# Hareket yok: Dur
 		velocity = velocity.lerp(Vector2.ZERO, friction * delta)
-		
-		# Durma (Idle) animasyonunu oynat
 		play_animation("idle")
 
 	move_and_slide()
 
 func play_animation(action_name: String):
-	var dir_suffix = "_down" # Varsayılan aşağı
+	var dir_suffix = "_down"
 	
 	if abs(last_direction.x) > abs(last_direction.y):
-		# Yatay hareket daha baskın
 		if last_direction.x > 0:
 			dir_suffix = "_right"
 		else:
 			dir_suffix = "_left"
 	else:
-		# Dikey hareket daha baskın
 		if last_direction.y > 0:
 			dir_suffix = "_down"
 		else:
