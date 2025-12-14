@@ -3127,11 +3127,11 @@ tile_map_data = PackedByteArray("AAAFAAQAAQACAAEAAAAFAAUAAQACAAEAAAAkABEAAQAAAAE
 tile_set = SubResource("TileSet_lamap")
 
 [node name="Player" parent="." instance=ExtResource("1_mhx8p")]
-position = Vector2(993, 501)
+position = Vector2(717, 620)
 
 [node name="Door" parent="." instance=ExtResource("11_65la3")]
-position = Vector2(991, 449.00003)
-scale = Vector2(-1.9753234, -1.8874065)
+position = Vector2(718, 633)
+scale = Vector2(-1.9753234, -0.64740896)
 is_exit_door = true
 
 [node name="CalendarZone" type="Area2D" parent="."]
