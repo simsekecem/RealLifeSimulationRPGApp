@@ -10,10 +10,10 @@ var next_scene_path: String = ""
 var is_quitting: bool = false 
 var last_scene_path := ""
 
-
 var cache := {
+	"owner_id": "", # <--- YENİ: Bu verilerin kime ait olduğunu tutar (Ahmet mi Mehmet mi?)
 	"user": { "name": "", "birthdate": "" },
-	"preferences": { "music_volume": 50 },
+	"preferences": { "music_volume": 50 }, # Sadece yerelde kalacak
 	"gym_log": [],
 	"library": [],
 	"study_log": [],
@@ -61,21 +61,26 @@ func ensure_list(data) -> Array:
 func safe_int(value) -> int: return int(float(str(value)))
 func safe_str(value) -> String: return str(value).strip_edges()
 
+# --- YENİ: Sunucuya gidecek veriyi hazırla (Preferences HARİÇ) ---
+func _get_sync_payload() -> Dictionary:
+	var payload = cache.duplicate(true)
+	# Preferences'i siliyoruz ki sunucuya gitmesin, sadece cihazda kalsın.
+	if payload.has("preferences"):
+		payload.erase("preferences") 
+	# Owner ID sunucuya gitmesine gerek yok, yerel kontrol için. Ama gitse de zararı yok.
+	return payload
+
 # ============================================================
 #  ÇIKIŞ VE ARKA PLAN SİNYALLERİ
 # ============================================================
 func _notification(what):
-	# 1. PC: Çarpı tuşu
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		print("🛑 (PC) Çıkış. Veriler sunucuya gönderiliyor...")
 		handle_save_and_exit()
 
-	# 2. MOBİL: Uygulama arka plana atıldı
 	elif what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		print("📱 (MOBİL) Arka plan. Yerel kayıt alınıyor...")
 		save_cache() 
-		# Arka planda gönderme işlemini erteliyoruz (Deferred)
-		# Bu sayede "Parent is busy" hatası almıyoruz.
 		send_to_server_background()
 
 func handle_save_and_exit():
@@ -97,7 +102,9 @@ func send_to_server_and_quit():
 
 	var headers = ["Content-Type: application/json", "Authorization: Bearer " + auth_token]
 	print("📡 Kapanış verisi gönderiliyor...")
-	http.request("https://life-sim-worker.life-simulation.workers.dev/api/save_all", headers, HTTPClient.METHOD_POST, JSON.stringify(cache))
+	
+	var payload = _get_sync_payload()
+	http.request("https://life-sim-worker.life-simulation.workers.dev/api/save_all", headers, HTTPClient.METHOD_POST, JSON.stringify(payload))
 
 func _on_exit_save_completed(_result, response_code, _headers, body):
 	if response_code == 200:
@@ -111,11 +118,9 @@ func _on_exit_save_completed(_result, response_code, _headers, body):
 	get_tree().quit()
 
 # ------------------------------------------------------------------
-# DÜZELTME: "Parent Busy" Hatasını Çözen Arka Plan Gönderimi
+# ARKA PLAN GÖNDERİMİ
 # ------------------------------------------------------------------
 func send_to_server_background():
-	# HATA ÇÖZÜMÜ: add_child işlemini hemen yapma, bir sonraki kareye ertele.
-	# Böylece Godot meşgulken düğüm eklemeye çalışıp hata vermez.
 	call_deferred("_deferred_background_save")
 
 func _deferred_background_save():
@@ -124,12 +129,12 @@ func _deferred_background_save():
 	var http = HTTPRequest.new()
 	add_child(http)
 	
-	# İşlem bitince bu node'u silmek bellek için iyi olur
 	http.request_completed.connect(func(res, code, head, body): http.queue_free())
 	
 	var headers = ["Content-Type: application/json", "Authorization: Bearer " + auth_token]
-	http.request("https://life-sim-worker.life-simulation.workers.dev/api/save_all", headers, HTTPClient.METHOD_POST, JSON.stringify(cache))
-# ------------------------------------------------------------------
+	
+	var payload = _get_sync_payload()
+	http.request("https://life-sim-worker.life-simulation.workers.dev/api/save_all", headers, HTTPClient.METHOD_POST, JSON.stringify(payload))
 
 func force_quit():
 	get_tree().quit()
@@ -156,19 +161,36 @@ func _on_load_complete(_res, code, _headers, body):
 			var data = json.get_data()
 			if typeof(data) == TYPE_DICTIONARY:
 				
-				if cache.get("unsynced_changes", false) == true:
-					print("⚠️ ÇAKIŞMA: Sunucu ve Yerel veri birleştiriliyor...")
+				# --- GÜVENLİK KONTROLÜ BAŞLANGICI ---
+				
+				# 1. Cihazdaki veri kime ait?
+				var local_owner = cache.get("owner_id", "")
+				
+				# 2. Eğer cihazda kayıtlı bir sahibi varsa VE şu an giriş yapan kişi o değilse:
+				if local_owner != "" and local_owner != user_id:
+					print("🛑 DİKKAT: Cihazda başka bir kullanıcının (", local_owner, ") verisi bulundu!")
+					print("♻️ Güvenlik sebebiyle yerel veri siliniyor ve ", user_id, " verisiyle değiştiriliyor.")
+					
+					# Merge işlemini atla, direkt sunucu verisini uygula (Overwrite)
+					apply_server_data(data)
+					
+				# 3. Eğer kullanıcı aynıysa veya cihazdaki veri sahipsizse normal akışa devam et:
+				elif cache.get("unsynced_changes", false) == true:
+					print("⚠️ ÇAKIŞMA: Sunucu ve Yerel veri birleştiriliyor (Aynı Kullanıcı)...")
 					merge_server_with_local(data)
 				else:
 					apply_server_data(data)
 					print("✅ Veriler sunucudan alındı.")
+				
+				# --- GÜVENLİK KONTROLÜ BİTİŞİ ---
 	else:
 		print("❌ Veri çekme hatası: ", code)
 
 # --- Veri Uygulama ---
 func apply_server_data(data):
 	if data.has("user"): cache["user"] = data["user"]
-	if data.has("preferences"): cache["preferences"] = data["preferences"]
+	
+	# Preferences silme işlemi (Server yerel ayarı ezmesin diye)
 	
 	cache["study_log"] = ensure_list(data.get("study_log"))
 	cache["gym_log"] = ensure_list(data.get("gym_log"))
@@ -177,13 +199,14 @@ func apply_server_data(data):
 	cache["calendar_notes"] = ensure_list(data.get("calendar_notes"))
 	cache["restaurant"] = ensure_list(data.get("restaurant"))
 	
+	# YENİ: Veri yüklendiğinde, bu verinin sahibini mühürle
+	cache["owner_id"] = user_id 
 	cache["unsynced_changes"] = false
 	save_cache()
 
 # --- Veri Birleştirme ---
 func merge_server_with_local(server_data):
 	if server_data.has("user"): cache["user"] = server_data["user"]
-	if server_data.has("preferences"): cache["preferences"] = server_data["preferences"]
 	
 	merge_list("study_log", ensure_list(server_data.get("study_log")))
 	merge_list("gym_log", ensure_list(server_data.get("gym_log")))
@@ -193,6 +216,9 @@ func merge_server_with_local(server_data):
 	merge_list("restaurant", ensure_list(server_data.get("restaurant")))
 	
 	print("🤝 Veriler birleştirildi. Sunucuya geri yükleniyor...")
+	
+	# YENİ: Veri birleştirildiğinde, bu verinin sahibini mühürle
+	cache["owner_id"] = user_id 
 	cache["unsynced_changes"] = false
 	save_cache()
 	send_to_server_background()
@@ -230,6 +256,8 @@ func save_cache():
 	var file = FileAccess.open(cache_path, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(cache))
+		# WEB İÇİN DÜZELTME: Dosyayı kapatmak kaydı zorlar.
+		file.close()
 
 # ============================================================
 #  HAFTALIK RESET
