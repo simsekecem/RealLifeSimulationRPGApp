@@ -36,7 +36,7 @@ export default {
                 body: JSON.stringify({
                     email: body.email,
                     password: body.password,
-                    email_redirect_to: "https://life-sim.pages.dev/signup-confirmed",
+                    email_redirect_to: "https://web.life-simulation.workers.dev/signup-confirmed",
                 }),
             });
 
@@ -45,8 +45,6 @@ export default {
         // ---------- LOGIN ----------
         if (path === "/api/login" && method === "POST") {
             const body = await request.json();
-            
-            // Supabase'e giriş isteği atıyoruz (Email + Şifre ile)
             const res = await fetch(`${env.SUPABASE_URL}/auth/v1/token?grant_type=password`, {
                 method: "POST",
                 headers: {
@@ -58,8 +56,6 @@ export default {
                     password: body.password,
                 }),
             });
-
-            // Supabase'den gelen cevabı (Token'ı) Godot'ya iletiyoruz
             return addCors(new Response(await res.text(), { status: res.status }));
         }
 
@@ -130,8 +126,8 @@ export default {
                 user: await env.DB.prepare(`SELECT name, birthdate FROM users WHERE user_id=?`)
                     .bind(userId).first(),
 
-                preferences: await env.DB.prepare(`SELECT music_volume FROM user_preferences WHERE user_id=?`)
-                    .bind(userId).first(),
+                // Preferences satırını buradan kaldırdık. 
+                // Artık cihazlar arası ses senkronizasyonu yok.
 
                 library: await env.DB.prepare(`SELECT title, status FROM library_books WHERE user_id=?`)
                     .bind(userId).all(),
@@ -143,7 +139,7 @@ export default {
                                                   FROM gym_log WHERE user_id=?`)
                     .bind(userId).all(),
 
-                market_items: await env.DB.prepare(`SELECT category, item_name, planned, bought, date
+                market_items: await env.DB.prepare(`SELECT id, category, item_name, planned, bought, date
                                                       FROM market_items WHERE user_id=?`)
                     .bind(userId).all(),
 
@@ -158,7 +154,7 @@ export default {
             return addCors(new Response(JSON.stringify(result), { status: 200 }));
         }
 
-// =====================================================
+        // =====================================================
         // SAVE ALL (TYPE SAFE & CRASH PROOF VERSION)
         // =====================================================
         if (path === "/api/save_all" && method === "POST") {
@@ -173,8 +169,6 @@ export default {
                     }
                 }
 
-                // --- HELPER: Gelen veri kesinlikle Array olsun ---
-                // Eğer "null" gelirse veya yanlışlıkla "{}" (Object) gelirse boş dizi [] yap.
                 const safeList = (data) => Array.isArray(data) ? data : [];
 
                 // 1. USER
@@ -189,16 +183,10 @@ export default {
                     [userName, userBirth, userId]
                 );
 
-                // 2. PREFERENCES
-                const prefsBox = body.preferences || {};
-                await insertOrUpdate(
-                    `INSERT INTO user_preferences (user_id, music_volume) VALUES (?, ?)`,
-                    [userId, prefsBox.music_volume || 50],
-                    `UPDATE user_preferences SET music_volume=? WHERE user_id=?`,
-                    [prefsBox.music_volume || 50, userId]
-                );
+                // 2. PREFERENCES (KALDIRILDI)
+                // Artık sunucuya kaydedilmiyor.
 
-                // 3. LIBRARY (HATA BURADAYDI -> DÜZELTİLDİ)
+                // 3. LIBRARY
                 const library = safeList(body.library);
                 for (const b of library) {
                     await insertOrUpdate(
@@ -234,12 +222,58 @@ export default {
                 // 6. MARKET ITEMS
                 const market_items = safeList(body.market_items);
                 for (const m of market_items) {
-                    await insertOrUpdate(
-                        `INSERT INTO market_items (user_id, category, item_name, planned, bought, date) VALUES (?, ?, ?, ?, ?, ?)`,
-                        [userId, m.category, m.item_name, m.planned, m.bought, m.date],
-                        `UPDATE market_items SET planned=?, bought=?, date=? WHERE user_id=? AND category=? AND item_name=?`,
-                        [m.planned, m.bought, m.date, userId, m.category, m.item_name]
-                    );
+                    
+                    // ---------------------------------------------------------
+                    // 1. ADIM: İSİM KONTROLÜ (BOŞSA YOK ET!)
+                    // ---------------------------------------------------------
+                    // Eğer isim yoksa veya boşluksa...
+                    if (!m.item_name || m.item_name.trim() === "") {
+                        // ...ve bu eski bir kayıtsa (ID'si varsa)
+                        if (m.id) {
+                            // Veritabanından silip atıyoruz.
+                            await env.DB.prepare(`DELETE FROM market_items WHERE id=? AND user_id=?`)
+                                .bind(m.id, userId).run();
+                        }
+                        // İster yeni olsun ister eski, işlem burada biter.
+                        // Aşağıdaki koda inip "boş isimle kaydetmeye" çalışmasına izin vermiyoruz!
+                        continue; 
+                    }
+
+                    // ---------------------------------------------------------
+                    // 2. ADIM: DOLU İSİMLERİ KAYDET
+                    // ---------------------------------------------------------
+                    
+                    // A) GÜNCELLEME (ID VARSA)
+                    if (m.id) {
+                        try {
+                            await env.DB.prepare(`
+                                UPDATE market_items 
+                                SET category=?, item_name=?, planned=?, bought=?, date=? 
+                                WHERE id=? AND user_id=?
+                            `).bind(m.category, m.item_name, m.planned, m.bought, m.date, m.id, userId).run();
+                        } catch (e) {
+                            // Eğer isim değiştirdin ve o isimde başka ürün varsa (Çakışma),
+                            // Eskisini sil ki çakışma olmasın.
+                            await env.DB.prepare(`DELETE FROM market_items WHERE id=?`).bind(m.id).run();
+                        }
+                    } 
+                    
+                    // B) EKLEME (ID YOKSA)
+                    else {
+                        try {
+                            await env.DB.prepare(`
+                                INSERT INTO market_items (user_id, category, item_name, planned, bought, date) 
+                                VALUES (?, ?, ?, ?, ?, ?)
+                            `).bind(userId, m.category, m.item_name, m.planned, m.bought, m.date).run();
+                        } catch (e) {
+                            // Zaten varsa özelliklerini güncelle
+                            await env.DB.prepare(`
+                                UPDATE market_items 
+                                SET planned=?, bought=?, date=? 
+                                WHERE user_id=? AND category=? AND item_name=?
+                            `).bind(m.planned, m.bought, m.date, userId, m.category, m.item_name).run();
+                        }
+                    }
                 }
 
                 // 7. RESTAURANT LOG
