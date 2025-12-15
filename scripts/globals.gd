@@ -8,6 +8,8 @@ var user_id: String = ""
 var door_locked: bool = false
 var next_scene_path: String = "" 
 var is_quitting: bool = false 
+var last_scene_path := ""
+
 
 var cache := {
 	"user": { "name": "", "birthdate": "" },
@@ -22,7 +24,8 @@ var cache := {
 }
 
 var save_timer := 0.0
-var debounce_seconds := 30.0
+var debounce_seconds := 5.0 if OS.has_feature("web") else 30.0
+
 var cache_path := "user://user_cache.json"
 var WEEK_RESET_DAYS := 7
 
@@ -257,5 +260,15 @@ func weekly_reset():
 # ============================================================
 func change_scene_with_loading(target_path: String):
 	save_cache()
+	
+	if OS.has_feature("web") and auth_token != "":
+		if target_path != last_scene_path and cache.get("unsynced_changes", false):
+			print("🌐 WEB: Değişiklik var → DB save")
+			send_to_server_background()
+			cache["unsynced_changes"] = false
+		else:
+			print("🌐 WEB: Değişiklik yok → DB save atlandı")
+	
+	last_scene_path = target_path
 	next_scene_path = target_path
 	get_tree().change_scene_to_file("res://scenes/UserInterface/LoadingScreen.tscn")
