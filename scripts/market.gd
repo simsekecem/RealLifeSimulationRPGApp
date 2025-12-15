@@ -1,4 +1,3 @@
-# market_main.gd
 extends Control
 
 @onready var btn_g = $VBoxContainer2/G_Button
@@ -8,41 +7,58 @@ extends Control
 @onready var btn_he = $VBoxContainer2/HE_Button
 @onready var back_button = $Back_Button
 
-@onready var panel: Panel = $Panel   # panel node adı "Panel"
+# Panel koduna erişim
+@onready var panel: Panel = $Panel
+
+# Hangi kategorideyiz?
+var current_category_name = ""
 
 func _ready():
 	UI.get_node("UIRoot").show_only_top_right_buttons()
+	
+	
 	back_button.pressed.connect(_on_back_button_pressed)
-	# Bütün butonları reset-panel fonksiyonuna bağla
-	btn_g.pressed.connect(_on_button_pressed)
-	btn_hg.pressed.connect(_on_button_pressed)
-	btn_c.pressed.connect(_on_button_pressed)
-	btn_pc.pressed.connect(_on_button_pressed)
-	btn_he.pressed.connect(_on_button_pressed)
-
-	# opsiyonel: panelde CloseButton varsa kapatma
-	if panel.has_node("CloseButton"):
-		panel.get_node("CloseButton").pressed.connect(_on_close_panel)
-
-
-func _on_button_pressed() -> void:
 	
-	var items_vbox_path = "ItemsScroll/ItemsVBox"
-	if panel.has_node(items_vbox_path):
-		var vbox = panel.get_node(items_vbox_path)
-		
-		for child in vbox.get_children():
-			child.queue_free()
-	
-	if panel.has_method("add_item"):
-		panel.call("add_item", true)
-	
-	
-	panel.visible = true
+	# Butonları kategorilere göre bağla
+	btn_g.pressed.connect(func(): _switch_category("Groceries"))
+	btn_hg.pressed.connect(func(): _switch_category("Home Goods"))
+	btn_c.pressed.connect(func(): _switch_category("Clothing"))
+	btn_pc.pressed.connect(func(): _switch_category("Personal Care"))
+	btn_he.pressed.connect(func(): _switch_category("Household Essentials"))
 
-func _on_close_panel() -> void:
+	# Paneli başta gizle
 	panel.visible = false
+	
+	# Globals sinyalini dinle (Veri güncellenirse listeyi yenile)
+	if Globals.has_signal("data_updated"):
+		if not Globals.data_updated.is_connected(_on_global_data_updated):
+			Globals.data_updated.connect(_on_global_data_updated)
+
+func _switch_category(cat_name: String):
+	# Eğer zaten açıksa ve panel görünürse işlem yapma (veya yenile)
+	# Önceki kategoriyi kaydet (Panel açıksa)
+	if panel.visible and current_category_name != "":
+		panel.save_items_to_cache()
+	
+	current_category_name = cat_name
+	panel.visible = true
+	
+	print("🛒 Kategori Açıldı: ", cat_name)
+	
+	# Panel scriptindeki yükleme fonksiyonunu çağır
+	panel.load_category(cat_name)
 
 func _on_back_button_pressed():
+	# Çıkarken kaydet
+	if panel.visible and current_category_name != "":
+		panel.save_items_to_cache()
 	
 	UI.get_node("UIRoot").return_to_town()
+
+func _on_global_data_updated():
+	# Eğer panel açıksa, o anki kategoriyi tekrar yükle
+	if panel.visible and current_category_name != "":
+		print("🔄 Market: Veri güncellendi, liste yenileniyor...")
+		# Not: Kullanıcı yazı yazarken yenilenirse yazısı gidebilir, 
+		# ama veri bütünlüğü için yenilemek genelde iyidir.
+		panel.load_category(current_category_name)
