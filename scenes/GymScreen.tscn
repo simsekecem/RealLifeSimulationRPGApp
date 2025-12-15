@@ -1,8 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://dm8yea7kjvrhm"]
+[gd_scene load_steps=11 format=3 uid="uid://dm8yea7kjvrhm"]
 
 [ext_resource type="Script" uid="uid://dm6agftvum4vd" path="res://scripts/GymScreen.gd" id="1_jyrom"]
 [ext_resource type="Texture2D" uid="uid://bods6euoxuh5l" path="res://assets/backgrounds/gym2.png" id="1_nmixc"]
+[ext_resource type="PackedScene" uid="uid://cphccg5ghjwjp" path="res://scenes/prefabs/DailyExerciseRow.tscn" id="2_hbc16"]
 [ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="2_qlnuv"]
+[ext_resource type="PackedScene" uid="uid://bsbp2gyrwgqtg" path="res://scenes/prefabs/WeeklyExerciseRow.tscn" id="3_dscua"]
 [ext_resource type="Texture2D" uid="uid://c4614rpjrbwnx" path="res://assets/gym_sign.png" id="3_v4x2c"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nmixc"]
@@ -34,6 +36,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_jyrom")
+daily_row_scene = ExtResource("2_hbc16")
+weekly_row_scene = ExtResource("3_dscua")
 
 [node name="Background" type="NinePatchRect" parent="."]
 layout_mode = 0
@@ -179,6 +183,8 @@ size_flags_vertical = 3
 
 [node name="ContentList" type="VBoxContainer" parent="TabContainer/Daily/ListArea/ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="AddButton" type="Button" parent="TabContainer/Daily"]
 layout_mode = 0
@@ -294,9 +300,13 @@ text = "Tuesday"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/TuesdayRow"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/TuesdayRow/ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 100
 
 [node name="WednesdayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
 layout_mode = 2
@@ -310,9 +320,12 @@ text = "Wednesday"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/WednesdayRow"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/WednesdayRow/ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="ThursdayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
 layout_mode = 2
@@ -326,9 +339,12 @@ text = "Thursday"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/ThursdayRow"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/ThursdayRow/ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="FridayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
 layout_mode = 2
@@ -342,9 +358,12 @@ text = "Friday"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/FridayRow"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/FridayRow/ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="SaturdayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
 layout_mode = 2
@@ -358,9 +377,12 @@ text = "Saturday"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/SaturdayRow"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/SaturdayRow/ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="SundayRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer"]
 layout_mode = 2
@@ -374,9 +396,13 @@ text = "Sunday"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Weekly/VBoxContainer/SundayRow"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="ExercisesRow" type="HBoxContainer" parent="TabContainer/Weekly/VBoxContainer/SundayRow/ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 100
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 0

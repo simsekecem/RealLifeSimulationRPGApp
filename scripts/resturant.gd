@@ -6,7 +6,6 @@ extends Control
 @onready var notes_edit: TextEdit = $NinePatchRect/TextEdit
 @onready var meal_panel: Control = $MealPanel 
 
-# UYARI: "Snakcs_Panel" yazım hatasına sadık kalındı.
 @onready var input_fields := {
 	"breakfast": $MealPanel/ScrollContainer/MealList/Breakfast_Panel/TextEdit,
 	"lunch":     $MealPanel/ScrollContainer/MealList/Lunch_Panel/TextEdit,
@@ -24,8 +23,15 @@ extends Control
 
 var current_day: String = "" 
 
+# 👇 GÜNLERİN SAYISAL DEĞERLERİ (Hesaplama için şart)
+var day_indices = {
+	"Monday": 1, "Tuesday": 2, "Wednesday": 3,
+	"Thursday": 4, "Friday": 5, "Saturday": 6,
+	"Sunday": 7
+}
+
 # =================================================
-# BAŞLANGIÇ (READY)
+# BAŞLANGIÇ
 # =================================================
 func _ready():
 	if meal_panel: meal_panel.visible = false
@@ -37,6 +43,7 @@ func _ready():
 		var btn = day_buttons[day_name]
 		if btn:
 			btn.toggle_mode = true
+			# Butona basınca o günün ismini (Monday) fonksiyona yolla
 			btn.pressed.connect(_on_day_button_pressed.bind(day_name))
 
 	for field_key in input_fields.keys():
@@ -49,24 +56,62 @@ func _ready():
 		notes_edit.text_changed.connect(_on_notes_changed)
 
 # =================================================
-# GÜN SEÇİMİ VE GÖRSEL GÜNCELLEME
+# GÜN SEÇİMİ (BURASI TARİHİ HESAPLAR)
 # =================================================
-func _on_day_button_pressed(selected_day: String):
-	if current_day == selected_day and meal_panel.visible: return
+func _on_day_button_pressed(selected_day_name: String):
+	# 👇 1. Adım: Buton ismini (Monday) gerçek tarihe (2025-12-15) çevir
+	var real_date = get_date_string_for_day(selected_day_name)
+	
+	# Eğer zaten o gündeysek işlem yapma
+	if current_day == real_date and meal_panel.visible: return
 
-	current_day = selected_day
+	# 👇 2. Adım: Artık sistemde "Monday" değil "2025-12-15" olarak çalışacağız
+	current_day = real_date
+	print("📅 Buton: ", selected_day_name, " -> Hesaplanan Tarih: ", current_day)
 	
 	if meal_panel: meal_panel.visible = true
 	if notes_edit: notes_edit.editable = true
 
+	# Buton ışıklarını güncelle
 	for d_name in day_buttons.keys():
 		if day_buttons[d_name]:
-			day_buttons[d_name].set_pressed_no_signal(d_name == selected_day)
+			day_buttons[d_name].set_pressed_no_signal(d_name == selected_day_name)
 
-	var day_data = _get_data_for_day(selected_day)
+	# 👇 3. Adım: Veritabanından o tarihe ait veriyi getir
+	var day_data = _get_data_for_day(current_day)
 	_set_inputs_quietly(day_data)
 
 
+# =================================================
+# TARİH HESAPLAMA MOTORU ⚙️
+# =================================================
+func get_date_string_for_day(day_name: String) -> String:
+	# 1. Bugünün sistem saatini al
+	var today_dict = Time.get_date_dict_from_system()
+	var current_unix = Time.get_unix_time_from_datetime_dict(today_dict)
+	
+	# 2. Bugün haftanın kaçıncı günü? (Pzt=1 ... Paz=7 yapıyoruz)
+	var current_weekday = today_dict.weekday
+	if current_weekday == 0: current_weekday = 7 # Godot'da Pazar 0 ise 7 olsun
+	
+	# 3. Tıklanan buton haftanın kaçıncı günü? (Örn: Monday = 1)
+	var target_weekday = day_indices.get(day_name, 1)
+	
+	# 4. Aradaki gün farkını bul
+	# Örnek: Bugün Salı(2). Pazartesi(1) butonuna bastın.
+	# Fark = 1 - 2 = -1 gün (Dün)
+	var diff_days = target_weekday - current_weekday
+	
+	# 5. Farkı saniye olarak şu anki zamana ekle
+	var target_unix = current_unix + (diff_days * 86400)
+	
+	# 6. Yeni tarihi string'e çevir (YYYY-MM-DD)
+	var target_date_dict = Time.get_date_dict_from_unix_time(target_unix)
+	return "%04d-%02d-%02d" % [target_date_dict.year, target_date_dict.month, target_date_dict.day]
+
+# =================================================
+# EKRANI DOLDURMA
+# =================================================
 func _set_inputs_quietly(data: Dictionary):
 	for field in input_fields.keys():
 		var edit = input_fields[field]
@@ -77,15 +122,12 @@ func _set_inputs_quietly(data: Dictionary):
 		notes_edit.text = Globals.safe_str(data.get("notes", ""))
 
 # =================================================
-# VERİ KAYIT/GÜNCELLEME (DEFENSIVE + DB UYUMU)
+# VERİ KAYIT (DB İŞLEMLERİ)
 # =================================================
-
 func _get_data_for_day(day: String) -> Dictionary:
-	# Listeyi alır ve tipinin Array olduğundan emin olur
 	var list: Array = Globals.ensure_list(Globals.cache.get("restaurant", []))
-	
 	for entry in list:
-		# DB UYUMU: 'date' anahtarı ile karşılaştırma (study_log mantığı)
+		# Veritabanında tarih eşleşmesi arıyoruz
 		if Globals.safe_str(entry.get("date", "")) == day: 
 			return entry
 	return {}
@@ -93,8 +135,6 @@ func _get_data_for_day(day: String) -> Dictionary:
 func _save_data(field: String, value: String):
 	if current_day == "": return 
 
-	# Globals cache'den listeyi çek ve üzerinde çalış
-	# Bunu garanti altına almak için listeyi çekip hemen Globals'a geri atıyoruz.
 	var list: Array = Globals.ensure_list(Globals.cache.get("restaurant", []))
 	Globals.cache["restaurant"] = list
 	
@@ -102,33 +142,22 @@ func _save_data(field: String, value: String):
 	for i in range(list.size()):
 		if typeof(list[i]) != TYPE_DICTIONARY: continue
 		
-		# Benzersiz anahtar kontrolü: 'date'
+		# Listede bu tarihi (2025-12-16) bulursan güncelle
 		if Globals.safe_str(list[i].get("date", "")) == current_day:
-			
-			# Var olan kaydı güncelle
 			list[i][field] = value
 			found = true
 			break
 	
+	# Bulamazsan yeni ekle
 	if not found:
-		# Yeni bir kayıt oluştur
 		var new_entry = { 
-			"date": current_day, 
-			"breakfast": "", 
-			"lunch": "", 
-			"dinner": "", 
-			"snacks": "", 
-			"notes": "" 
+			"date": current_day, # Buraya artık Monday değil tarih yazılıyor
+			"breakfast": "", "lunch": "", "dinner": "", "snacks": "", "notes": "" 
 		}
 		new_entry[field] = value
 		list.append(new_entry)
 	
-	# Değişiklik yapıldıktan sonra Globals'i kirli olarak işaretle
 	Globals.mark_dirty()
-	
-	# 🔴 DEBUG KONTROLÜ: Verinin cache'e kaydedildiğini konsolda gösterir.
-	# Eğer bu çıktı doğruysa, sorun Godot'ta değil, Cloudflare'dadır.
-	print("✅ RESTAURANT SAVE: Güncellenen Cache İçeriği: ", JSON.stringify(Globals.cache["restaurant"]))
 
 # =================================================
 # SİNYALLER
@@ -141,13 +170,6 @@ func _on_notes_changed():
 	if meal_panel.visible:
 		_save_data("notes", notes_edit.text)
 
-# =================================================
-# ÇIKIŞ (CRITICAL DEBUG POINT)
-# =================================================
 func _on_back_button_pressed():
-	# Çıkıştan hemen önce son durumu kontrol et
-	print("🚨 ÇIKIŞ KONTROLÜ: Global Cache'deki RESTAURANT verisi:")
-	print(JSON.stringify(Globals.cache.get("restaurant", "VERİ YOK")))
-	
-	# Güvenli sahne geçişi (Bu, aynı zamanda kaydı tetikler)
-	Globals.change_scene_with_loading("res://scenes/town.tscn")
+	Globals.save_cache()
+	if UI.has_node("UIRoot"): UI.get_node("UIRoot").return_to_town()

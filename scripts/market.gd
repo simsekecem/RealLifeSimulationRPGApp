@@ -53,7 +53,7 @@ func _on_back_button_pressed():
 	if panel.visible and current_category_name != "":
 		panel.save_items_to_cache()
 	
-	UI.get_node("UIRoot").return_to_town()
+	if UI.has_node("UIRoot"): UI.get_node("UIRoot").return_to_town()
 
 func _on_global_data_updated():
 	# Eğer panel açıksa, o anki kategoriyi tekrar yükle

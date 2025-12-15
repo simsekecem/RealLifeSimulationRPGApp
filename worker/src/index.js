@@ -135,8 +135,8 @@ export default {
                 study_log: await env.DB.prepare(`SELECT date, start_time, end_time, subject FROM study_log WHERE user_id=?`)
                     .bind(userId).all(),
 
-                gym_log: await env.DB.prepare(`SELECT date, exercise_name, sets, reps, duration, rest, weight, region, completed 
-                                                  FROM gym_log WHERE user_id=?`)
+                gym_log: await env.DB.prepare(`SELECT id, date, exercise_name, sets, reps, duration, rest, weight, region, completed 
+                                  FROM gym_log WHERE user_id=?`)
                     .bind(userId).all(),
 
                 market_items: await env.DB.prepare(`SELECT id, category, item_name, planned, bought, date
@@ -209,14 +209,60 @@ export default {
                 }
 
                 // 5. GYM LOG
+                // 5. GYM LOG (GÜNCELLENDİ: CRASH-PROOF & ID DESTEKLİ)
                 const gym_log = safeList(body.gym_log);
                 for (const g of gym_log) {
-                    await insertOrUpdate(
-                        `INSERT INTO gym_log (user_id, date, exercise_name, sets, reps, duration, rest, weight, region, completed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                        [userId, g.date, g.exercise_name, g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed],
-                        `UPDATE gym_log SET sets=?, reps=?, duration=?, rest=?, weight=?, region=?, completed=? WHERE user_id=? AND date=? AND exercise_name=?`,
-                        [g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed, userId, g.date, g.exercise_name]
-                    );
+                    
+                    // ---------------------------------------------------------
+                    // 1. ADIM: SİLME KONTROLÜ (İsim Boşsa + ID Varsa -> SİL)
+                    // ---------------------------------------------------------
+                    if (g.id && (!g.exercise_name || g.exercise_name.trim() === "")) {
+                        await env.DB.prepare(`DELETE FROM gym_log WHERE id=? AND user_id=?`)
+                            .bind(g.id, userId).run();
+                        continue;
+                    }
+
+                    // ---------------------------------------------------------
+                    // 2. ADIM: KAYDETME / GÜNCELLEME
+                    // ---------------------------------------------------------
+                    
+                    // A) GÜNCELLEME (ID VARSA)
+                    if (g.id) {
+                        try {
+                            // Var olan ID'yi güncellemeye çalış
+                            await env.DB.prepare(`
+                                UPDATE gym_log 
+                                SET date=?, exercise_name=?, sets=?, reps=?, duration=?, rest=?, weight=?, region=?, completed=? 
+                                WHERE id=? AND user_id=?
+                            `).bind(g.date, g.exercise_name, g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed, g.id, userId).run();
+                        } catch (e) {
+                            // HATA: Eğer ismini değiştirdin ve o tarihte o isimde zaten başka kayıt varsa (Çakışma)
+                            // Eskisini sil (Merge mantığı: yenisi kalsın, eskisi gitsin)
+                            await env.DB.prepare(`DELETE FROM gym_log WHERE id=?`).bind(g.id).run();
+                        }
+                    }
+                    
+                    // B) EKLEME (ID YOKSA)
+                    else {
+                        // İsimsiz yeni kayıtları engelle
+                        if (!g.exercise_name || g.exercise_name.trim() === "") continue;
+
+                        try {
+                            // Yeni eklemeyi dene
+                            await env.DB.prepare(`
+                                INSERT INTO gym_log (user_id, date, exercise_name, sets, reps, duration, rest, weight, region, completed) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            `).bind(userId, g.date, g.exercise_name, g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed).run();
+                        } catch (e) {
+                            // HATA: Eğer "Zaten var" derse, var olan kaydı güncelle
+                            // (Örneğin kullanıcı aynı gün tekrar 'Push Up' eklemiş ama ID'si yok)
+                            await env.DB.prepare(`
+                                UPDATE gym_log 
+                                SET sets=?, reps=?, duration=?, rest=?, weight=?, region=?, completed=? 
+                                WHERE user_id=? AND date=? AND exercise_name=?
+                            `).bind(g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed, userId, g.date, g.exercise_name).run();
+                        }
+                    }
                 }
 
                 // 6. MARKET ITEMS

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cphccg5ghjwjp"]
+[gd_scene load_steps=3 format=3 uid="uid://cphccg5ghjwjp"]
 
 [ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="1_jqvq1"]
+[ext_resource type="Script" uid="uid://bsuhpy8u5bvac" path="res://scenes/prefabs/DailyExerciseRow.gd" id="2_e305o"]
 
 [node name="DailyExerciseRow" type="HBoxContainer"]
 custom_minimum_size = Vector2(1084, 40)
@@ -11,6 +12,7 @@ offset_bottom = 99.0
 theme = ExtResource("1_jqvq1")
 theme_override_constants/separation = 7
 alignment = 1
+script = ExtResource("2_e305o")
 
 [node name="BoxContainer" type="BoxContainer" parent="."]
 custom_minimum_size = Vector2(80, 0)
