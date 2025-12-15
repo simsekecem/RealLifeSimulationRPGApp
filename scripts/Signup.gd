@@ -27,6 +27,6 @@ func _on_request_completed(_result: int, code: int, _headers: PackedStringArray,
 
 	if code == 200:
 		print("✅ Signup successful. Check your email for confirmation.")
-		get_tree().change_scene_to_file("res://scenes/authscreen_login.tscn")
+		get_tree().change_scene_to_file("res://scenes/auth_screen.tscn")
 	else:
 		print("❌ Signup failed:", data)
