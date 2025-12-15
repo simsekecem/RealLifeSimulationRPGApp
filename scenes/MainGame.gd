@@ -10,7 +10,8 @@ var town_scene_path = "res://scenes/town.tscn"
 
 func _ready():
 	print("MainGame Başlatıldı. TownContainer dolduruluyor...")
-	
+	# 🎵 ARKA PLAN MÜZİĞİ BAŞLAT
+	MusicController.bgm_play()
 	# ---------------------------------------------------------
 	# 1. TOWN SAHNESİNİ YÜKLEME
 	# ---------------------------------------------------------
@@ -123,3 +124,7 @@ func exit_house():
 	await get_tree().create_timer(1.0).timeout
 	Globals.door_locked = false
 	print("🔓 Kapılar tekrar aktif.")
+	
+	
+	
+  

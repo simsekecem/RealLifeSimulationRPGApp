@@ -3,11 +3,13 @@ extends "res://scripts/AuthBase.gd"
 @onready var email_field = $NinePatchRect/Email_LineEdit
 @onready var password_field = $NinePatchRect/Password_LineEdit
 @onready var signup_button = $NinePatchRect/Signup_Button
+@onready var back_button = $NinePatchRect/BackButton
 @onready var http = $HTTPRequest
 
 func _ready():
 	UI.get_node("UIRoot").hide_all_ui()
 	signup_button.pressed.connect(_on_signup_pressed)
+	back_button.pressed.connect(_on_back_pressed)
 	http.request_completed.connect(_on_request_completed)
 
 func _on_signup_pressed() -> void:
@@ -16,6 +18,9 @@ func _on_signup_pressed() -> void:
 		"password": password_field.text
 	}
 	send_request(http, "/api/signup", body)
+	
+func _on_back_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/auth_screen.tscn")
 
 func _on_request_completed(_result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	var data = JSON.parse_string(body.get_string_from_utf8())

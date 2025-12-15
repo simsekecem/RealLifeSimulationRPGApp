@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://b1cv8k5tedi8k"]
+[gd_scene load_steps=11 format=3 uid="uid://b1cv8k5tedi8k"]
 
 [ext_resource type="Script" uid="uid://xo21tpyg3s7e" path="res://scripts/ResetPassword.gd" id="1_6t2li"]
 [ext_resource type="Texture2D" uid="uid://bejnmtmc8xfaa" path="res://assets/backgrounds/signup.png" id="2_lglgl"]
@@ -27,6 +27,27 @@ corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8qvy1"]
 bg_color = Color(0.5921569, 0.49803922, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6t2li"]
+bg_color = Color(0.5921569, 0.2627451, 0.8117647, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lglgl"]
+bg_color = Color(0.5921569, 0.2627451, 0.8117647, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fl0re"]
+bg_color = Color(0.5921569, 0.2627451, 0.8117647, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="authscreen_forgotps" type="Control"]
 layout_mode = 3
@@ -127,5 +148,20 @@ text = "If an account with that email exists,
 we've sent password reset instructions."
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="BackButton" type="Button" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 1152.0
+offset_top = 49.0
+offset_right = 1214.0
+offset_bottom = 95.0
+theme_override_colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+theme_override_colors/font_focus_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+theme_override_colors/font_pressed_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+theme_override_fonts/font = ExtResource("3_fl0re")
+theme_override_styles/normal = SubResource("StyleBoxFlat_6t2li")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_lglgl")
+theme_override_styles/hover = SubResource("StyleBoxFlat_fl0re")
+text = "<-"
 
 [node name="HTTPRequest" type="HTTPRequest" parent="."]

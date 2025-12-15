@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bpeqbnhvknrg1"]
+[gd_scene load_steps=13 format=3 uid="uid://bpeqbnhvknrg1"]
 
 [ext_resource type="Script" uid="uid://dnnmdu0epangt" path="res://scripts/Signup.gd" id="1_55345"]
 [ext_resource type="Texture2D" uid="uid://bstqm8ldnm0ok" path="res://assets/backgrounds/orig_big.png" id="2_s4chm"]
@@ -33,6 +33,27 @@ bg_color = Color(0.4627451, 0.34901962, 0.9490196, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uaa5n"]
 bg_color = Color(0.4627451, 0.34901962, 0.9490196, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_55345"]
+bg_color = Color(0.4627451, 0.34901962, 0.9490196, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s4chm"]
+bg_color = Color(0.4627451, 0.34901962, 0.9490196, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ri3o2"]
+bg_color = Color(0.4627451, 0.34901962, 0.9490196, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="Authscreen_signup" type="Control"]
 layout_mode = 3
@@ -175,5 +196,20 @@ text = "You're almost there! We’ve sent you an email with a confirmation link.
 Check your inbox (and spam folder just in case) to activate your account."
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="BackButton" type="Button" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 1149.0
+offset_top = 49.0
+offset_right = 1212.0
+offset_bottom = 94.0
+theme_override_colors/font_color = Color(0.30588236, 0.13725491, 0.5176471, 1)
+theme_override_colors/font_focus_color = Color(0.30588236, 0.13725491, 0.5176471, 1)
+theme_override_colors/font_pressed_color = Color(0.30588236, 0.13725491, 0.5176471, 1)
+theme_override_fonts/font = ExtResource("3_ri3o2")
+theme_override_styles/normal = SubResource("StyleBoxFlat_55345")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_s4chm")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ri3o2")
+text = "<-"
 
 [node name="HTTPRequest" type="HTTPRequest" parent="."]

@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://pcrsajrggrix"]
+
+[ext_resource type="Script" uid="uid://bp2eqhc3x8taw" path="res://scenes/Autoloads/music_controller.gd" id="1_5nojn"]
+[ext_resource type="AudioStream" uid="uid://cld8p1af6leg6" path="res://assets/bgmusic/Blithe part B.ogg" id="2_ceoon"]
+
+[node name="MusicController" type="Node2D"]
+script = ExtResource("1_5nojn")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_ceoon")
+bus = &"Music"

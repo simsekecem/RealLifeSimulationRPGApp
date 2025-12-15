@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cld8p1af6leg6"
+path="res://.godot/imported/Blithe part B.ogg-e4e241b1bd5c19e619145225884eb0d0.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/bgmusic/Blithe part B.ogg"
+dest_files=["res://.godot/imported/Blithe part B.ogg-e4e241b1bd5c19e619145225884eb0d0.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
