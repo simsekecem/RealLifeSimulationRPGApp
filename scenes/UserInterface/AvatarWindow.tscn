@@ -54,6 +54,23 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("AtlasTexture_lochu")
 
+[node name="CharacterPreviewHolder" type="Control" parent="Background"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -162.0
+offset_top = 52.0
+offset_right = -162.0
+offset_bottom = 52.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PreviewSprite" type="AnimatedSprite2D" parent="Background/CharacterPreviewHolder"]
+scale = Vector2(3, 3)
+
 [node name="CloseButton" type="TextureButton" parent="."]
 layout_mode = 1
 anchors_preset = 8
@@ -195,21 +212,23 @@ text = "EDIT"
 
 [node name="EditWindow" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Background" type="NinePatchRect" parent="EditWindow"]
-layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 462.0
-offset_top = 272.0
-offset_right = 832.0
-offset_bottom = 444.0
+offset_left = -163.0
+offset_top = -89.0
+offset_right = 238.0
+offset_bottom = 103.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="NinePatchRect" parent="EditWindow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("AtlasTexture_hk04k")
@@ -221,9 +240,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -188.0
+offset_left = -201.5
 offset_top = -104.0
-offset_right = 187.0
+offset_right = 199.5
 offset_bottom = -63.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -232,19 +251,19 @@ region_rect = Rect2(0, 0, 208, 29.389801)
 
 [node name="CloseButton" type="TextureButton" parent="EditWindow/Background"]
 layout_mode = 0
-offset_left = 322.0
-offset_top = -12.0
-offset_right = 361.0
-offset_bottom = 15.0
+offset_left = 346.0
+offset_top = -3.0
+offset_right = 389.0
+offset_bottom = 25.0
 texture_normal = SubResource("AtlasTexture_vfbpj")
 stretch_mode = 0
 
-[node name="NameLabel" type="Label" parent="EditWindow/Background"]
+[node name="NameLabel" type="Label" parent="EditWindow"]
 layout_mode = 0
-offset_left = 27.0
-offset_top = 47.0
-offset_right = 171.0
-offset_bottom = 82.0
+offset_left = 32.0
+offset_top = 64.0
+offset_right = 176.0
+offset_bottom = 99.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
 theme_override_font_sizes/font_size = 14
@@ -253,10 +272,10 @@ text = "New Name:
 
 [node name="SaveButton" type="TextureButton" parent="EditWindow"]
 layout_mode = 0
-offset_left = 732.0
-offset_top = 412.0
-offset_right = 820.0
-offset_bottom = 455.0
+offset_left = 271.0
+offset_top = 140.0
+offset_right = 359.0
+offset_bottom = 183.0
 texture_normal = SubResource("AtlasTexture_vbpkm")
 stretch_mode = 0
 
@@ -280,20 +299,21 @@ text = "SAVE"
 
 [node name="NewNameLE" type="LineEdit" parent="EditWindow"]
 layout_mode = 0
-offset_left = 649.0
-offset_top = 331.0
-offset_right = 815.0
-offset_bottom = 359.0
+offset_left = 179.0
+offset_top = 60.0
+offset_right = 357.0
+offset_bottom = 88.0
 theme_override_fonts/font = ExtResource("4_xix68")
 theme_override_font_sizes/font_size = 14
 placeholder_text = "Test"
+max_length = 8
 
 [node name="BirthdayLabel" type="Label" parent="EditWindow"]
 layout_mode = 0
-offset_left = 508.0
-offset_top = 380.0
-offset_right = 625.0
-offset_bottom = 415.0
+offset_left = 31.0
+offset_top = 109.0
+offset_right = 148.0
+offset_bottom = 144.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_378xl")
 theme_override_font_sizes/font_size = 13
@@ -301,10 +321,10 @@ text = "Birthday:"
 
 [node name="BirthdayContainer" type="HBoxContainer" parent="EditWindow"]
 layout_mode = 0
-offset_left = 637.0
-offset_top = 376.0
-offset_right = 814.0
-offset_bottom = 396.0
+offset_left = 160.0
+offset_top = 105.0
+offset_right = 337.0
+offset_bottom = 125.0
 alignment = 1
 
 [node name="Day" type="OptionButton" parent="EditWindow/BirthdayContainer"]
@@ -312,6 +332,7 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("4_xix68")
 
 [node name="Month" type="OptionButton" parent="EditWindow/BirthdayContainer"]
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("4_xix68")

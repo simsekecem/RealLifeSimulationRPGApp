@@ -2,121 +2,133 @@ extends Control
 
 @onready var windows = $Windows
 
-# ARTIK PRELOAD YOK! (Donma sebebi buydu, sildik)
-# Town yükleme işini artık MainGame ve LoadingScreen yapıyor.
+# Sol Üst Köşe Referansları
+@onready var top_left_frame = $TopLeftButtons/Frame
+@onready var avatar_icon = $TopLeftButtons/Frame/AvatarIcon
+@onready var xp_bar = $TopLeftButtons/Frame/XPBar
+@onready var username_text = $TopLeftButtons/Frame/UsernameText
 
 func _ready():
-	# AvatarIcon, Frame altında yer alıyor.
-	if has_node("TopLeftButtons/Frame/AvatarIcon"):
-		$TopLeftButtons/Frame/AvatarIcon.pressed.connect(show_avatar)
+	# Avatar Butonu Tıklaması
+	if avatar_icon:
+		avatar_icon.pressed.connect(show_avatar)
 	
-	# TopRightButtons altındaki diğer butonlar
+	# Sağ Üst Butonlar
 	if has_node("TopRightButtons/MissionsButton"):
 		$TopRightButtons/MissionsButton.pressed.connect(show_missions)
 	if has_node("TopRightButtons/SettingsButton"):
 		$TopRightButtons/SettingsButton.pressed.connect(show_settings)
-
+	
+	# 👇 Veri değişince (İsim, XP veya Karakter değişince) burayı güncelle
+	if Globals.has_signal("data_updated"):
+		Globals.data_updated.connect(update_top_left_ui)
+	
+	# Başlangıçta verileri yükle
+	update_top_left_ui()
 	print("✅ UI bağlantıları başarıyla kuruldu.")
 
-### --- Pencere Yönetim Fonksiyonları --- ###
+# =================================================
+# 👇 GÜNCELLENDİ: SOL ÜST KÖŞE YÖNETİMİ
+# =================================================
+func update_top_left_ui():
+	var user_data = Globals.cache.get("user", {})
+	
+	# 1. İsim
+	if username_text:
+		username_text.text = str(user_data.get("name", "Player"))
+	
+	# 2. XP Bar
+	if xp_bar:
+		var current_xp = int(user_data.get("experience", 0))
+		var current_lvl = int(user_data.get("level", 1))
+		xp_bar.max_value = current_lvl * 100 
+		xp_bar.value = current_xp
+		xp_bar.tooltip_text = "Level: %d | XP: %d / %d" % [current_lvl, current_xp, xp_bar.max_value]
+
+	# 3. 👇 YENİ: AVATAR İKONUNU GÜNCELLE
+	if avatar_icon:
+		var char_id = int(user_data.get("character_id", 1))
+		
+		# İkon dosya yolu (Eğer ikonların yoksa burayı normal resim yolu yapabilirsin)
+		# Örnek İkon Yolu: res://assets/characters/icons/char_icon_1.png
+		var path = "res://assets/characters/icons/char_icon_%d.png" % char_id
+		
+		# Eğer ikon dosyası yoksa, belki normal karakter dosyası vardır?
+		if not ResourceLoader.exists(path):
+			path = "res://assets/characters/char_%d.png" % char_id
+
+		if ResourceLoader.exists(path):
+			var tex = load(path)
+			
+			# AvatarIcon bir Button mu yoksa TextureRect mi? Ona göre atama yapalım.
+			if avatar_icon is TextureButton:
+				avatar_icon.texture_normal = tex
+				# İkonun boyutunu korumak için (gerekirse)
+				avatar_icon.ignore_texture_size = true
+				avatar_icon.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+			elif avatar_icon is TextureRect:
+				avatar_icon.texture = tex
+		else:
+			print("⚠️ Avatar ikonu bulunamadı: ", path)
+
+# =================================================
+# PENCERE YÖNETİMİ (Burası aynı kalıyor)
+# =================================================
 
 func hide_all_windows():
-	"""Windows düğümünün altındaki tüm çocukları (pencereleri) gizler."""
 	if windows:
 		for w in windows.get_children():
 			w.visible = false
-	print("Tüm pencereler gizlendi.")
 
 func hide_all_ui():
-	"""Tüm UI öğelerini gizler (login/signup/forgotpassword/cutscene için)."""
 	$TopLeftButtons.visible = false
 	$TopRightButtons.visible = false
 	hide_all_windows()
-	
-	# Joystick varsa gizle (User isteği üzerine buraya dokunmadım)
-	if has_node("Joystick"):
-		$Joystick.visible = false
-		
-	print("UI öğeleri tamamen gizlendi.")
+	if has_node("Joystick"): $Joystick.visible = false
 
 func show_avatar():
-	"""AvatarWindow'u gösterir."""
 	hide_all_windows()
 	if has_node("Windows/AvatarWindow"):
 		$Windows/AvatarWindow.visible = true
-		print("🟢 AvatarWindow açıldı.")
+		if $Windows/AvatarWindow.has_method("update_ui_from_cache"):
+			$Windows/AvatarWindow.update_ui_from_cache()
 
 func show_missions():
-	"""MissionsWindow'u gösterir."""
 	hide_all_windows()
 	if has_node("Windows/MissionsWindow"):
 		$Windows/MissionsWindow.visible = true
-		print("🟢 MissionsWindow açıldı.")
 
 func show_settings():
-	"""SettingsWindow'u gösterir."""
 	hide_all_windows()
 	if has_node("Windows/SettingsWindow"):
 		$Windows/SettingsWindow.visible = true
-		print("🟢 SettingsWindow açıldı.")
 	
 func show_only_top_right_buttons():
-	"""Sadece TopRightButtons görünür, diğer her şey gizlenir."""
 	$TopLeftButtons.visible = false
 	hide_all_windows()
-	if has_node("Joystick"):
-		$Joystick.visible = false
+	if has_node("Joystick"): $Joystick.visible = false
 	$TopRightButtons.visible = true
 	
 func change_scene_to(scene_path: String):
-	"""
-	Genel Sahne Değiştirici.
-	Login -> Oyun geçişleri için kullanılır.
-	"""
-	
-	# 1. Verileri yerel olarak kaydet (Garanti olsun)
 	Globals.save_cache()
-
-	# 2. Loading Screen sistemini kullan
-	print("🔄 Sahne değiştiriliyor (Loading ile): ", scene_path)
 	Globals.change_scene_with_loading(scene_path)
 
 func show_full_ui():
-	"""Town veya MainGame açıldığında UI elemanlarını görünür yapar."""
 	$TopLeftButtons.visible = true
 	$TopRightButtons.visible = true
-	
-	if has_node("Joystick"):
-		$Joystick.visible = true 
-		
-	hide_all_windows() 
-	print("✅ Tam UI görünür hale geldi.")
-
-# --- DÜZELTME: _notification FONKSİYONU SİLİNDİ ---
-# Artık çıkış işlemlerini ve veri kaydını Globals.gd tek başına yönetiyor.
-# Buradaki kod çakışma yaratıyordu.
+	if has_node("Joystick"): $Joystick.visible = true
+	hide_all_windows()
+	update_top_left_ui() # UI açılınca bilgileri tazele
 
 func return_to_town():
-	print("🔙 Town'a dönülüyor...")
-	
-	# 1. YÖNTEM: Normal Oyun Modu (MainGame var mı?)
 	var current_scene = get_tree().current_scene
-	
-	# Eğer sahnenin kendisi MainGame ise veya MainGame'i bulabiliyorsak
 	if current_scene.has_method("exit_house"):
 		current_scene.exit_house()
 		return
-	
-	# MainGame ağacın tepesinde olabilir mi?
 	if get_tree().root.has_node("MainGame"):
 		var main_node = get_tree().root.get_node("MainGame")
 		if main_node.has_method("exit_house"):
 			main_node.exit_house()
 			return
-
-	# 2. YÖNTEM: Test Modu (MainGame yok)
-	print("⚠️ Test Modu: Direkt Town sahnesi yükleniyor...")
 	get_tree().change_scene_to_file("res://scenes/town.tscn")
-	
-	# UI'ı tekrar açalım ki joystick gelsin
 	show_full_ui()

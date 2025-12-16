@@ -3,6 +3,9 @@ extends Node
 # ============================================================
 #  GLOBAL STATE
 # ============================================================
+# 👇 YENİ: UI güncellemesi için bu sinyal kalmalı
+signal data_updated 
+
 var auth_token: String = ""
 var user_id: String = ""
 var door_locked: bool = false
@@ -11,9 +14,9 @@ var is_quitting: bool = false
 var last_scene_path := ""
 
 var cache := {
-	"owner_id": "", # <--- YENİ: Bu verilerin kime ait olduğunu tutar (Ahmet mi Mehmet mi?)
-	"user": { "name": "", "birthdate": "" },
-	"preferences": { "music_volume": 50 }, # Sadece yerelde kalacak
+	"owner_id": "", 
+	"user": { "name": "Rookie", "birthdate": "", "level": 1, "experience": 0, "character_id": 1 },
+	"preferences": { "music_volume": 50 }, 
 	"gym_log": [],
 	"library": [],
 	"study_log": [],
@@ -43,6 +46,9 @@ func _ready():
 func mark_dirty():
 	cache["unsynced_changes"] = true
 	save_timer = debounce_seconds
+	
+	# 👇 Veri değişince sinyal gönder (UI güncellensin diye)
+	data_updated.emit()
 
 func _process(delta):
 	if save_timer > 0:
@@ -54,6 +60,7 @@ func _process(delta):
 #  HELPER FONKSİYONLAR
 # ============================================================
 func ensure_list(data) -> Array:
+	if data == null: return []
 	if typeof(data) == TYPE_DICTIONARY and data.has("results"): return data["results"]
 	elif typeof(data) == TYPE_ARRAY: return data
 	return []
@@ -61,13 +68,10 @@ func ensure_list(data) -> Array:
 func safe_int(value) -> int: return int(float(str(value)))
 func safe_str(value) -> String: return str(value).strip_edges()
 
-# --- YENİ: Sunucuya gidecek veriyi hazırla (Preferences HARİÇ) ---
 func _get_sync_payload() -> Dictionary:
 	var payload = cache.duplicate(true)
-	# Preferences'i siliyoruz ki sunucuya gitmesin, sadece cihazda kalsın.
 	if payload.has("preferences"):
 		payload.erase("preferences") 
-	# Owner ID sunucuya gitmesine gerek yok, yerel kontrol için. Ama gitse de zararı yok.
 	return payload
 
 # ============================================================
@@ -117,9 +121,6 @@ func _on_exit_save_completed(_result, response_code, _headers, body):
 	
 	get_tree().quit()
 
-# ------------------------------------------------------------------
-# ARKA PLAN GÖNDERİMİ
-# ------------------------------------------------------------------
 func send_to_server_background():
 	call_deferred("_deferred_background_save")
 
@@ -140,7 +141,7 @@ func force_quit():
 	get_tree().quit()
 
 # ============================================================
-#  SUNUCUDAN YÜKLEME (AKILLI BİRLEŞTİRME / SMART MERGE)
+#  SUNUCUDAN YÜKLEME
 # ============================================================
 func load_from_server():
 	if auth_token == "": return
@@ -161,36 +162,24 @@ func _on_load_complete(_res, code, _headers, body):
 			var data = json.get_data()
 			if typeof(data) == TYPE_DICTIONARY:
 				
-				# --- GÜVENLİK KONTROLÜ BAŞLANGICI ---
-				
-				# 1. Cihazdaki veri kime ait?
 				var local_owner = cache.get("owner_id", "")
 				
-				# 2. Eğer cihazda kayıtlı bir sahibi varsa VE şu an giriş yapan kişi o değilse:
 				if local_owner != "" and local_owner != user_id:
-					print("🛑 DİKKAT: Cihazda başka bir kullanıcının (", local_owner, ") verisi bulundu!")
-					print("♻️ Güvenlik sebebiyle yerel veri siliniyor ve ", user_id, " verisiyle değiştiriliyor.")
-					
-					# Merge işlemini atla, direkt sunucu verisini uygula (Overwrite)
+					print("🛑 DİKKAT: Cihazda başka kullanıcının verisi var. Temizleniyor.")
 					apply_server_data(data)
 					
-				# 3. Eğer kullanıcı aynıysa veya cihazdaki veri sahipsizse normal akışa devam et:
 				elif cache.get("unsynced_changes", false) == true:
-					print("⚠️ ÇAKIŞMA: Sunucu ve Yerel veri birleştiriliyor (Aynı Kullanıcı)...")
+					print("⚠️ ÇAKIŞMA: Sunucu ve Yerel veri birleştiriliyor...")
 					merge_server_with_local(data)
 				else:
 					apply_server_data(data)
 					print("✅ Veriler sunucudan alındı.")
-				
-				# --- GÜVENLİK KONTROLÜ BİTİŞİ ---
 	else:
 		print("❌ Veri çekme hatası: ", code)
 
 # --- Veri Uygulama ---
 func apply_server_data(data):
 	if data.has("user"): cache["user"] = data["user"]
-	
-	# Preferences silme işlemi (Server yerel ayarı ezmesin diye)
 	
 	cache["study_log"] = ensure_list(data.get("study_log"))
 	cache["gym_log"] = ensure_list(data.get("gym_log"))
@@ -199,10 +188,12 @@ func apply_server_data(data):
 	cache["calendar_notes"] = ensure_list(data.get("calendar_notes"))
 	cache["restaurant"] = ensure_list(data.get("restaurant"))
 	
-	# YENİ: Veri yüklendiğinde, bu verinin sahibini mühürle
 	cache["owner_id"] = user_id 
 	cache["unsynced_changes"] = false
 	save_cache()
+	
+	# Veri değişti sinyali
+	data_updated.emit()
 
 # --- Veri Birleştirme ---
 func merge_server_with_local(server_data):
@@ -217,12 +208,14 @@ func merge_server_with_local(server_data):
 	
 	print("🤝 Veriler birleştirildi. Sunucuya geri yükleniyor...")
 	
-	# YENİ: Veri birleştirildiğinde, bu verinin sahibini mühürle
 	cache["owner_id"] = user_id 
 	cache["unsynced_changes"] = false
 	save_cache()
 	send_to_server_background()
+	
+	data_updated.emit()
 
+# 👇 ESKİ SİSTEM: ID KONTROLÜ YOK, SADECE İÇERİK/HASH KONTROLÜ
 func merge_list(key: String, server_list: Array):
 	var local_list = cache[key]
 	var combined_list = server_list.duplicate()
@@ -230,6 +223,7 @@ func merge_list(key: String, server_list: Array):
 	for local_item in local_list:
 		var is_present = false
 		for server_item in server_list:
+			# ID'ye bakmadan sadece içeriğin hash'ini karşılaştır
 			if local_item.hash() == server_item.hash():
 				is_present = true
 				break
@@ -256,7 +250,6 @@ func save_cache():
 	var file = FileAccess.open(cache_path, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(cache))
-		# WEB İÇİN DÜZELTME: Dosyayı kapatmak kaydı zorlar.
 		file.close()
 
 # ============================================================
@@ -291,11 +284,8 @@ func change_scene_with_loading(target_path: String):
 	
 	if OS.has_feature("web") and auth_token != "":
 		if target_path != last_scene_path and cache.get("unsynced_changes", false):
-			print("🌐 WEB: Değişiklik var → DB save")
 			send_to_server_background()
 			cache["unsynced_changes"] = false
-		else:
-			print("🌐 WEB: Değişiklik yok → DB save atlandı")
 	
 	last_scene_path = target_path
 	next_scene_path = target_path

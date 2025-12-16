@@ -123,7 +123,7 @@ export default {
         if (path === "/api/load_all" && method === "GET") {
 
             const result = {
-                user: await env.DB.prepare(`SELECT name, birthdate FROM users WHERE user_id=?`)
+                user: await env.DB.prepare(`SELECT name, birthdate, level, experience, character_id FROM users WHERE user_id=?`)
                     .bind(userId).first(),
 
                 // Preferences satırını buradan kaldırdık. 
@@ -172,15 +172,25 @@ export default {
                 const safeList = (data) => Array.isArray(data) ? data : [];
 
                 // 1. USER
+                // 1. USER (Level, XP ve Karakter ID Eklendi)
+                // 1. USER (İsim Varsayılanı DB Tarafından Kontrol Ediliyor)
                 const userBox = body.user || {}; 
                 const userName = userBox.name || ""; 
                 const userBirth = userBox.birthdate || "";
+                const userLevel = userBox.level || 1;
+                const userExp = userBox.experience || 0;
+                const charId = userBox.character_id || 1;
+
+                // 👇 YENİ: İsim boşsa DB'ye "Çaylak" olarak yazılmasını garantile
+                const finalUserName = userName === "" ? "Rookie" : userName;
 
                 await insertOrUpdate(
-                    `INSERT INTO users (user_id, name, birthdate) VALUES (?, ?, ?)`,
-                    [userId, userName, userBirth],
-                    `UPDATE users SET name=?, birthdate=? WHERE user_id=?`,
-                    [userName, userBirth, userId]
+                    // INSERT: İlk kayıt yapılırken finalUserName kullanılır
+                    `INSERT INTO users (user_id, name, birthdate, level, experience, character_id) VALUES (?, ?, ?, ?, ?, ?)`,
+                    [userId, finalUserName, userBirth, userLevel, userExp, charId],
+                    // UPDATE: Zaten kayıtlıysa güncel isim kullanılır
+                    `UPDATE users SET name=?, birthdate=?, level=?, experience=?, character_id=? WHERE user_id=?`,
+                    [finalUserName, userBirth, userLevel, userExp, charId, userId]
                 );
 
                 // 2. PREFERENCES (KALDIRILDI)
