@@ -22,6 +22,10 @@ var note_popup: Node
 
 func _ready() -> void:
 	UI.get_node("UIRoot").show_only_top_right_buttons()
+	if has_node("Back_Button"):
+		$Back_Button.pressed.connect(_on_back_button_pressed)
+	elif has_node("%Back_Button"): # Eğer Unique Name (%) kullandıysan
+		%Back_Button.pressed.connect(_on_back_button_pressed)
 	cal.set_first_weekday(Time.WEEKDAY_MONDAY)
 	cal.week_number_system = Calendar.WeekNumberSystem.WEEK_NUMBER_FOUR_DAY
 	
@@ -240,5 +244,17 @@ class CalendarLabel:
 	
 	func set_font_size(font_size: int = 12):
 		label_settings.font_size = font_size
+
 func _on_back_button_pressed():
-	UI.get_node("UIRoot").change_scene_to("res://scenes/house.tscn")
+	# 1. Verileri kaydet
+	Globals.save_cache()
+	
+	# 2. Oyunu tekrar hareket ettir (Unpause)
+	get_tree().paused = false
+	
+	# 3. Eğer UIRoot'a bağlıysan, eski UI düzenini geri getir (Opsiyonel ama şık durur)
+	if UI.has_node("UIRoot"):
+		UI.get_node("UIRoot").show_full_ui() # Veya show_only_top_right_buttons()
+	
+	# 4. Takvim penceresini yok et (Kapat)
+	queue_free()
