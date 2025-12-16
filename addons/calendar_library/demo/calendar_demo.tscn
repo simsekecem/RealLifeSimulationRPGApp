@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bt72ebrhuikpt"]
+[gd_scene load_steps=18 format=3 uid="uid://bt72ebrhuikpt"]
 
 [ext_resource type="Script" uid="uid://dw0eeknmwd05k" path="res://addons/calendar_library/demo/calendar_demo.gd" id="1_qxlq3"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_ycdnr"]
@@ -39,6 +39,27 @@ bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jjuse"]
 bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n581x"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dgoue"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b7slj"]
+bg_color = Color(0.57254905, 0.6313726, 0.8117647, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="CalendarDemo" type="Control"]
 layout_mode = 3
@@ -133,7 +154,7 @@ theme_override_constants/separation = 50
 layout_mode = 2
 theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
 theme_override_fonts/font = ExtResource("2_ycdnr")
-text = "Demo languages"
+text = "Languages"
 
 [node name="LanguageOptionButton" type="OptionButton" parent="Padding/CalendarComponents/VBoxContainer/Language"]
 layout_mode = 0
@@ -245,6 +266,22 @@ text = "Show week numbers"
 
 [node name="HSeparator" type="HSeparator" parent="Padding/CalendarComponents/VBoxContainer"]
 layout_mode = 2
+
+[node name="Back_Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1186.0
+offset_top = 140.0
+offset_right = 1245.0
+offset_bottom = 190.0
+theme_override_colors/font_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_colors/font_focus_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_colors/font_pressed_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_colors/font_hover_color = Color(0.22745098, 0.4117647, 0.3764706, 1)
+theme_override_fonts/font = ExtResource("2_ycdnr")
+theme_override_styles/normal = SubResource("StyleBoxFlat_n581x")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_dgoue")
+theme_override_styles/hover = SubResource("StyleBoxFlat_b7slj")
+text = "<-"
 
 [connection signal="pressed" from="Padding/CalendarComponents/YearCalendarContainer/HBoxContainer/YearMinus" to="." method="_on_year_minus_pressed"]
 [connection signal="pressed" from="Padding/CalendarComponents/YearCalendarContainer/HBoxContainer/YearPlus" to="." method="_on_year_plus_pressed"]

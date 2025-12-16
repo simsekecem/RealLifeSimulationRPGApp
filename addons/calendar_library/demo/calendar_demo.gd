@@ -1,5 +1,6 @@
 extends Control
 
+
 var cal: Calendar = Calendar.new()
 var year = 2025
 
@@ -240,4 +241,4 @@ class CalendarLabel:
 	func set_font_size(font_size: int = 12):
 		label_settings.font_size = font_size
 func _on_back_button_pressed():
-	UI.get_node("UIRoot").change_scene_to("res://scenes/town.tscn")
+	UI.get_node("UIRoot").change_scene_to("res://scenes/house.tscn")
