@@ -56,13 +56,24 @@ func interact():
 			print("🛏️ Uykucu şirin!")
 
 func open_calendar():
-	# Takvim sahnesini yükle
-	var calendar_scene = load("res://addons/calendar_library/demo/calendar_demo.tscn").instantiate()
+	print("📅 Takvim Overlay olarak açılıyor...")
 	
+	# 1. Takvim sahnesini hafızaya yükle
+	var calendar_scn = load("res://addons/calendar_library/demo/calendar_demo.tscn").instantiate()
+	
+	# 2. Takvimin "Pause" modunda çalışabilmesi için ayar
+	# (Bunu yapmazsak oyun durduğunda takvim de donar, tıklayamazsın!)
+	calendar_scn.process_mode = Node.PROCESS_MODE_ALWAYS
+	
+	# 3. Oyunu durdur (Arkada karakter yürümesin)
+	get_tree().paused = true
+	
+	# 4. Takvimi ekrana (UI'ın en üstüne) ekle
 	if UI.has_node("UIRoot"):
-		UI.get_node("UIRoot").add_child(calendar_scene)
+		UI.get_node("UIRoot").add_child(calendar_scn)
 	else:
-		add_child(calendar_scene)
+		# UI yoksa direkt ekle (Yedek plan)
+		add_child(calendar_scn)
 
 func start_dialog():
 	print("💬 NPC: ", dialog_text)
