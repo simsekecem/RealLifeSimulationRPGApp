@@ -1,4 +1,4 @@
-[gd_scene load_steps=79 format=4 uid="uid://dcuhs4nnpnmmm"]
+[gd_scene load_steps=81 format=4 uid="uid://dcuhs4nnpnmmm"]
 
 [ext_resource type="Script" uid="uid://cmbw3kb4yt3e4" path="res://scripts/town.gd" id="1_gt07c"]
 [ext_resource type="Texture2D" uid="uid://dmurvqte4t28x" path="res://assets/new/map1.png" id="2_eruj1"]
@@ -10,6 +10,8 @@
 [ext_resource type="Texture2D" uid="uid://fgrbaj1pq6kw" path="res://assets/new/Houses Sprite Sheet 32x32.png" id="7_v3ani"]
 [ext_resource type="Texture2D" uid="uid://db63h6yjbcoc6" path="res://assets/new/Houses Sprite Sheet 24x24.png" id="8_5q1rr"]
 [ext_resource type="PackedScene" uid="uid://pwbdgrhl5obe" path="res://scenes/player.tscn" id="10_5q1rr"]
+[ext_resource type="PackedScene" uid="uid://dfejtdwtedt4y" path="res://scenes/npc_interactable.tscn" id="11_u4arb"]
+[ext_resource type="PackedScene" uid="uid://bukn52lgq1s8n" path="res://scenes/duck.tscn" id="12_u4arb"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cq4yp"]
 texture = ExtResource("2_eruj1")
@@ -81493,7 +81495,7 @@ tile_map_data = PackedByteArray("AAAhAAgAAAAAAAAAAAAhAAkAAAAAAAEAAAAiAAoAAAACAAo
 tile_set = SubResource("TileSet_ov17k")
 
 [node name="Door" parent="House" instance=ExtResource("6_v3ani")]
-position = Vector2(656, 258)
+position = Vector2(655, 254)
 target_scene_path = "uid://chaxn0raj3mjl"
 
 [node name="TileMapLayer6" type="TileMapLayer" parent="."]
@@ -81589,8 +81591,16 @@ tile_map_data = PackedByteArray("AAA7ABUAAAALACIAAAA7ABYAAAALACMAAAA7ABcAAAALACQ
 tile_set = SubResource("TileSet_by33p")
 
 [node name="TileMapLayer19" type="TileMapLayer" parent="."]
+visible = false
 tile_map_data = PackedByteArray("AAASAA4AAQAIAAoAAFA=")
 tile_set = SubResource("TileSet_pwx13")
 
 [node name="Player" parent="." instance=ExtResource("10_5q1rr")]
 position = Vector2(655, 346)
+
+[node name="NPC_Interactable" parent="." instance=ExtResource("11_u4arb")]
+position = Vector2(1015, 418)
+dialog_text = "Study math for 2 hours today"
+
+[node name="Duck" parent="." instance=ExtResource("12_u4arb")]
+position = Vector2(989, 216)

@@ -1,0 +1,65 @@
+[gd_scene load_steps=6 format=3 uid="uid://dfejtdwtedt4y"]
+
+[ext_resource type="Script" uid="uid://dg0p87th31cee" path="res://npc_interactable.gd" id="1_f1gap"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_2vo3h"]
+[ext_resource type="Texture2D" uid="uid://b63medlv5kmag" path="res://assets/c 32 x 32/character_3_frame32x32.png" id="3_4euao"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_svlq0"]
+radius = 28.01785
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cna4p"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 5
+border_width_bottom = 5
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="NPC_Interactable" type="Area2D"]
+script = ExtResource("1_f1gap")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -19)
+shape = SubResource("CircleShape2D_svlq0")
+
+[node name="DialogBubble" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = -87.0
+offset_top = -191.0
+offset_right = 79.0
+offset_bottom = -50.0
+
+[node name="Panel" type="Panel" parent="DialogBubble"]
+layout_mode = 0
+offset_left = 19.0
+offset_top = 57.0
+offset_right = 159.0
+offset_bottom = 137.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_cna4p")
+
+[node name="QuestLabel" type="Label" parent="DialogBubble/Panel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 131.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_2vo3h")
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.1
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, -11)
+scale = Vector2(1.883, 2)
+texture = ExtResource("3_4euao")
+region_enabled = true
+region_rect = Rect2(32, 0, 32, 32)
