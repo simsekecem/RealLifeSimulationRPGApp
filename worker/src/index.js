@@ -197,14 +197,19 @@ export default {
                 // Artık sunucuya kaydedilmiyor.
 
                 // 3. LIBRARY
-                const library = safeList(body.library);
-                for (const b of library) {
-                    await insertOrUpdate(
-                        `INSERT INTO library_books (user_id, title, status) VALUES (?, ?, ?)`,
-                        [userId, b.title, b.status],
-                        `UPDATE library_books SET status=? WHERE user_id=? AND title=?`,
-                        [b.status, userId, b.title]
-                    );
+                if (body.library !== undefined) {
+                    const library = safeList(body.library);
+                    
+                    // A) Önce eski listeyi tamamen temizle (En temiz senkronizasyon)
+                    await env.DB.prepare(`DELETE FROM library_books WHERE user_id=?`).bind(userId).run();
+
+                    // B) Listeyi olduğu gibi (boşluklar dahil) kaydet
+                    for (const b of library) {
+                        // 👇 DEĞİŞİKLİK: 'if' kontrolünü kaldırdık. 
+                        // Başlık boş olsa bile ('') veritabanına kaydediyoruz.
+                         await env.DB.prepare(`INSERT INTO library_books (user_id, title, status) VALUES (?, ?, ?)`)
+                            .bind(userId, b.title || "", b.status).run();
+                    }
                 }
 
                 // 4. STUDY LOG
