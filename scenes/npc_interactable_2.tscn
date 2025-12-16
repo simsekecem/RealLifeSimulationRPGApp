@@ -1,0 +1,64 @@
+[gd_scene load_steps=6 format=3 uid="uid://ck1d5s0qg2yjp"]
+
+[ext_resource type="Script" uid="uid://ddhu6m1cys8tx" path="res://npc_interactable_2.gd" id="1_eq8iq"]
+[ext_resource type="Texture2D" uid="uid://mgvdicfuftym" path="res://assets/c 32 x 32/character_17_frame32x32.png" id="2_3chbw"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_v0mck"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_63pl0"]
+radius = 32.06244
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6aw48"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 5
+border_width_bottom = 5
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="npc_interactable2" type="Area2D"]
+script = ExtResource("1_eq8iq")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -12)
+shape = SubResource("CircleShape2D_63pl0")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, -12)
+scale = Vector2(2.1875, 2.125)
+texture = ExtResource("2_3chbw")
+region_enabled = true
+region_rect = Rect2(32, 0, 32, 32)
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="DialogBubble" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = -144.0
+offset_top = -178.0
+offset_right = 145.0
+offset_bottom = -40.0
+
+[node name="Panel" type="Panel" parent="DialogBubble"]
+layout_mode = 0
+offset_left = 81.0
+offset_top = 45.0
+offset_right = 209.0
+offset_bottom = 133.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_6aw48")
+
+[node name="QuestLabel" type="Label" parent="DialogBubble/Panel"]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 4.0
+offset_right = 122.0
+offset_bottom = 77.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_v0mck")
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2

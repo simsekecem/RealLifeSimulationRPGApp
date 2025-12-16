@@ -1,10 +1,11 @@
 extends Area2D
 
 # --- EDİTÖRDEN AYARLANACAK DEĞİŞKENLER (@export) ---
-# Görsel ve Region ayarları artık editörde kalıcı olarak yapıldığı için sadece etkileşim ayarları kaldı.
-@export_enum("Gym", "Market", "Restaurant", "Library") var interact_type: String = "Library" # Library olarak ayarlandı
-@export_multiline var dialog_text: String = "Lütfen sessiz ol, ama o kayıp kitabı bulabilir misin?" # Library metni
+# Artık sadece bekleme süresi var. İnek sadece "MOOO!" diyecek.
 @export var wait_time: float = 1.0
+
+# İnek her zaman sadece "MOOO!" diyecek, bu yüzden metni sabitliyoruz.
+var dialog_text: String = "MOOO!" 
 
 # --- SAHNE BAĞLANTILARI ---
 @onready var sprite = $Sprite2D
@@ -16,18 +17,16 @@ var has_triggered: bool = false # Balon açıldı mı?
 var player_ref: Node2D = null # Oyuncuyu takip etmek için
 
 func _ready():
-	# Artık görsel ayarı kodda yapılmıyor. Editörde kalıcı ayarlandı.
-	
-	# 2. Timer Ayarları
+	# 1. Timer Ayarları
 	timer.wait_time = wait_time
 	timer.one_shot = true
 	
-	# 3. Sinyalleri Bağla
+	# 2. Sinyalleri Bağla
 	timer.timeout.connect(_on_timer_timeout)
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	
-	# 4. Başlangıçta balonu gizle
+	# 3. Başlangıçta balonu gizle
 	dialog_bubble.visible = false
 
 func _process(_delta):
@@ -42,7 +41,8 @@ func _on_body_entered(body):
 		player_ref = body # Oyuncuyu hafızaya al
 		has_triggered = false
 		timer.start() # Sayacı başlat
-		print("⏳ ", interact_type, " bekleme modu...")
+		# Loglama kaldırıldı veya sadeleştirildi.
+		# print("⏳ İnek bekleme modu...")
 
 # --- ALANDAN ÇIKINCA ---
 func _on_body_exited(body):
@@ -67,23 +67,13 @@ func flip_towards_player():
 
 # --- KONUŞMA BALONUNU AÇ ---
 func show_dialogue():
-	print("✅ Görev: ", interact_type)
+	# print("✅ İnek: MOOO!") # İstenirse bu satır kaldırılabilir
 	
-	# Balondaki yazıyı ayarla
-	quest_label.text = dialog_text
+	# Balondaki yazıyı ayarla (Her zaman "MOOO!")
+	quest_label.text = dialog_text 
 	# Balonu görünür yap
 	dialog_bubble.visible = true
 	
-	# Şimdilik görev yok, sonra buraya eklenecek
-	interaction_logic()
+	# İnek görev vermediği için interaction_logic'i çağırmaya gerek yok.
 
-func interaction_logic():
-	match interact_type:
-		"Gym":
-			pass
-		"Market":
-			pass
-		"Restaurant":
-			pass
-		"Library":
-			pass
+# interaction_logic() fonksiyonu artık gerekli değildir, kaldırılmıştır.

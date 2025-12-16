@@ -1,4 +1,4 @@
-[gd_scene load_steps=81 format=4 uid="uid://dcuhs4nnpnmmm"]
+[gd_scene load_steps=86 format=4 uid="uid://dcuhs4nnpnmmm"]
 
 [ext_resource type="Script" uid="uid://cmbw3kb4yt3e4" path="res://scripts/town.gd" id="1_gt07c"]
 [ext_resource type="Texture2D" uid="uid://dmurvqte4t28x" path="res://assets/new/map1.png" id="2_eruj1"]
@@ -12,6 +12,11 @@
 [ext_resource type="PackedScene" uid="uid://pwbdgrhl5obe" path="res://scenes/player.tscn" id="10_5q1rr"]
 [ext_resource type="PackedScene" uid="uid://dfejtdwtedt4y" path="res://scenes/npc_interactable.tscn" id="11_u4arb"]
 [ext_resource type="PackedScene" uid="uid://bukn52lgq1s8n" path="res://scenes/duck.tscn" id="12_u4arb"]
+[ext_resource type="PackedScene" uid="uid://d6nrn4c6s4w3" path="res://scenes/npc_interactable_1.tscn" id="13_icc4n"]
+[ext_resource type="PackedScene" uid="uid://dj6iwlw1lbftm" path="res://scenes/cow.tscn" id="14_b0eaf"]
+[ext_resource type="PackedScene" uid="uid://dhamtn1v1vp73" path="res://scenes/random_npc.tscn" id="15_uutfq"]
+[ext_resource type="PackedScene" uid="uid://ck1d5s0qg2yjp" path="res://scenes/npc_interactable_2.tscn" id="16_b00ts"]
+[ext_resource type="PackedScene" uid="uid://ckybxhsidl0tf" path="res://scenes/npc_interactable_3.tscn" id="17_i0mj0"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cq4yp"]
 texture = ExtResource("2_eruj1")
@@ -81604,3 +81609,26 @@ dialog_text = "Study math for 2 hours today"
 
 [node name="Duck" parent="." instance=ExtResource("12_u4arb")]
 position = Vector2(989, 216)
+
+[node name="npc_interactable1" parent="." instance=ExtResource("13_icc4n")]
+position = Vector2(590, 465)
+interact_type = "Market"
+dialog_text = "Buy more veggies"
+
+[node name="Cow" parent="." instance=ExtResource("14_b0eaf")]
+position = Vector2(1179, 702)
+
+[node name="Cow2" parent="." instance=ExtResource("14_b0eaf")]
+position = Vector2(721, 676)
+
+[node name="random_npc" parent="." instance=ExtResource("15_uutfq")]
+position = Vector2(312, 446)
+
+[node name="npc_interactable2" parent="." instance=ExtResource("16_b00ts")]
+position = Vector2(921, 165)
+dialog_text = "Lets keep on rolling baby
+"
+
+[node name="npc_interactable3" parent="." instance=ExtResource("17_i0mj0")]
+position = Vector2(383, 213)
+dialog_text = "Let her cook!"

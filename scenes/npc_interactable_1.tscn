@@ -1,0 +1,64 @@
+[gd_scene load_steps=6 format=3 uid="uid://d6nrn4c6s4w3"]
+
+[ext_resource type="Script" uid="uid://ccpk2qgl4fwnp" path="res://npc_interactable_1.gd" id="1_4vugy"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_7dlc8"]
+[ext_resource type="Texture2D" uid="uid://babjluscfqv4x" path="res://assets/c 32 x 32/character_20_frame32x32.png" id="2_d3guc"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7dlc8"]
+radius = 32.24903
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ijepc"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 5
+border_width_bottom = 5
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="npc_interactable1" type="Area2D"]
+script = ExtResource("1_4vugy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1, -17)
+shape = SubResource("CircleShape2D_7dlc8")
+
+[node name="DialogBubble" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = -85.0
+offset_top = -156.0
+offset_right = 95.0
+offset_bottom = -40.0
+
+[node name="Panel" type="Panel" parent="DialogBubble"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 27.0
+offset_right = 155.0
+offset_bottom = 104.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_ijepc")
+
+[node name="QuestLabel" type="Label" parent="DialogBubble/Panel"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 6.0
+offset_right = 130.0
+offset_bottom = 68.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_7dlc8")
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(1, -14)
+scale = Vector2(2.3710938, 2.3417969)
+texture = ExtResource("2_d3guc")
+region_enabled = true
+region_rect = Rect2(32, 0, 32, 32)
