@@ -349,14 +349,21 @@ export default {
                 }
 
                 // 8. CALENDAR NOTES
+                // 8. CALENDAR NOTES (GÜNCELLENDİ: Boş Notları Korur & Çift Kaydı Önler)
                 const calendar_notes = safeList(body.calendar_notes);
                 for (const c of calendar_notes) {
-                    await insertOrUpdate(
-                        `INSERT INTO calendar_notes (user_id, date, note) VALUES (?, ?, ?)`,
-                        [userId, c.date, c.note],
-                        `UPDATE calendar_notes SET note=? WHERE user_id=? AND date=?`,
-                        [c.note, userId, c.date]
-                    );
+                    // Not içeriği undefined ise boş string yap ama null yapma
+                    const noteContent = (c.note === undefined || c.note === null) ? "" : c.note;
+
+                    // 1. Önce var olan tarihi güncellemeyi dene
+                    const updateRes = await env.DB.prepare(`UPDATE calendar_notes SET note=? WHERE user_id=? AND date=?`)
+                        .bind(noteContent, userId, c.date).run();
+                    
+                    // 2. Eğer güncellenecek satır yoksa (yani o tarih ilk kez geliyorsa) yeni ekle
+                    if (updateRes.meta.changes === 0) {
+                         await env.DB.prepare(`INSERT INTO calendar_notes (user_id, date, note) VALUES (?, ?, ?)`)
+                            .bind(userId, c.date, noteContent).run();
+                    }
                 }
 
                 return addCors(new Response(JSON.stringify({ ok: true }), { status: 200 }));
