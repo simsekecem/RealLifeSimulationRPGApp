@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dm8yea7kjvrhm"]
+[gd_scene load_steps=15 format=3 uid="uid://dm8yea7kjvrhm"]
 
 [ext_resource type="Script" uid="uid://dm6agftvum4vd" path="res://scripts/GymScreen.gd" id="1_jyrom"]
 [ext_resource type="Texture2D" uid="uid://bods6euoxuh5l" path="res://assets/backgrounds/gym2.png" id="1_nmixc"]
@@ -6,6 +6,10 @@
 [ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="2_qlnuv"]
 [ext_resource type="PackedScene" uid="uid://bsbp2gyrwgqtg" path="res://scenes/prefabs/WeeklyExerciseRow.tscn" id="3_dscua"]
 [ext_resource type="Texture2D" uid="uid://c4614rpjrbwnx" path="res://assets/gym_sign.png" id="3_v4x2c"]
+[ext_resource type="Texture2D" uid="uid://b0ccs3regj4y5" path="res://assets/ui/gymcharacter.png" id="7_gh0q6"]
+[ext_resource type="Texture2D" uid="uid://c6sbofl7vg4ne" path="res://assets/ui/balon.png" id="8_opj1y"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="9_82e2v"]
+[ext_resource type="PackedScene" uid="uid://bm4gmo3si2ldv" path="res://scenes/chat_popup.tscn" id="10_opj1y"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nmixc"]
 bg_color = Color(0.7058824, 0.8509804, 0.8235294, 0.6313726)
@@ -41,9 +45,9 @@ weekly_row_scene = ExtResource("3_dscua")
 
 [node name="Background" type="NinePatchRect" parent="."]
 layout_mode = 0
-offset_left = -6.0
-offset_top = -6.0
-offset_right = 1288.0
+offset_left = -3.0
+offset_top = 1.0
+offset_right = 1296.0
 offset_bottom = 731.0
 texture = ExtResource("1_nmixc")
 
@@ -423,3 +427,39 @@ theme = ExtResource("2_qlnuv")
 theme_override_colors/font_color = Color(0.30200332, 0.2666, 0.43, 1)
 theme_override_font_sizes/font_size = 18
 text = "<"
+
+[node name="TextureButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 894.0
+offset_top = 596.0
+offset_right = 1020.0
+offset_bottom = 710.0
+texture_normal = ExtResource("7_gh0q6")
+texture_pressed = ExtResource("7_gh0q6")
+texture_hover = ExtResource("7_gh0q6")
+
+[node name="TextureRect2" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 809.0
+offset_top = 558.0
+offset_right = 933.0
+offset_bottom = 643.0
+texture = ExtResource("8_opj1y")
+
+[node name="Label" type="Label" parent="TextureRect2"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 26.0
+offset_right = 110.0
+offset_bottom = 49.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("9_82e2v")
+theme_override_font_sizes/font_size = 10
+text = "Need help?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ChatPopup" parent="." instance=ExtResource("10_opj1y")]
+visible = false
+
+[connection signal="pressed" from="TextureButton" to="." method="_on_texture_button_pressed"]

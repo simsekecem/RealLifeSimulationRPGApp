@@ -359,3 +359,10 @@ func update_days_in_dropdown():
 
 	for d in range(1, limit + 1):
 		day_select.add_item(str(d))
+
+func _on_texture_button_pressed() -> void:
+	# Bu satırın başında 1 tane TAB tuşuna bas
+	$ChatPopup.visible = true
+	
+	# Bu satırın başında da 1 tane TAB tuşuna bas
+	$ChatPopup/MainWindow/InputField.grab_focus()

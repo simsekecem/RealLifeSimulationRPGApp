@@ -342,23 +342,26 @@ offset_top = 581.0
 offset_right = 1266.0
 offset_bottom = 711.0
 texture_normal = ExtResource("6_cysxn")
+texture_pressed = ExtResource("6_cysxn")
+texture_hover = ExtResource("6_cysxn")
 stretch_mode = 0
 
 [node name="TextureRect2" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1065.0
-offset_top = 546.0
-offset_right = 1169.0
+offset_left = 1061.0
+offset_top = 543.0
+offset_right = 1184.0
 offset_bottom = 634.0
 texture = ExtResource("7_w80t8")
 
 [node name="Label" type="Label" parent="TextureRect2"]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 34.0
-offset_right = 98.0
-offset_bottom = 57.0
+offset_left = 11.0
+offset_top = 33.0
+offset_right = 116.0
+offset_bottom = 56.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_o6s3j")
 theme_override_font_sizes/font_size = 10
-text = "Need help"
+text = "Need help?"
+horizontal_alignment = 1

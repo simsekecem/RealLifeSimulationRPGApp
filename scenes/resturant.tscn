@@ -1,10 +1,12 @@
-[gd_scene load_steps=13 format=3 uid="uid://ctsiv3uhedeok"]
+[gd_scene load_steps=15 format=3 uid="uid://ctsiv3uhedeok"]
 
 [ext_resource type="Script" uid="uid://beps51rmvgvle" path="res://scripts/resturant.gd" id="1_b53mu"]
 [ext_resource type="Texture2D" uid="uid://ccqwsnc4t1nwu" path="res://assets/backgrounds/unnamed (8).jpg" id="2_hgrxd"]
 [ext_resource type="Texture2D" uid="uid://w1oy22xskssh" path="res://assets/ui/rsw.png" id="3_orihb"]
 [ext_resource type="Theme" uid="uid://conk5286ea1du" path="res://resturant.tres" id="4_dtr25"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="5_f158r"]
+[ext_resource type="Texture2D" uid="uid://bclscw3s3mjcp" path="res://assets/ui/dinnercharacter.png" id="6_orihb"]
+[ext_resource type="Texture2D" uid="uid://c6sbofl7vg4ne" path="res://assets/ui/balon.png" id="7_dtr25"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rvna5"]
 bg_color = Color(0.9607843, 0.79607844, 0.79607844, 1)
@@ -52,9 +54,9 @@ texture = ExtResource("2_hgrxd")
 custom_minimum_size = Vector2(1280, 720)
 layout_mode = 0
 offset_left = -1.0
-offset_top = 3.0
+offset_top = -2.0
 offset_right = 1279.0
-offset_bottom = 723.0
+offset_bottom = 718.0
 
 [node name="TextureRect" type="TextureRect" parent="NinePatchRect"]
 custom_minimum_size = Vector2(10, 20)
@@ -1271,3 +1273,34 @@ offset_right = 106.0
 offset_bottom = 86.0
 theme = ExtResource("4_dtr25")
 text = "<"
+
+[node name="TextureButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1131.0
+offset_top = 611.0
+offset_right = 1267.0
+offset_bottom = 721.0
+texture_normal = ExtResource("6_orihb")
+texture_pressed = ExtResource("6_orihb")
+texture_hover = ExtResource("6_orihb")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 1033.0
+offset_top = 576.0
+offset_right = 1162.0
+offset_bottom = 661.0
+texture = ExtResource("7_dtr25")
+
+[node name="Label" type="Label" parent="TextureRect"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 28.0
+offset_right = 116.0
+offset_bottom = 51.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("5_f158r")
+theme_override_font_sizes/font_size = 10
+text = "Need help?"
+horizontal_alignment = 1
+vertical_alignment = 1
