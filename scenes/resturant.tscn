@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://ctsiv3uhedeok"]
+[gd_scene load_steps=16 format=3 uid="uid://ctsiv3uhedeok"]
 
 [ext_resource type="Script" uid="uid://beps51rmvgvle" path="res://scripts/resturant.gd" id="1_b53mu"]
 [ext_resource type="Texture2D" uid="uid://ccqwsnc4t1nwu" path="res://assets/backgrounds/unnamed (8).jpg" id="2_hgrxd"]
@@ -7,6 +7,7 @@
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="5_f158r"]
 [ext_resource type="Texture2D" uid="uid://bclscw3s3mjcp" path="res://assets/ui/dinnercharacter.png" id="6_orihb"]
 [ext_resource type="Texture2D" uid="uid://c6sbofl7vg4ne" path="res://assets/ui/balon.png" id="7_dtr25"]
+[ext_resource type="PackedScene" uid="uid://duv5tekuk2xdu" path="res://scenes/chat_popup_r.tscn" id="8_dtr25"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rvna5"]
 bg_color = Color(0.9607843, 0.79607844, 0.79607844, 1)
@@ -1304,3 +1305,8 @@ theme_override_font_sizes/font_size = 10
 text = "Need help?"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ChatPopup_R" parent="." instance=ExtResource("8_dtr25")]
+visible = false
+
+[connection signal="pressed" from="TextureButton" to="." method="_on_texture_button_pressed"]

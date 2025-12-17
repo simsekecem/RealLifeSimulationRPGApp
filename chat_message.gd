@@ -13,7 +13,7 @@ func setup(content: String, is_user: bool):
 		# Kullanıcı mesajını SAĞA yasla
 		layout_direction = Control.LAYOUT_DIRECTION_RTL
 		# Senin UI stilindeki pembe tonu
-		bubble.modulate = Color("ffb2d1") 
+		bubble.modulate = Color("ffcacc") 
 	else:
 		# AI mesajını SOLA yasla
 		layout_direction = Control.LAYOUT_DIRECTION_LTR

@@ -173,3 +173,11 @@ func _on_notes_changed():
 func _on_back_button_pressed():
 	Globals.save_cache()
 	if UI.has_node("UIRoot"): UI.get_node("UIRoot").return_to_town()
+
+
+func _on_texture_button_pressed() -> void:
+	# Bu satırın başında 1 tane TAB tuşuna bas
+	$ChatPopup_R.visible = true
+	
+	# Bu satırın başında da 1 tane TAB tuşuna bas
+	$ChatPopup_R/MainWindow/InputField.grab_focus()

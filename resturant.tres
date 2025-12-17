@@ -58,7 +58,7 @@ bg_color = Color(0.9490196, 0.68235296, 0.73333335, 1)
 
 [resource]
 default_font = ExtResource("1_xooke")
-Button/colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
+Button/colors/font_color = Color(0.54509807, 0.654902, 0.50980395, 1)
 Button/fonts/font = ExtResource("1_xooke")
 Button/styles/focus = SubResource("StyleBoxFlat_mbnxb")
 Button/styles/hover = SubResource("StyleBoxFlat_d6ix0")

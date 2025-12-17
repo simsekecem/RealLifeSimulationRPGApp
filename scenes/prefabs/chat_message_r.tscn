@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3 uid="uid://cb4i3hy5p20y4"]
+
+[ext_resource type="Theme" uid="uid://cgv0pwibnyvdf" path="res://scenes/GymScreen.tres" id="1_tnmak"]
+[ext_resource type="Script" uid="uid://m62hkudm4mqg" path="res://chat_message.gd" id="2_nl0l8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wrxyh"]
+bg_color = Color(1, 0.7921569, 0.8, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="ChatMessage_r" type="HBoxContainer"]
+offset_left = 1.0
+offset_right = 422.0
+offset_bottom = 35.0
+size_flags_horizontal = 3
+theme = ExtResource("1_tnmak")
+script = ExtResource("2_nl0l8")
+
+[node name="BubblePanel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+theme = ExtResource("1_tnmak")
+theme_override_styles/panel = SubResource("StyleBoxFlat_wrxyh")
+
+[node name="MessageLabel" type="Label" parent="BubblePanel"]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+theme = ExtResource("1_tnmak")
+theme_override_colors/font_color = Color(0.4497125, 0.55272496, 0.4150679, 1)
+text = "test mesahı uzun olunca alta geçmeli"
+autowrap_mode = 3
