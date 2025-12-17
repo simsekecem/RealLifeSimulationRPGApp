@@ -1,12 +1,12 @@
 extends HBoxContainer
 
 # Prefab içindeki düğümlere ulaşalım
-@onready var label = $BubblePanel/MessageLabel
+@onready var label = $BubblePanel/PanelContainer/MessageLabel
 @onready var bubble = $BubblePanel
 
 func setup(content: String, is_user: bool):
 	# Mesaj metnini ayarla
-	$BubblePanel/MessageLabel.text = content
+	$BubblePanel/PanelContainer/MessageLabel.text = content
 	
 	# Kullanıcı mı yoksa AI mı olduğuna göre tasarımı değiştir
 	if is_user:

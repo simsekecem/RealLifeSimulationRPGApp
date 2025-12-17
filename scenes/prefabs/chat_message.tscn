@@ -11,24 +11,35 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [node name="ChatMessage" type="HBoxContainer"]
+custom_minimum_size = Vector2(400, 50)
 offset_left = 1.0
 offset_right = 422.0
-offset_bottom = 35.0
+offset_bottom = 50.0
 size_flags_horizontal = 3
 theme = ExtResource("1_6xr5u")
+alignment = 1
 script = ExtResource("2_dq3kd")
 
 [node name="BubblePanel" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 8
+size_flags_horizontal = 2
 theme = ExtResource("1_6xr5u")
 theme_override_styles/panel = SubResource("StyleBoxFlat_crhpk")
 
-[node name="MessageLabel" type="Label" parent="BubblePanel"]
-custom_minimum_size = Vector2(300, 0)
+[node name="PanelContainer" type="BoxContainer" parent="BubblePanel"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+alignment = 1
+
+[node name="MessageLabel" type="Label" parent="BubblePanel/PanelContainer"]
+custom_minimum_size = Vector2(270, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
 theme = ExtResource("1_6xr5u")
+theme_override_font_sizes/font_size = 12
 text = "test mesahı uzun olunca alta geçmeli"
+vertical_alignment = 1
 autowrap_mode = 3

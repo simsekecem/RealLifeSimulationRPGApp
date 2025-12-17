@@ -37,8 +37,9 @@ grow_vertical = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="MainWindow"]
 layout_mode = 0
+offset_left = 12.5
 offset_top = 51.5
-offset_right = 436.0
+offset_right = 423.5
 offset_bottom = 401.5
 
 [node name="ContentLayout" type="VBoxContainer" parent="MainWindow/MarginContainer"]
