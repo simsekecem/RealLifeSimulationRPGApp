@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://b0ccs3regj4y5" path="res://assets/ui/gymcharacter.png" id="7_gh0q6"]
 [ext_resource type="Texture2D" uid="uid://c6sbofl7vg4ne" path="res://assets/ui/balon.png" id="8_opj1y"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="9_82e2v"]
-[ext_resource type="PackedScene" uid="uid://bm4gmo3si2ldv" path="res://scenes/chat_popup.tscn" id="10_opj1y"]
+[ext_resource type="PackedScene" path="res://scenes/chat_popup.tscn" id="10_opj1y"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nmixc"]
 bg_color = Color(0.7058824, 0.8509804, 0.8235294, 0.6313726)
@@ -46,9 +46,9 @@ weekly_row_scene = ExtResource("3_dscua")
 [node name="Background" type="NinePatchRect" parent="."]
 layout_mode = 0
 offset_left = -3.0
-offset_top = 1.0
+offset_top = -7.0
 offset_right = 1296.0
-offset_bottom = 731.0
+offset_bottom = 723.0
 texture = ExtResource("1_nmixc")
 
 [node name="TabContainer" type="TabContainer" parent="."]
@@ -181,13 +181,13 @@ size_flags_horizontal = 8
 color = Color(0.39708546, 0.2981006, 0.42885175, 1)
 
 [node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Daily/ListArea"]
-custom_minimum_size = Vector2(1084, 400)
+custom_minimum_size = Vector2(1100, 400)
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="ContentList" type="VBoxContainer" parent="TabContainer/Daily/ListArea/ScrollContainer"]
+custom_minimum_size = Vector2(1084, 0)
 layout_mode = 2
-size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="AddButton" type="Button" parent="TabContainer/Daily"]

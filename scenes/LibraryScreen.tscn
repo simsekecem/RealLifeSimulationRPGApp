@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://cd5swl0nqiup6"]
+[gd_scene load_steps=18 format=3 uid="uid://cd5swl0nqiup6"]
 
 [ext_resource type="Texture2D" uid="uid://1r6d4qjhnbcr" path="res://assets/backgrounds/library.png" id="1_kwsf8"]
 [ext_resource type="Script" uid="uid://35k5ed4pxeom" path="res://scripts/LibraryScreen.gd" id="1_rlh3e"]
@@ -36,6 +36,8 @@ corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_w80t8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w80t8"]
 bg_color = Color(0.6901961, 0.654902, 0.8235294, 1)
@@ -98,9 +100,9 @@ texture = ExtResource("1_kwsf8")
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 0
 offset_left = 44.0
-offset_top = 298.0
+offset_top = 275.0
 offset_right = 311.0
-offset_bottom = 613.0
+offset_bottom = 590.0
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_cysxn")
 
@@ -162,10 +164,10 @@ theme_override_styles/normal = SubResource("StyleBoxLine_juet4")
 [node name="HoursPanel" type="Panel" parent="."]
 custom_minimum_size = Vector2(860, 0)
 layout_mode = 0
-offset_left = 380.0
-offset_top = 188.0
-offset_right = 1242.0
-offset_bottom = 649.0
+offset_left = 378.0
+offset_top = 170.0
+offset_right = 1240.0
+offset_bottom = 608.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_juet4")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="HoursPanel"]
@@ -178,17 +180,23 @@ grow_vertical = 2
 theme = ExtResource("4_juet4")
 metadata/_edit_use_anchors_ = true
 
-[node name="HoursList" type="VBoxContainer" parent="HoursPanel/ScrollContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="HoursPanel/ScrollContainer"]
+custom_minimum_size = Vector2(830, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_w80t8")
+
+[node name="HoursList" type="VBoxContainer" parent="HoursPanel/ScrollContainer/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="DaysPanel" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 383.0
-offset_top = 125.0
-offset_right = 1219.0
-offset_bottom = 170.0
+offset_left = 381.0
+offset_top = 107.0
+offset_right = 1217.0
+offset_bottom = 152.0
 
 [node name="MondayButton" type="Button" parent="DaysPanel"]
 custom_minimum_size = Vector2(110, 45)
@@ -309,8 +317,8 @@ text = "SUNDAY"
 layout_mode = 0
 offset_left = 27.0
 offset_top = 15.0
-offset_right = 327.0
-offset_bottom = 290.0
+offset_right = 306.0
+offset_bottom = 272.0
 texture = ExtResource("4_2yf15")
 expand_mode = 1
 
@@ -337,10 +345,10 @@ text = "<"
 
 [node name="TextureButton" type="TextureButton" parent="."]
 layout_mode = 0
-offset_left = 1136.0
-offset_top = 581.0
-offset_right = 1266.0
-offset_bottom = 711.0
+offset_left = 1167.0
+offset_top = 622.0
+offset_right = 1297.0
+offset_bottom = 752.0
 texture_normal = ExtResource("6_cysxn")
 texture_pressed = ExtResource("6_cysxn")
 texture_hover = ExtResource("6_cysxn")
@@ -348,10 +356,10 @@ stretch_mode = 0
 
 [node name="TextureRect2" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1061.0
-offset_top = 543.0
-offset_right = 1184.0
-offset_bottom = 634.0
+offset_left = 1092.0
+offset_top = 584.0
+offset_right = 1215.0
+offset_bottom = 675.0
 texture = ExtResource("7_w80t8")
 
 [node name="Label" type="Label" parent="TextureRect2"]

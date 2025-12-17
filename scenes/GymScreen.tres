@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=26 format=3 uid="uid://cgv0pwibnyvdf"]
+[gd_resource type="Theme" load_steps=29 format=3 uid="uid://cgv0pwibnyvdf"]
 
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="1_hhto0"]
 [ext_resource type="Texture2D" uid="uid://d0kjsliwxt510" path="res://assets/check.png" id="2_j0yw1"]
@@ -56,6 +56,27 @@ corner_radius_top_left = 7
 corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_px74w"]
+bg_color = Color(0.76862746, 0.4, 0.5176471, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s5p5d"]
+bg_color = Color(0.8901961, 0.60784316, 0.6862745, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_veccr"]
+bg_color = Color(0.654902, 0.3137255, 0.42745098, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ujl0p"]
 bg_color = Color(0.78, 0.51479995, 0.6164599, 0.8784314)
@@ -136,6 +157,8 @@ corner_radius_top_left = 15
 corner_radius_top_right = 15
 corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
+expand_margin_left = 2.0
+expand_margin_right = 2.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_npv4a"]
 bg_color = Color(0.8892744, 0.60701954, 0.68677306, 1)
@@ -170,6 +193,9 @@ CheckBox/icons/checked = ExtResource("2_j0yw1")
 CheckBox/icons/unchecked = ExtResource("3_3ywbm")
 CheckBox/styles/hover = SubResource("StyleBoxFlat_iggs6")
 CheckBox/styles/hover_pressed = SubResource("StyleBoxFlat_75bhs")
+HScrollBar/styles/grabber = SubResource("StyleBoxFlat_px74w")
+HScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_s5p5d")
+HScrollBar/styles/grabber_pressed = SubResource("StyleBoxFlat_veccr")
 Label/colors/font_color = Color(0.36078432, 0.34509805, 0.41960785, 1)
 Label/fonts/font = ExtResource("1_hhto0")
 LineEdit/colors/font_color = Color(0.36078432, 0.34509805, 0.41960785, 1)

@@ -6,4 +6,4 @@ extends Panel
 
 func _ready():
 	# Sadece root Panel genişliği sabit
-	custom_minimum_size = Vector2(800, 70)  # Width = 862, Height = 40
+	custom_minimum_size = Vector2(500, 70)  # Width = 862, Height = 40

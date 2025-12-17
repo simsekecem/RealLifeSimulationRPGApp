@@ -17,7 +17,7 @@ extends Control
 	$DaysPanel/MondayButton, $DaysPanel/TuesdayButton, $DaysPanel/WednesdayButton,
 	$DaysPanel/ThursdayButton, $DaysPanel/FridayButton, $DaysPanel/SaturdayButton, $DaysPanel/SundayButton
 ]
-@onready var hours_list = $HoursPanel/ScrollContainer/HoursList
+@onready var hours_list = $HoursPanel/ScrollContainer/PanelContainer/HoursList
 @onready var back_button = $BackButton
 
 var current_selected_button: Button = null
