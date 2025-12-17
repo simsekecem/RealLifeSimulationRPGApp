@@ -3,9 +3,13 @@ extends Control
 # =================================================
 # NODE REFERANSLARI
 # =================================================
+# Not kutusunun olduğu yer (Sol taraf veya alt taraf)
 @onready var notes_edit: TextEdit = $NinePatchRect/TextEdit
+
+# Yemeklerin olduğu panel (Sağ taraf)
 @onready var meal_panel: Control = $MealPanel 
 
+# Yemek Giriş Kutuları
 @onready var input_fields := {
 	"breakfast": $MealPanel/ScrollContainer/MealList/Breakfast_Panel/TextEdit,
 	"lunch":     $MealPanel/ScrollContainer/MealList/Lunch_Panel/TextEdit,
@@ -13,6 +17,7 @@ extends Control
 	"snacks":    $MealPanel/ScrollContainer/MealList/Snakcs_Panel/TextEdit 
 }
 
+# Gün Butonları
 @onready var day_buttons := {
 	"Monday":    $M_Button, "Tuesday":   $TU_Button, "Wednesday": $W_Button,
 	"Thursday":  $T_Button, "Friday":    $F_Button, "Saturday":  $SA_Button,
@@ -21,9 +26,10 @@ extends Control
 
 @onready var back_button: BaseButton = $Back_Button 
 
+# Şu an seçili olan tarih (String formatında: "2025-10-25")
 var current_day: String = "" 
 
-# 👇 GÜNLERİN SAYISAL DEĞERLERİ (Hesaplama için şart)
+# 👇 GÜNLERİN SAYISAL DEĞERLERİ (Tarih hesaplama için)
 var day_indices = {
 	"Monday": 1, "Tuesday": 2, "Wednesday": 3,
 	"Thursday": 4, "Friday": 5, "Saturday": 6,
@@ -34,11 +40,13 @@ var day_indices = {
 # BAŞLANGIÇ
 # =================================================
 func _ready():
+	# 1. BAŞLANGIÇTA HER ŞEYİ GİZLE
 	if meal_panel: meal_panel.visible = false
-	if notes_edit: notes_edit.editable = false
+	if notes_edit: notes_edit.visible = false # Direkt görünmez yapıyoruz
 	
 	if back_button: back_button.pressed.connect(_on_back_button_pressed)
 	
+	# Gün butonlarını bağla
 	for day_name in day_buttons.keys():
 		var btn = day_buttons[day_name]
 		if btn:
@@ -46,38 +54,45 @@ func _ready():
 			# Butona basınca o günün ismini (Monday) fonksiyona yolla
 			btn.pressed.connect(_on_day_button_pressed.bind(day_name))
 
+	# Input alanlarını (Yemekler) bağla - Yazı değişince kaydetsin
 	for field_key in input_fields.keys():
 		var edit = input_fields[field_key]
 		if edit:
 			if not edit.text_changed.is_connected(_on_meal_text_changed.bind(field_key, edit)):
 				edit.text_changed.connect(_on_meal_text_changed.bind(field_key, edit))
 
+	# Not alanı bağlantısı
 	if notes_edit and not notes_edit.text_changed.is_connected(_on_notes_changed):
 		notes_edit.text_changed.connect(_on_notes_changed)
 
+	# ❌ OTOMATİK SEÇİM YOK: Kullanıcı tıklayana kadar her şey gizli kalacak.
+
 # =================================================
-# GÜN SEÇİMİ (BURASI TARİHİ HESAPLAR)
+# GÜN SEÇİMİ (BURASI TARİHİ HESAPLAR VE AÇAR)
 # =================================================
 func _on_day_button_pressed(selected_day_name: String):
 	# 👇 1. Adım: Buton ismini (Monday) gerçek tarihe (2025-12-15) çevir
 	var real_date = get_date_string_for_day(selected_day_name)
 	
-	# Eğer zaten o gündeysek işlem yapma
+	# Eğer zaten o gündeysek ve panel açıksa tekrar yükleme yapma
 	if current_day == real_date and meal_panel.visible: return
 
-	# 👇 2. Adım: Artık sistemde "Monday" değil "2025-12-15" olarak çalışacağız
+	# 👇 2. Adım: Yeni tarihi ayarla
 	current_day = real_date
-	print("📅 Buton: ", selected_day_name, " -> Hesaplanan Tarih: ", current_day)
+	print("📅 Buton: ", selected_day_name, " -> Tarih: ", current_day)
 	
+	# 👇 3. Adım: PANELLERİ GÖRÜNÜR YAP
 	if meal_panel: meal_panel.visible = true
-	if notes_edit: notes_edit.editable = true
+	if notes_edit: 
+		notes_edit.visible = true
+		notes_edit.editable = true
 
-	# Buton ışıklarını güncelle
+	# Buton ışıklarını güncelle (Sadece basılan yansın)
 	for d_name in day_buttons.keys():
 		if day_buttons[d_name]:
 			day_buttons[d_name].set_pressed_no_signal(d_name == selected_day_name)
 
-	# 👇 3. Adım: Veritabanından o tarihe ait veriyi getir
+	# 👇 4. Adım: Veritabanından o tarihe ait veriyi getir ve doldur
 	var day_data = _get_data_for_day(current_day)
 	_set_inputs_quietly(day_data)
 
@@ -98,8 +113,6 @@ func get_date_string_for_day(day_name: String) -> String:
 	var target_weekday = day_indices.get(day_name, 1)
 	
 	# 4. Aradaki gün farkını bul
-	# Örnek: Bugün Salı(2). Pazartesi(1) butonuna bastın.
-	# Fark = 1 - 2 = -1 gün (Dün)
 	var diff_days = target_weekday - current_weekday
 	
 	# 5. Farkı saniye olarak şu anki zamana ekle
@@ -110,14 +123,17 @@ func get_date_string_for_day(day_name: String) -> String:
 	return "%04d-%02d-%02d" % [target_date_dict.year, target_date_dict.month, target_date_dict.day]
 
 # =================================================
-# EKRANI DOLDURMA
+# EKRANI DOLDURMA (SESSİZCE)
 # =================================================
 func _set_inputs_quietly(data: Dictionary):
+	# Yemekleri doldur
 	for field in input_fields.keys():
 		var edit = input_fields[field]
 		if edit:
+			# Signal tetiklemeden metni değiştir (TextEdit için direkt atama yeterli genelde)
 			edit.text = Globals.safe_str(data.get(field, ""))
 	
+	# Notları doldur
 	if notes_edit:
 		notes_edit.text = Globals.safe_str(data.get("notes", ""))
 
@@ -127,7 +143,6 @@ func _set_inputs_quietly(data: Dictionary):
 func _get_data_for_day(day: String) -> Dictionary:
 	var list: Array = Globals.ensure_list(Globals.cache.get("restaurant", []))
 	for entry in list:
-		# Veritabanında tarih eşleşmesi arıyoruz
 		if Globals.safe_str(entry.get("date", "")) == day: 
 			return entry
 	return {}
@@ -142,7 +157,7 @@ func _save_data(field: String, value: String):
 	for i in range(list.size()):
 		if typeof(list[i]) != TYPE_DICTIONARY: continue
 		
-		# Listede bu tarihi (2025-12-16) bulursan güncelle
+		# Listede bu tarihi bulursan güncelle
 		if Globals.safe_str(list[i].get("date", "")) == current_day:
 			list[i][field] = value
 			found = true
@@ -151,7 +166,7 @@ func _save_data(field: String, value: String):
 	# Bulamazsan yeni ekle
 	if not found:
 		var new_entry = { 
-			"date": current_day, # Buraya artık Monday değil tarih yazılıyor
+			"date": current_day, 
 			"breakfast": "", "lunch": "", "dinner": "", "snacks": "", "notes": "" 
 		}
 		new_entry[field] = value
@@ -163,21 +178,15 @@ func _save_data(field: String, value: String):
 # SİNYALLER
 # =================================================
 func _on_meal_text_changed(field_key: String, edit_node: TextEdit):
+	# Sadece panel görünürse kaydet (Hata önlemek için)
 	if meal_panel.visible:
 		_save_data(field_key, edit_node.text)
 
 func _on_notes_changed():
-	if meal_panel.visible:
+	# Sadece panel görünürse kaydet (notes_edit de meal_panel mantığıyla hareket ediyor)
+	if meal_panel.visible: 
 		_save_data("notes", notes_edit.text)
 
 func _on_back_button_pressed():
 	Globals.save_cache()
 	if UI.has_node("UIRoot"): UI.get_node("UIRoot").return_to_town()
-
-
-func _on_texture_button_pressed() -> void:
-	# Bu satırın başında 1 tane TAB tuşuna bas
-	$ChatPopup_R.visible = true
-	
-	# Bu satırın başında da 1 tane TAB tuşuna bas
-	$ChatPopup_R/MainWindow/InputField.grab_focus()
