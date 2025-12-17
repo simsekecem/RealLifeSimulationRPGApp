@@ -19,7 +19,7 @@ theme = ExtResource("1_6xr5u")
 script = ExtResource("2_dq3kd")
 
 [node name="BubblePanel" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(500, 0)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 8
@@ -27,7 +27,7 @@ theme = ExtResource("1_6xr5u")
 theme_override_styles/panel = SubResource("StyleBoxFlat_crhpk")
 
 [node name="MessageLabel" type="Label" parent="BubblePanel"]
-custom_minimum_size = Vector2(500, 0)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme = ExtResource("1_6xr5u")
 text = "test mesahı uzun olunca alta geçmeli"

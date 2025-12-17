@@ -215,20 +215,46 @@ func merge_server_with_local(server_data):
 	
 	data_updated.emit()
 
-# 👇 ESKİ SİSTEM: ID KONTROLÜ YOK, SADECE İÇERİK/HASH KONTROLÜ
+# ============================================================
+# 👇 YENİ GÜNCELLENMİŞ MERGE SİSTEMİ (Çift Kayıt Önleyici)
+# ============================================================
 func merge_list(key: String, server_list: Array):
 	var local_list = cache[key]
+	
+	# Sunucudan gelenleri listeye al (Bunlar her zaman "doğru" kabul edilir)
 	var combined_list = server_list.duplicate()
 	
 	for local_item in local_list:
-		var is_present = false
-		for server_item in server_list:
-			# ID'ye bakmadan sadece içeriğin hash'ini karşılaştır
-			if local_item.hash() == server_item.hash():
-				is_present = true
-				break
+		var is_duplicate = false
 		
-		if not is_present:
+		for server_item in server_list:
+			
+			# 
+			# 🏋️‍♂️ SADECE SPOR SALONU (gym_log) İÇİN ÖZEL MANTIK
+			if key == "gym_log":
+				# 1. ID KONTROLÜ: Eğer ikisinin de ID'si var ve aynıysa -> ÇİFT KAYIT
+				if local_item.get("id") != null and server_item.get("id") != null:
+					if str(local_item["id"]) == str(server_item["id"]):
+						is_duplicate = true
+						break
+				
+				# 2. İÇERİK KONTROLÜ: ID yoksa (yeni eklenmişse) Tarih + İsim + Set sayısına bak
+				# (Aynı gün, aynı isimde, aynı set sayısında egzersiz varsa çift say)
+				elif local_item.get("date") == server_item.get("date") and \
+					 local_item.get("exercise_name") == server_item.get("exercise_name") and \
+					 str(local_item.get("sets")) == str(server_item.get("sets")):
+					is_duplicate = true
+					break
+
+			# 📦 DİĞER LİSTELER (MARKET, KİTAPLIK VS.)
+			else:
+				# Eski usül "Hash" kontrolü (Birebir aynısı mı?)
+				if local_item.hash() == server_item.hash():
+					is_duplicate = true
+					break
+		
+		# Eğer çift kayıt değilse, yerel veriyi listeye ekle
+		if not is_duplicate:
 			combined_list.append(local_item)
 	
 	cache[key] = combined_list

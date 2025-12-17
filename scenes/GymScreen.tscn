@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://b0ccs3regj4y5" path="res://assets/ui/gymcharacter.png" id="7_gh0q6"]
 [ext_resource type="Texture2D" uid="uid://c6sbofl7vg4ne" path="res://assets/ui/balon.png" id="8_opj1y"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="9_82e2v"]
-[ext_resource type="PackedScene" path="res://scenes/chat_popup.tscn" id="10_opj1y"]
+[ext_resource type="PackedScene" uid="uid://bm4gmo3si2ldv" path="res://scenes/chat_popup.tscn" id="10_opj1y"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nmixc"]
 bg_color = Color(0.7058824, 0.8509804, 0.8235294, 0.6313726)

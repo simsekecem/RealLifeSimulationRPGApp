@@ -91,6 +91,71 @@ export default {
             return addCors(new Response(await res.text(), { status: res.status }));
         }
 
+        // ---------- AI CHAT (GYM COACH) ----------
+       // ---------- AI CHAT (GYM COACH) ----------
+        if (path === "/api/ai_chat" && method === "POST") {
+            try {
+                const body = await request.json();
+                const userMessage = body.message;
+                const userContext = body.context || "Veri yok.";
+                const userName = body.user_name || "Sporcu";
+
+                // Gemini'ye Gönderilecek İngilizce System Prompt
+                const systemPrompt = `
+                    You are a personal trainer, a professional, friendly, and data-driven personal trainer.
+                    
+                    USER PROFILE:
+                    Name: ${userName}
+                    
+                    TRAINING HISTORY (JSON Context):
+                    ${JSON.stringify(userContext)}
+                    
+                    INSTRUCTIONS:
+                    1. Analyze the user's training history provided in the JSON context to answer their question.
+                    2. BE DATA-DRIVEN: Compare past lifts with current ones. Mention specific numbers (e.g., "You increased your Bench Press weight by 10kg since last week!").
+                    3. If the history shows a gap in training, be encouraging and motivate them to get back on track.
+                    4. If the data is empty or irrelevant to the question, provide expert general fitness advice.
+                    5. TONE: Energetic, supportive, concise (short paragraphs), and use emojis.
+                    
+                    ⚠️ LANGUAGE CONSTRAINT (CRITICAL):
+                    Detect the language of the "${userMessage}". YOU MUST RESPOND IN THE EXACT SAME LANGUAGE as the user's message.
+                    (e.g., If the user asks in Turkish, reply in Turkish. If English, reply in English).
+
+                    USER QUESTION: "${userMessage}"
+                `;
+
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+                
+                const response = await fetch(geminiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                // 👇 DEBUG: Varsayılan mesaj yerine hatayı görelim
+                let replyText = "Couldn't understand. Please ask again.";
+
+                // EĞER GEMINI HATA DÖNDÜRDÜYSE ONU YAZDIR
+                if (data.error) {
+                    replyText = "ERROR: " + data.error.message;
+                } 
+                // EĞER BAŞARILIYSA CEVABI AL
+                else if (data.candidates && data.candidates.length > 0) {
+                    replyText = data.candidates[0].content.parts[0].text;
+                }
+
+                return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
+
+            } catch (err) {
+                // Kod patlarsa hatayı görelim
+                return addCors(new Response(JSON.stringify({ reply: "SERVER ERROR: " + err.message }), { status: 200 }));
+            }
+        }
+
         // =====================================================
         // AUTH CHECK (Protected Routes)
         // =====================================================

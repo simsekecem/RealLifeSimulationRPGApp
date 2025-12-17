@@ -34,8 +34,6 @@ extends Control
 # STATE
 # ------------------------------------------------------------
 var selected_date_dict: Dictionary = {}
-
-# 👇 YENİ: Veritabanından silinecek olan ID'leri burada tutacağız
 var pending_deletes = []
 
 # ------------------------------------------------------------
@@ -59,14 +57,12 @@ func _ready():
 
 	tab_container.tab_changed.connect(_on_tab_changed)
 	
-	# Veri güncellendi sinyali varsa dinle (Opsiyonel ama iyi olur)
 	if Globals.has_signal("data_updated"):
 		if not Globals.data_updated.is_connected(_on_global_data_updated):
 			Globals.data_updated.connect(_on_global_data_updated)
 
 	go_to_today()
 
-# Veri güncellenirse ekranı yenile
 func _on_global_data_updated():
 	load_daily_list()
 	if tab_container.current_tab == 1:
@@ -87,13 +83,10 @@ func go_to_tomorrow():
 	load_daily_list()
 
 func _on_date_changed():
-	if day_select.item_count == 0:
-		return
-
+	if day_select.item_count == 0: return
 	selected_date_dict["day"] = int(day_select.get_item_text(day_select.selected))
 	selected_date_dict["month"] = month_select.selected + 1
 	selected_date_dict["year"] = int(year_select.get_item_text(year_select.selected))
-
 	load_daily_list()
 
 func update_ui_dropdowns():
@@ -101,157 +94,167 @@ func update_ui_dropdowns():
 		if int(year_select.get_item_text(i)) == selected_date_dict.year:
 			year_select.select(i)
 			break
-
 	month_select.select(selected_date_dict.month - 1)
 	update_days_in_dropdown()
-
 	var idx = selected_date_dict.day - 1
 	if idx >= 0 and idx < day_select.item_count:
 		day_select.select(idx)
 
 func get_date_str(d: Dictionary) -> String:
-	if not d.has("year") or not d.has("month") or not d.has("day"):
-		return ""
+	if not d.has("year") or not d.has("month") or not d.has("day"): return ""
 	return "%04d-%02d-%02d" % [int(d.year), int(d.month), int(d.day)]
 
 # ------------------------------------------------------------
 # DAILY
 # ------------------------------------------------------------
 func load_daily_list():
-	# Sayfa değiştiğinde silme kuyruğunu temizle (Karışıklık olmasın)
 	pending_deletes.clear()
 
 	# 1. Temizlik
 	for child in daily_list_container.get_children():
+		daily_list_container.remove_child(child)
 		child.queue_free()
 
 	var target_date := get_date_str(selected_date_dict)
 	
 	# 2. Veriyi al
 	var logs = Globals.cache.get("gym_log")
-
+	
 	# ============================================================
-	# 🛠️ DÜZELTME YAMASI: Tip 27 (Dictionary) ise Array'e çevir
+	# 🛠️ DÜZELTİLEN KISIM: Veri Düzeltme + RETURN
 	# ============================================================
 	if typeof(logs) == TYPE_DICTIONARY:
-		# print("⚠️ UYARI: gym_log Dictionary (Tip 27) olarak gelmiş. Düzeltiliyor...")
+		# print("⚠️ gym_log Dictionary formatında, Array'e çevriliyor...")
 		
-		# İhtimaller:
-		# 1. Veri { "results": [..] } şeklindeyse:
 		if logs.has("results") and typeof(logs["results"]) == TYPE_ARRAY:
 			logs = logs["results"]
-		
-		# 2. Veri { "unique_id": {data}, "unique_id2": {data} } şeklindeyse:
 		else:
-			logs = logs.values() # Sadece içindeki değerleri alıp liste yap
-		
-		# Düzeltilmiş halini hafızaya geri yaz (Kalıcı çözüm olsun)
+			logs = logs.values()
+			
 		Globals.cache["gym_log"] = logs
 		Globals.mark_dirty() 
-	
-	if typeof(logs) != TYPE_ARRAY:
-		logs = []
+		
+		# 🛑 KRİTİK NOKTA: Buraya RETURN ekledik.
+		# mark_dirty() sinyal yaydığı için bu fonksiyon yeniden tetiklenir.
+		# Eğer return demezsek, bu kopya da çalışmaya devam eder ve çift kayıt basar.
+		return 
 	# ============================================================
+	
+	if typeof(logs) != TYPE_ARRAY: logs = []
 
-	print("📂 İncelenen Kayıt Sayısı: ", logs.size())
+	# Temizlik
+	logs = _clean_duplicates(logs)
+	Globals.cache["gym_log"] = logs 
+
+	print("📂 İncelenen Kayıt Sayısı (Temizlenmiş): ", logs.size())
 
 	# 3. Normal Döngü
 	for entry in logs:
-		if typeof(entry) != TYPE_DICTIONARY:
-			continue
+		if typeof(entry) != TYPE_DICTIONARY: continue
 
 		var entry_date = str(entry.get("date", "")).strip_edges()
-		
-		# 👇 YENİ: Eğer ismi boşsa (daha önce silinmişse) yükleme
 		var e_name = str(entry.get("exercise_name", "")).strip_edges()
 		if e_name == "": continue
 
 		if entry_date == target_date:
 			var row = daily_row_scene.instantiate()
 			daily_list_container.add_child(row)
-			
-			# --- YENİ: Silme sinyalini bağla ---
 			row.delete_requested.connect(_on_row_delete_requested)
 			
 			if row.has_method("set_data"):
 				row.set_data(entry)
 
+# 👇 ÇİFT KAYIT TEMİZLEYİCİ HELPER FONKSİYON
+func _clean_duplicates(raw_list: Array) -> Array:
+	var unique_list = []
+	var seen_ids = []     # ID'leri takip etmek için
+	var seen_content = [] # ID'si olmayanların içeriğini takip etmek için
+	
+	for entry in raw_list:
+		if typeof(entry) != TYPE_DICTIONARY: continue
+		
+		var is_dup = false
+		
+		# A) ID VARSA: ID listesine bak
+		if entry.has("id") and entry["id"] != null:
+			var str_id = str(entry["id"])
+			if str_id in seen_ids:
+				is_dup = true
+			else:
+				seen_ids.append(str_id)
+		
+		# B) ID YOKSA: İçeriğe (Tarih + İsim) bak
+		else:
+			var content_key = str(entry.get("date")) + "_" + str(entry.get("exercise_name")) + "_" + str(entry.get("sets"))
+			if content_key in seen_content:
+				is_dup = true
+			else:
+				seen_content.append(content_key)
+		
+		# Eğer kopya değilse listeye ekle
+		if not is_dup:
+			unique_list.append(entry)
+			
+	return unique_list
+
 func add_empty_row():
 	var row = daily_row_scene.instantiate()
 	daily_list_container.add_child(row)
-	# --- YENİ: Yeni eklenen satır için de silme sinyalini bağla ---
 	row.delete_requested.connect(_on_row_delete_requested)
 
 # ------------------------------------------------------------
-# 🗑️ SİLME YÖNETİMİ (GÜNCELLENDİ)
+# 🗑️ SİLME YÖNETİMİ
 # ------------------------------------------------------------
 func _on_row_delete_requested(row_node):
-	# 1. Satırın verisini al
 	if row_node.has_method("get_data"):
 		var data = row_node.get_data()
-		
-		# 2. Eğer bu satır veritabanından geliyorsa (ID'si varsa)
-		# Onu "silinecekler" listesine ekle.
-		# Worker mantığı: ID var + İsim Boş = SİL
 		if data.has("id") and data["id"] != null:
 			print("🗑️ Silme kuyruğuna eklendi: ID ", data["id"])
 			pending_deletes.append({
 				"id": data["id"],
 				"date": get_date_str(selected_date_dict),
-				"exercise_name": "", # İSMİ BOŞ GÖNDERİYORUZ Kİ WORKER SİLSİN
-				# Diğer alanlar boş olsa da olur, Worker sadece ID ve isme bakıyor
+				"exercise_name": "",
 				"sets": 0, "reps": 0, "duration": 0, "rest": 0, "weight": 0, "region": "", "completed": false
 			})
 
-	# 3. Satırı UI'dan hemen sil
 	daily_list_container.remove_child(row_node)
 	row_node.queue_free()
 	
-	# 4. Godot'nun işlemi bitirmesi için 1 kare bekle ve KAYDET
 	await get_tree().process_frame
 	save_daily_data()
 
 func save_daily_data():
 	var target_date := get_date_str(selected_date_dict)
-	if target_date == "":
-		return
+	if target_date == "": return
 
 	var new_log_list: Array = []
 
-	# 1. BAŞKA GÜNLERİN VERİSİNİ KORU
+	# 1. Başka günleri koru
 	for entry in Globals.cache.get("gym_log", []):
 		if typeof(entry) == TYPE_DICTIONARY and entry.get("date") != target_date:
 			new_log_list.append(entry)
 
-	# 2. SİLİNECEK OLANLARI (ID'li ama ismi boşaltılmış) LİSTEYE EKLE
-	# Bunlar sunucuya gidince "DELETE" komutunu tetikleyecek.
+	# 2. Silinenleri ekle
 	for del_item in pending_deletes:
 		new_log_list.append(del_item)
 
-	# 3. EKRANDAKİ MEVCUT SATIRLARI EKLE
+	# 3. Ekrandakileri ekle
 	for child in daily_list_container.get_children():
-		if not child.has_method("get_data"):
-			continue
-
+		if not child.has_method("get_data"): continue
 		var data = child.get_data()
-		if data.is_empty():
-			continue
+		if data.is_empty(): continue
 
 		var name = data.get("exercise_name", "").strip_edges()
-		
-		# İsim boşsa ve ID yoksa kaydetme (Yeni açılmış boş satır)
-		if name == "" and (not data.has("id") or data["id"] == null):
-			continue
+		if name == "" and (not data.has("id") or data["id"] == null): continue
 
 		data["date"] = target_date
 		new_log_list.append(data)
 
-	# 4. KAYDET
+	# 4. Kaydet
 	Globals.cache["gym_log"] = new_log_list
 	Globals.mark_dirty()
 	Globals.save_cache()
 	
-	# Kuyruğu temizle (Artık listeye girdiler)
 	pending_deletes.clear()
 	print("✅ Günlük plan kaydedildi ve silme emirleri işlendi.")
 
@@ -263,33 +266,29 @@ func _on_tab_changed(tab_idx):
 		refresh_weekly_view()
 
 func refresh_weekly_view():
-	# print("\n📅 --- HAFTALIK GÖRÜNÜM HESAPLANIYOR (DEBUG MOD) ---")
-
 	var today_dict = Time.get_date_dict_from_system()
 	today_dict["hour"] = 12 
 	today_dict["minute"] = 0
 	today_dict["second"] = 0
 	
 	var today_str = get_date_str(today_dict)
-	
 	var current_unix = Time.get_unix_time_from_datetime_dict(today_dict)
 	var weekday = today_dict.weekday
 	var days_from_monday = weekday - 1
-	if weekday == 0:
-		days_from_monday = 6
+	if weekday == 0: days_from_monday = 6
 
 	var monday_unix = current_unix - (days_from_monday * 86400)
 	
-	# --- VERİ ALMA VE DÜZELTME ---
 	var logs = Globals.cache.get("gym_log")
 	if typeof(logs) == TYPE_DICTIONARY:
 		if logs.has("results") and typeof(logs["results"]) == TYPE_ARRAY:
 			logs = logs["results"]
 		else:
 			logs = logs.values()
-	if typeof(logs) != TYPE_ARRAY:
-		logs = []
-	# -----------------------------
+	if typeof(logs) != TYPE_ARRAY: logs = []
+
+	# Haftalık görünümde de temizle
+	logs = _clean_duplicates(logs)
 
 	for i in range(1, 8):
 		var loop_unix = monday_unix + ((i - 1) * 86400)
@@ -297,25 +296,20 @@ func refresh_weekly_view():
 		var loop_date_str = get_date_str(loop_date_dict)
 
 		var container = weekly_rows.get(i)
-		if not container:
-			continue
+		if not container: continue
 
 		for child in container.get_children():
 			child.queue_free()
 
 		for entry in logs:
 			if typeof(entry) != TYPE_DICTIONARY: continue
-			
 			var entry_date = str(entry.get("date", "")).strip_edges()
-			
-			# İsim kontrolü (Boş olanları gösterme)
 			var e_name = str(entry.get("exercise_name", "")).strip_edges()
 			if e_name == "": continue
 
 			if entry_date == loop_date_str:
 				var row = weekly_row_scene.instantiate()
 				container.add_child(row)
-				
 				row.custom_minimum_size.y = 40
 				
 				var duration_text := ""
@@ -326,10 +320,8 @@ func refresh_weekly_view():
 				if row.has_method("setup_row"):
 					row.setup_row(entry.get("exercise_name", ""), duration_text, is_done, is_past and not is_done)
 
-	# print("🏁 Haftalık döngü bitti.")
-
 # ------------------------------------------------------------
-# DROPDOWNS
+# DROPDOWNS & CHAT POPUP
 # ------------------------------------------------------------
 func fill_years():
 	year_select.clear()
@@ -339,10 +331,7 @@ func fill_years():
 
 func fill_months():
 	month_select.clear()
-	var months = [
-		"January","February","March","April","May","June",
-		"July","August","September","October","November","December"
-	]
+	var months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 	for m in months:
 		month_select.add_item(m)
 
@@ -351,18 +340,11 @@ func update_days_in_dropdown():
 	var m = month_select.selected + 1
 	var y = int(year_select.get_item_text(year_select.selected))
 	var limit = 31
-
-	if m in [4, 6, 9, 11]:
-		limit = 30
-	elif m == 2:
-		limit = 29 if y % 4 == 0 else 28
-
+	if m in [4, 6, 9, 11]: limit = 30
+	elif m == 2: limit = 29 if y % 4 == 0 else 28
 	for d in range(1, limit + 1):
 		day_select.add_item(str(d))
 
 func _on_texture_button_pressed() -> void:
-	# Bu satırın başında 1 tane TAB tuşuna bas
 	$ChatPopup.visible = true
-	
-	# Bu satırın başında da 1 tane TAB tuşuna bas
 	$ChatPopup/MainWindow/InputField.grab_focus()
