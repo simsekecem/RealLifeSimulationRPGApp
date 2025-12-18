@@ -1,0 +1,162 @@
+[gd_scene load_steps=10 format=3 uid="uid://cnh67ta3q18xk"]
+
+[ext_resource type="Theme" uid="uid://cns8x5gumkdgm" path="res://scenes/LibraryScreen.tres" id="1_0flk7"]
+[ext_resource type="Script" uid="uid://h3213118fo4y" path="res://chat_popup_l.gd" id="1_7syeu"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_7syeu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6kacc"]
+bg_color = Color(0.56407547, 0.5177013, 0.7230825, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tqjhr"]
+bg_color = Color(0.56407547, 0.5177013, 0.7230825, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m6inc"]
+bg_color = Color(0.56407547, 0.5177013, 0.7230825, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0flk7"]
+bg_color = Color(0.56407547, 0.5177013, 0.7230825, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7syeu"]
+bg_color = Color(0.56407547, 0.5177013, 0.7230825, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o2ilv"]
+bg_color = Color(0.56407547, 0.5177013, 0.7230825, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="ChatPopup_L" type="CanvasLayer"]
+script = ExtResource("1_7syeu")
+
+[node name="BackgroundDimmer" type="ColorRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -272.0
+offset_top = -327.0
+offset_right = 133.0
+offset_bottom = 105.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.6901961, 0.654902, 0.8235294, 0.92156863)
+
+[node name="MainWindow" type="NinePatchRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -272.0
+offset_top = -327.0
+offset_right = 131.0
+offset_bottom = 104.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MainWindow"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 71.0
+offset_right = 395.0
+offset_bottom = 372.0
+
+[node name="ContentLayout" type="VBoxContainer" parent="MainWindow/MarginContainer"]
+layout_mode = 2
+
+[node name="ChatScroll" type="ScrollContainer" parent="MainWindow/MarginContainer/ContentLayout"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+
+[node name="MessageList" type="VBoxContainer" parent="MainWindow/MarginContainer/ContentLayout/ChatScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CloseButton" type="Button" parent="MainWindow"]
+layout_mode = 0
+offset_left = 335.0
+offset_top = 23.0
+offset_right = 373.0
+offset_bottom = 59.0
+theme = ExtResource("1_0flk7")
+theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_pressed_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_hover_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_fonts/font = ExtResource("2_7syeu")
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_6kacc")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tqjhr")
+theme_override_styles/hover = SubResource("StyleBoxFlat_m6inc")
+text = "X"
+
+[node name="TitleLabel" type="Label" parent="MainWindow"]
+layout_mode = 0
+offset_left = 82.0
+offset_top = 21.0
+offset_right = 295.0
+offset_bottom = 59.0
+theme = ExtResource("1_0flk7")
+theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_fonts/font = ExtResource("2_7syeu")
+theme_override_font_sizes/font_size = 20
+text = "AI CHATBOT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InputArea" type="HBoxContainer" parent="MainWindow"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 378.0
+offset_right = 404.0
+offset_bottom = 427.0
+
+[node name="InputField" type="LineEdit" parent="MainWindow"]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 389.0
+offset_right = 301.0
+offset_bottom = 426.0
+theme = ExtResource("1_0flk7")
+theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_fonts/font = ExtResource("2_7syeu")
+theme_override_styles/normal = SubResource("StyleBoxFlat_0flk7")
+placeholder_text = "Enter your text..."
+
+[node name="SendButton" type="Button" parent="MainWindow"]
+layout_mode = 0
+offset_left = 307.0
+offset_top = 382.0
+offset_right = 393.0
+offset_bottom = 425.0
+theme = ExtResource("1_0flk7")
+theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_pressed_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_fonts/font = ExtResource("2_7syeu")
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_7syeu")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_o2ilv")
+text = "Send"
+
+[connection signal="pressed" from="MainWindow/CloseButton" to="." method="_on_close_button_pressed"]
+[connection signal="text_submitted" from="MainWindow/InputField" to="." method="_on_input_field_text_submitted"]
+[connection signal="pressed" from="MainWindow/SendButton" to="." method="_on_send_button_pressed"]

@@ -1,0 +1,50 @@
+[gd_scene load_steps=5 format=3 uid="uid://cxv02hfiyasqp"]
+
+[ext_resource type="Theme" uid="uid://cns8x5gumkdgm" path="res://scenes/LibraryScreen.tres" id="1_vvs14"]
+[ext_resource type="Script" uid="uid://qs57ysbwu2vr" path="res://chat_message_l.gd" id="2_7k82p"]
+[ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_f6at6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_55nju"]
+bg_color = Color(0.6901961, 0.654902, 0.8235294, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="ChatMessage_l" type="HBoxContainer"]
+offset_left = -2.0
+offset_top = 1.0
+offset_right = 468.0
+offset_bottom = 41.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_vvs14")
+alignment = 1
+script = ExtResource("2_7k82p")
+
+[node name="BubblePanel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(270, 40)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 8
+theme = ExtResource("1_vvs14")
+theme_override_styles/panel = SubResource("StyleBoxFlat_55nju")
+
+[node name="PanelContainer" type="BoxContainer" parent="BubblePanel"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+alignment = 1
+
+[node name="MessageLabel" type="Label" parent="BubblePanel/PanelContainer"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme = ExtResource("1_vvs14")
+theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
+theme_override_fonts/font = ExtResource("3_f6at6")
+theme_override_font_sizes/font_size = 12
+text = "test yazım test alta geçme test"
+vertical_alignment = 1
+autowrap_mode = 3

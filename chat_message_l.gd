@@ -12,8 +12,8 @@ func setup(content: String, is_user: bool):
 	if is_user:
 		# Kullanıcı mesajını SAĞA yasla
 		layout_direction = Control.LAYOUT_DIRECTION_RTL
-		# Senin UI stilindeki pembe tonu
-		bubble.modulate = Color("f9c7d4") 
+		
+		bubble.modulate = Color("b0a7d2") 
 	else:
 		# AI mesajını SOLA yasla
 		layout_direction = Control.LAYOUT_DIRECTION_LTR

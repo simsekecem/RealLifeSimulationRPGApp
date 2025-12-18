@@ -40,6 +40,6 @@ size_flags_horizontal = 3
 size_flags_vertical = 1
 theme = ExtResource("1_6xr5u")
 theme_override_font_sizes/font_size = 12
-text = "test mesahı uzun olunca alta geçmeli"
+text = "test mesajı uzun olunca alta geçmeli"
 vertical_alignment = 1
 autowrap_mode = 3

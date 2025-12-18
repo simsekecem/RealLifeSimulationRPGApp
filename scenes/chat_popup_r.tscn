@@ -26,59 +26,73 @@ theme = ExtResource("2_jffjk")
 color = Color(0.9490196, 0.68235296, 0.73333335, 0.81960785)
 
 [node name="MainWindow" type="NinePatchRect" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -204.0
+offset_top = -242.0
+offset_right = 225.0
+offset_bottom = 212.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="MainWindow"]
 layout_mode = 0
-offset_left = 436.0
-offset_top = 119.0
-offset_right = 865.0
-offset_bottom = 569.0
+offset_left = 9.0
+offset_top = 50.0
+offset_right = 420.0
+offset_bottom = 395.0
 
 [node name="ContentLayout" type="VBoxContainer" parent="MainWindow/MarginContainer"]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 
 [node name="ChatScroll" type="ScrollContainer" parent="MainWindow/MarginContainer/ContentLayout"]
+custom_minimum_size = Vector2(0, 345)
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="MessageList" type="VBoxContainer" parent="MainWindow/MarginContainer/ContentLayout/ChatScroll"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="CloseButton" type="Button" parent="MainWindow"]
 layout_mode = 0
-offset_left = 792.0
-offset_top = 133.0
-offset_right = 834.0
-offset_bottom = 165.0
+offset_left = 364.0
+offset_top = 11.0
+offset_right = 406.0
+offset_bottom = 43.0
 theme = ExtResource("2_jffjk")
 theme_override_colors/font_color = Color(0.54646343, 0.6554028, 0.5099796, 1)
 text = "X"
 
 [node name="TitleLabel" type="Label" parent="MainWindow"]
 layout_mode = 0
-offset_left = 548.0
-offset_top = 146.0
-offset_right = 748.0
-offset_bottom = 166.0
+offset_left = 105.0
+offset_top = 24.0
+offset_right = 305.0
+offset_bottom = 44.0
 theme = ExtResource("2_jffjk")
+theme_override_colors/font_color = Color(0.54509807, 0.654902, 0.50980395, 1)
 theme_override_font_sizes/font_size = 20
 text = "AI CHATBOT"
 
 [node name="InputArea" type="HBoxContainer" parent="MainWindow"]
 layout_mode = 0
-offset_left = 438.0
-offset_top = 516.0
-offset_right = 863.0
-offset_bottom = 571.0
+offset_top = 398.0
+offset_right = 425.0
+offset_bottom = 451.0
 theme = ExtResource("2_jffjk")
 
 [node name="InputField" type="LineEdit" parent="MainWindow"]
 layout_mode = 0
-offset_left = 446.0
-offset_top = 523.0
-offset_right = 765.0
-offset_bottom = 564.0
+offset_left = 10.0
+offset_top = 403.0
+offset_right = 329.0
+offset_bottom = 444.0
 theme = ExtResource("2_jffjk")
 theme_override_colors/font_color = Color(0.4497125, 0.55272496, 0.4150679, 1)
 theme_override_colors/font_selected_color = Color(0.54509807, 0.654902, 0.50980395, 1)
@@ -88,10 +102,10 @@ placeholder_text = "Enter your text..."
 
 [node name="SendButton" type="Button" parent="MainWindow"]
 layout_mode = 0
-offset_left = 773.0
-offset_top = 522.0
-offset_right = 853.0
-offset_bottom = 563.0
+offset_left = 335.0
+offset_top = 400.0
+offset_right = 415.0
+offset_bottom = 441.0
 theme = ExtResource("2_jffjk")
 text = "Send"
 
