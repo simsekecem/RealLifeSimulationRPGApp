@@ -6,28 +6,21 @@ extends "res://scripts/AuthBase.gd"
 @onready var acc_button = $NinePatchRect/Acc_Button
 @onready var forgot_label = $NinePatchRect/ForgotPasswordLabel
 @onready var http = $HTTPRequest
-
-# 👇 YENİ: Hata mesajı etiketini buraya ekledik
-# (Eğer etiketin NinePatchRect'in altında değilse yolu düzeltmelisin)
 @onready var error_label = $NinePatchRect/CoudlntLoginLabel 
 
 func _ready():
-	# Giriş ekranındayken oyunun UI'ını gizle
 	if UI.has_node("UIRoot"):
 		UI.get_node("UIRoot").hide_all_ui()
 	
-	# 👇 YENİ: Başlangıçta hata mesajını gizle
 	if error_label:
 		error_label.visible = false
 		
 	login_button.pressed.connect(_on_login_pressed)
 	acc_button.pressed.connect(_on_acc_pressed)
 	http.request_completed.connect(_on_request_completed)
-
 	forgot_label.gui_input.connect(_on_forgot_label_input)
 
 func _on_login_pressed() -> void:
-	# 👇 YENİ: Yeni deneme yaparken eski hata mesajını gizle
 	if error_label:
 		error_label.visible = false
 	
@@ -37,7 +30,7 @@ func _on_login_pressed() -> void:
 	}
 	send_request(http, "/api/login", body)
 
-func _on_request_completed(_result: int, _code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+func _on_request_completed(_result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	var json = JSON.parse_string(body.get_string_from_utf8())
 	
 	if json == null:
@@ -46,53 +39,46 @@ func _on_request_completed(_result: int, _code: int, _headers: PackedStringArray
 		return
 
 	if json.has("access_token"):
-		# --- BAŞARILI GİRİŞ ---
+		# --- 1. TOKEN VE ID KAYDI ---
 		Globals.auth_token = json["access_token"]
 		Globals.user_id = json.get("user_id", "")
-		print("✅ Login başarılı.")
-		await Globals.load_from_server()
 		
-		# 3. Token cache'e işlendi, şimdi sunucuya "gel ben buradayım" de
-		Globals.send_to_server_background()
+		# --- 2. YENİ: SENKRONİZASYON BAYRAĞINI SIFIRLA ---
+		# Yeni giriş yapıldığı için eski verilerin beklenmediğinden emin olmalıyız.
+		Globals.is_initial_sync_done = false
+		
+		print("✅ Login başarılı. Yükleme ekranına geçiliyor...")
+		
+		# --- 3. SAHNE GEÇİŞİ ---
+		# Artık veriyi burada beklemiyoruz; LoadingScreen hem sahneyi hem veriyi bekleyecek.
 		Globals.change_scene_with_loading("res://scenes/MainGame.tscn")
 		
 	else:
 		# --- BAŞARISIZ GİRİŞ ---
-		print("❌ Login failed:", json)
-		
-		var error_msg = "Login failed :("
-		
-		# 1. Şifre/Email Yanlış
-		if json.has("error_code") and json["error_code"] == "invalid_credentials":
-			error_msg = "Incorrect email or password."
-			
-		# 2. Email Boş Girildiyse
-		elif json.has("error_code") and json["error_code"] == "validation_failed":
-			if "email" in str(json.get("msg", "")):
-				error_msg = "Please enter your email address."
-			else:
-				error_msg = "Validation failed."
+		_handle_login_error(json)
 
-		# 3. 👇 YENİ: Email Onaylanmadıysa
-		elif json.has("error_code") and json["error_code"] == "email_not_confirmed":
-			error_msg = "Email not confirmed. Please check your inbox."
+# Hata yönetimi için ayrı fonksiyon (Daha temiz kod)
+func _handle_login_error(json: Dictionary):
+	print("❌ Login failed:", json)
+	var error_msg = "Login failed :("
+	
+	if json.has("error_code") and json["error_code"] == "invalid_credentials":
+		error_msg = "Incorrect email or password."
+	elif json.has("error_code") and json["error_code"] == "validation_failed":
+		error_msg = "Please enter your email address."
+	elif json.has("error_code") and json["error_code"] == "email_not_confirmed":
+		error_msg = "Email not confirmed. Please check your inbox."
+	elif json.has("msg"):
+		error_msg = str(json["msg"])
+	elif json.has("error_description"):
+		error_msg = str(json["error_description"])
+	
+	_show_error(error_msg)
 
-		# 4. Diğer Hatalar (Fallback)
-		elif json.has("msg"):
-			error_msg = str(json["msg"])
-		elif json.has("error_description"):
-			error_msg = str(json["error_description"])
-		
-		# Hata mesajını ekranda göster
-		_show_error(error_msg)
-
-# 👇 YENİ: Hata gösterme fonksiyonu (Kod tekrarını önlemek için)
 func _show_error(message: String):
 	if error_label:
 		error_label.text = message
 		error_label.visible = true
-		
-		# (Opsiyonel) Dikkat çekmek için kırmızı yapabilirsin
 		error_label.add_theme_color_override("font_color", Color.RED)
 
 func _on_acc_pressed() -> void:

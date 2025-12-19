@@ -7,10 +7,9 @@ extends Control
 # AYARLAR
 # --------------------
 const MIN_PROGRESS_THRESHOLD: float = 20.0
-const MIN_LOADING_TIME: float = 1    # Minimum loading süresi (Görsel gecikme)
-const SMOOTH_RATE: float = 5.0         # Progress bar'ın gerçek yüke yaklaşma hızı
+const MIN_LOADING_TIME: float = 1.0
+const SMOOTH_RATE: float = 5.0
 
-# Nokta animasyonu ayarları
 const DOT_CHANGE_RATE: float = 0.25
 const MAX_DOTS: int = 4
 
@@ -24,9 +23,7 @@ var progress: Array = []
 var load_status: int = 0
 var loading_time: float = 0.0
 var is_loaded: bool = false
-var current_progress: float = 0.0 # ProgressBar'ın güncel tutulan yumuşak değeri
-
-# YENİ: Kalan sürede %100'e gitmek için gereken hız
+var current_progress: float = 0.0 
 var finish_speed: float = 0.0
 
 # --------------------
@@ -46,13 +43,17 @@ func _ready() -> void:
 
 	label.text = "Loading"
 
+	# 👇 YENİ: Sunucudan veri çekmeyi başlat (Globals.gd içindeki fonksiyon)
+	# Bu işlem arka planda (asenkron) başlar.
+	Globals.load_from_server()
+
 	target_scene_path = Globals.next_scene_path
 	if target_scene_path == "":
 		print("❌ Hata: Yüklenecek sahne yolu boş!")
 		return
 
 	ResourceLoader.load_threaded_request(target_scene_path)
-	print("⏳ Loading başladı:", target_scene_path)
+	print("⏳ Sahne yüklemesi ve Veri senkronizasyonu başladı...")
 
 # --------------------
 # PROCESS
@@ -60,66 +61,55 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	loading_time += delta
 	
-	# --------------------
-	# 1️⃣ Nokta animasyonu
-	# --------------------
+	# 1️⃣ Nokta animasyonu ve Etiket Güncelleme
 	dot_timer += delta
 	if dot_timer >= DOT_CHANGE_RATE:
 		dot_timer = 0.0
 		current_dot_count = (current_dot_count + 1) % (MAX_DOTS + 1)
-		label.text = "Loading" + ".".repeat(current_dot_count)
+		
+		# 👇 YENİ: Eğer sahne yüklendi ama hala veri bekleniyorsa metni değiştir
+		if is_loaded and not Globals.is_initial_sync_done:
+			label.text = "Syncing Data" + ".".repeat(current_dot_count)
+		else:
+			label.text = "Loading" + ".".repeat(current_dot_count)
 
-	# --------------------
 	# 2️⃣ Progress kontrolü ve Yumuşatma
-	# --------------------
 	load_status = ResourceLoader.load_threaded_get_status(target_scene_path, progress)
 
 	var target_progress: float = MIN_PROGRESS_THRESHOLD
 
 	if not is_loaded:
-		# Aşama 1: Gerçek Yük + Sahte Yük (0% - 90%)
 		if progress.size() > 0:
 			var actual_yuzde: float = progress[0] * 100.0
-			
-			# Hedefi asla %90'ı geçmeyecek şekilde ayarla
 			target_progress = clamp(actual_yuzde, MIN_PROGRESS_THRESHOLD, 90.0)
 		else:
-			# Gerçek yükleme bilgisi gelmiyorsa 90'a doğru yavaşça ilerle (Fake progress)
 			target_progress = lerp(MIN_PROGRESS_THRESHOLD, 90.0, loading_time / MIN_LOADING_TIME)
 			target_progress = clamp(target_progress, MIN_PROGRESS_THRESHOLD, 90.0)
 			
-		# current_progress'i hedefe doğru yumuşakça yaklaştır
 		current_progress = lerp(current_progress, target_progress, delta * SMOOTH_RATE)
 		
-		# Yükleme bitti mi?
 		if load_status == ResourceLoader.THREAD_LOAD_LOADED:
 			is_loaded = true
-			
-			# YÜKLEME BİTTİ (Aşama 2 için hız hesapla)
-			var time_remaining = max(0.01, MIN_LOADING_TIME - loading_time) # Kalan süre
-			
-			# Kalan sürede %90'dan %100'e gitmek için gereken lerp hızını hesapla
-			# Formül: 1 / Kalan Süre
+			var time_remaining = max(0.01, MIN_LOADING_TIME - loading_time) 
 			finish_speed = 1.0 / time_remaining
-			print("✅ Yükleme bitti. Kalan süre:", time_remaining, "s. Hız:", finish_speed)
+			print("✅ Sahne dosyası yüklendi. Veri senkronizasyonu bekleniyor...")
 
 	else:
-		# Aşama 2: Gerçek Yükleme Bitti (%90 - %100)
-		# Progress bar'ı hızla %100'e doğru çek.
+		# Sahne yüklendi, %100'e çekiyoruz
 		current_progress = lerp(current_progress, 100.0, delta * finish_speed)
 		
-	# Değeri ProgressBar'a ata
 	progress_bar.value = current_progress
 
 	# --------------------
-	# 3️⃣ Sahne geçişi
+	# 3️⃣ Sahne geçişi (GÜNCELLENDİ ✨)
 	# --------------------
-	# Hem yükleme bittiyse (is_loaded), hem de progress bar %99.9'u geçtiyse (animasyon bitti)
-	if is_loaded and current_progress >= 99.9:
+	# Şartlar: Sahne yüklendi mi? + Bar doldu mu? + SUNUCU VERİSİ GELDİ Mİ?
+	if is_loaded and current_progress >= 99.9 and Globals.is_initial_sync_done:
 		progress_bar.value = 100
 		await get_tree().process_frame
 		set_process(false)
 
+		print("🚀 Veriler hazır, sahneye geçiliyor!")
 		var new_scene = ResourceLoader.load_threaded_get(target_scene_path)
 		get_tree().change_scene_to_packed(new_scene)
 

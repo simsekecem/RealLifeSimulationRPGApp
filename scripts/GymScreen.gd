@@ -110,90 +110,68 @@ func get_date_str(d: Dictionary) -> String:
 func load_daily_list():
 	pending_deletes.clear()
 
-	# 1. Temizlik
+	# 1. UI Temizliği: Mevcut satırları tek seferde temizle
 	for child in daily_list_container.get_children():
-		daily_list_container.remove_child(child)
 		child.queue_free()
 
 	var target_date := get_date_str(selected_date_dict)
+	var raw_logs = Globals.cache.get("gym_log")
 	
-	# 2. Veriyi al
-	var logs = Globals.cache.get("gym_log")
+	# 2. Veri Tipi Düzeltme (Dictionary -> Array)
+	# Sinyal yaymadan (save_cache ile) sessizce düzeltiyoruz
+	if typeof(raw_logs) == TYPE_DICTIONARY:
+		raw_logs = raw_logs.values() if not raw_logs.has("results") else raw_logs["results"]
+		Globals.cache["gym_log"] = raw_logs
+		Globals.save_cache()
+
+	if typeof(raw_logs) != TYPE_ARRAY: 
+		raw_logs = []
+
+	# 3. Kopyaları Ayıkla ve Kalıcı Olarak Güncelle
+	var cleaned_logs = _clean_duplicates(raw_logs)
 	
-	# ============================================================
-	# 🛠️ DÜZELTİLEN KISIM: Veri Düzeltme + RETURN
-	# ============================================================
-	if typeof(logs) == TYPE_DICTIONARY:
-		# print("⚠️ gym_log Dictionary formatında, Array'e çevriliyor...")
-		
-		if logs.has("results") and typeof(logs["results"]) == TYPE_ARRAY:
-			logs = logs["results"]
-		else:
-			logs = logs.values()
-			
-		Globals.cache["gym_log"] = logs
-		Globals.mark_dirty() 
-		
-		# 🛑 KRİTİK NOKTA: Buraya RETURN ekledik.
-		# mark_dirty() sinyal yaydığı için bu fonksiyon yeniden tetiklenir.
-		# Eğer return demezsek, bu kopya da çalışmaya devam eder ve çift kayıt basar.
-		return 
-	# ============================================================
-	
-	if typeof(logs) != TYPE_ARRAY: logs = []
+	if cleaned_logs.size() != raw_logs.size():
+		print("🧹 Veritabanındaki kopyalar temizlendi: ", raw_logs.size() - cleaned_logs.size(), " adet.")
+		Globals.cache["gym_log"] = cleaned_logs
+		Globals.save_cache() # Dosyaya kalıcı yaz
 
-	# Temizlik
-	logs = _clean_duplicates(logs)
-	Globals.cache["gym_log"] = logs 
-
-	print("📂 İncelenen Kayıt Sayısı (Temizlenmiş): ", logs.size())
-
-	# 3. Normal Döngü
-	for entry in logs:
+	# 4. TEK DÖNGÜ: Sadece hedef tarihteki verileri listele
+	for entry in cleaned_logs:
 		if typeof(entry) != TYPE_DICTIONARY: continue
 
 		var entry_date = str(entry.get("date", "")).strip_edges()
 		var e_name = str(entry.get("exercise_name", "")).strip_edges()
-		if e_name == "": continue
-
-		if entry_date == target_date:
+		
+		# Sadece hedef tarihteki ve ismi boş olmayan kayıtları ekrana bas
+		if entry_date == target_date and e_name != "":
 			var row = daily_row_scene.instantiate()
 			daily_list_container.add_child(row)
 			row.delete_requested.connect(_on_row_delete_requested)
 			
 			if row.has_method("set_data"):
 				row.set_data(entry)
-
+				
 # 👇 ÇİFT KAYIT TEMİZLEYİCİ HELPER FONKSİYON
 func _clean_duplicates(raw_list: Array) -> Array:
 	var unique_list = []
-	var seen_ids = []     # ID'leri takip etmek için
-	var seen_content = [] # ID'si olmayanların içeriğini takip etmek için
+	var seen_keys = [] 
 	
 	for entry in raw_list:
 		if typeof(entry) != TYPE_DICTIONARY: continue
 		
-		var is_dup = false
-		
-		# A) ID VARSA: ID listesine bak
+		var content_key = ""
+		# ID varsa ID'yi, yoksa (Tarih + İsim + Set) kombinasyonunu anahtar yap
 		if entry.has("id") and entry["id"] != null:
-			var str_id = str(entry["id"])
-			if str_id in seen_ids:
-				is_dup = true
-			else:
-				seen_ids.append(str_id)
-		
-		# B) ID YOKSA: İçeriğe (Tarih + İsim) bak
+			content_key = "ID_" + str(entry["id"])
 		else:
-			var content_key = str(entry.get("date")) + "_" + str(entry.get("exercise_name")) + "_" + str(entry.get("sets"))
-			if content_key in seen_content:
-				is_dup = true
-			else:
-				seen_content.append(content_key)
+			var e_name = str(entry.get("exercise_name", "")).to_lower().strip_edges()
+			content_key = str(entry.get("date")) + "|" + e_name + "|" + str(entry.get("sets", "0"))
 		
-		# Eğer kopya değilse listeye ekle
-		if not is_dup:
-			unique_list.append(entry)
+		if content_key in seen_keys:
+			continue # Bu zaten var, atla
+			
+		seen_keys.append(content_key)
+		unique_list.append(entry)
 			
 	return unique_list
 

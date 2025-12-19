@@ -5,6 +5,7 @@ extends Node
 # ============================================================
 # 👇 UI güncellemesi için sinyal
 signal data_updated 
+signal sync_finished
 
 var auth_token: String = ""
 var user_id: String = ""
@@ -12,6 +13,9 @@ var door_locked: bool = false
 var next_scene_path: String = "" 
 var is_quitting: bool = false 
 var last_scene_path := ""
+
+var is_initial_sync_done: bool = false
+
 var supabase_anon_key: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6c25kdHN0b256dGZ1YXlvZG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyOTg4OTQsImV4cCI6MjA3NTg3NDg5NH0.UPDS44mZl-YP0UNGqnpPzIedyphNptgnXehax5tUi50" 
 var supabase_project_id: String = "rzsndtstonztfuayodmg"
 
@@ -37,7 +41,7 @@ var cache := {
 }
 
 var save_timer := 0.0
-var debounce_seconds := 5.0 if OS.has_feature("web") else 30.0
+var debounce_seconds := 10.0 if OS.has_feature("web") else 30.0
 
 var cache_path := "user://user_cache.json"
 var WEEK_RESET_DAYS := 7
@@ -220,9 +224,12 @@ func force_quit():
 #   SUNUCUDAN YÜKLEME
 # ============================================================
 func load_from_server():
-	if auth_token == "": return
+	if auth_token == "": 
+		is_initial_sync_done = true
+		sync_finished.emit()
+		return
+		
 	print("⬇️ Sunucudan veriler kontrol ediliyor...")
-	
 	var http = HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(_on_load_complete)
@@ -233,34 +240,24 @@ func _on_load_complete(_res, code, _headers, body):
 	if code == 200:
 		var json = JSON.new()
 		var parse_result = json.parse(body.get_string_from_utf8())
-		
 		if parse_result == OK:
 			var data = json.get_data()
 			if typeof(data) == TYPE_DICTIONARY:
-				
 				var local_owner = cache.get("owner_id", "")
-				
 				if local_owner != "" and local_owner != user_id:
-					print("🛑 DİKKAT: Cihazda başka kullanıcının verisi var. Temizleniyor.")
 					apply_server_data(data)
-					
 				elif cache.get("unsynced_changes", false) == true:
-					print("⚠️ ÇAKIŞMA: Sunucu ve Yerel veri birleştiriliyor...")
 					merge_server_with_local(data)
 				else:
 					apply_server_data(data)
-					print("✅ Veriler sunucudan alındı.")
 	else:
 		print("❌ Veri çekme hatası: ", code)
+		is_initial_sync_done = true 
+		sync_finished.emit()
 
-# --- Veri Uygulama ---
 func apply_server_data(data):
-	# 👇 KORUMA: Sunucudan veri çekerken elimizdeki güncel FCM Token silinmesin!
 	var current_local_token = cache["user"].get("fcm_token", "")
-	
 	if data.has("user"): cache["user"] = data["user"]
-	
-	# Eğer sunucudaki token boşsa ama bizde varsa, bizdekini geri koyuyoruz.
 	if cache["user"].get("fcm_token", "") == "" and current_local_token != "":
 		cache["user"]["fcm_token"] = current_local_token
 	
@@ -275,16 +272,14 @@ func apply_server_data(data):
 	cache["unsynced_changes"] = false
 	save_cache()
 	
-	# Veri değişti sinyali
+	is_initial_sync_done = true
+	sync_finished.emit() # 👈 Yükleme ekranına "geçebilirsin" haberi ver
 	data_updated.emit()
 
 # --- Veri Birleştirme ---
 func merge_server_with_local(server_data):
-	# 👇 KORUMA: Merge sırasında da token'ı koru
 	var current_local_token = cache["user"].get("fcm_token", "")
-	
 	if server_data.has("user"): cache["user"] = server_data["user"]
-	
 	if cache["user"].get("fcm_token", "") == "" and current_local_token != "":
 		cache["user"]["fcm_token"] = current_local_token
 	
@@ -295,13 +290,13 @@ func merge_server_with_local(server_data):
 	merge_list("calendar_notes", ensure_list(server_data.get("calendar_notes")))
 	merge_list("restaurant", ensure_list(server_data.get("restaurant")))
 	
-	print("🤝 Veriler birleştirildi. Sunucuya geri yükleniyor...")
-	
 	cache["owner_id"] = user_id 
 	cache["unsynced_changes"] = false
 	save_cache()
 	send_to_server_background()
 	
+	is_initial_sync_done = true
+	sync_finished.emit()
 	data_updated.emit()
 
 # ============================================================
@@ -313,27 +308,27 @@ func merge_list(key: String, server_list: Array):
 	
 	for local_item in local_list:
 		var is_duplicate = false
-		for server_item in server_list:
-			# 🏋️‍♂️ SPOR SALONU (gym_log) ÖZEL MANTIK
-			if key == "gym_log":
-				if local_item.get("id") != null and server_item.get("id") != null:
-					if str(local_item["id"]) == str(server_item["id"]):
-						is_duplicate = true
-						break
-				elif local_item.get("date") == server_item.get("date") and \
-					 local_item.get("exercise_name") == server_item.get("exercise_name") and \
-					 str(local_item.get("sets")) == str(server_item.get("sets")):
-					is_duplicate = true
-					break
-			# 📦 DİĞER LİSTELER
-			else:
-				if local_item.hash() == server_item.hash():
-					is_duplicate = true
-					break
 		
-		if not is_duplicate:
-			combined_list.append(local_item)
-	
+		# 🛡️ Dictionary kontrolü: String verilerin patlatmasını önler
+		if typeof(local_item) != TYPE_DICTIONARY:
+			if local_item in server_list: is_duplicate = true
+			if not is_duplicate: combined_list.append(local_item)
+			continue
+
+		for server_item in server_list:
+			if typeof(server_item) != TYPE_DICTIONARY: continue
+
+			if key == "gym_log":
+				var l_id = local_item.get("id"); var s_id = server_item.get("id")
+				if l_id != null and s_id != null:
+					if str(l_id) == str(s_id): is_duplicate = true; break
+				elif local_item.get("date") == server_item.get("date") and \
+					 local_item.get("exercise_name") == server_item.get("exercise_name"):
+					is_duplicate = true; break
+			else:
+				if local_item.hash() == server_item.hash(): is_duplicate = true; break
+		
+		if not is_duplicate: combined_list.append(local_item)
 	cache[key] = combined_list
 
 # ============================================================
@@ -343,23 +338,19 @@ func merge_list(key: String, server_list: Array):
 
 func load_cache():
 	if not FileAccess.file_exists(cache_path):
-		save_cache()
-		return
+		save_cache(); return
 	var file = FileAccess.open(cache_path, FileAccess.READ)
 	if file:
 		var data = JSON.parse_string(file.get_as_text())
 		if typeof(data) == TYPE_DICTIONARY:
-			# 👇 GÜVENLİ YÜKLEME: 
-			# Eski cache'i silmek yerine, dosyadaki verileri mevcut cache üzerine yazar.
-			# Böylece yeni eklediğimiz "character_id" gibi alanlar asla kaybolmaz.
+			# 👇 Güvenli Harmanlama: Yeni eklenen 'character_id' vb. alanları korur
 			for key in data.keys():
 				if key == "user" and cache.has("user"):
-					# User içindeki alt verileri (name, character_id vb.) tek tek birleştir
 					for u_key in data["user"].keys():
 						cache["user"][u_key] = data["user"][u_key]
 				else:
 					cache[key] = data[key]
-			print("✅ Yerel cache başarıyla yüklendi ve harmanlandı.")
+			print("✅ Yerel cache yüklendi.")
 
 func save_cache():
 	var file = FileAccess.open(cache_path, FileAccess.WRITE)

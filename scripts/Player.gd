@@ -11,6 +11,9 @@ extends CharacterBody2D
 
 var last_direction = Vector2.DOWN 
 
+# 👇 YENİ: Yüklenmiş olan karakter ID'sini takip etmek için
+var current_visual_id: int = -1 
+
 func _ready():
 	# 1. Kamera Ayarı
 	if camera:
@@ -19,8 +22,8 @@ func _ready():
 	# 2. Karakter Görünümünü Yükle
 	load_character_visuals()
 
-	# 👇 YENİ: Sinyal Bağlantısı
-	# Menüden karakter değişip "Close" butonuna basıldığında bu sinyal tetiklenir.
+	# 👇 Sinyal Bağlantısı
+	# data_updated sinyali her tetiklendiğinde load_character_visuals çalışır
 	if Globals.has_signal("data_updated"):
 		if not Globals.data_updated.is_connected(load_character_visuals):
 			Globals.data_updated.connect(load_character_visuals)
@@ -28,11 +31,16 @@ func _ready():
 
 # --- KARAKTER GÖRÜNÜMÜNÜ YÜKLE ---
 func load_character_visuals():
-	# 1. Global veriden seçili karakter ID'sini al (Yoksa 1 varsay)
+	# 1. Global veriden seçili karakter ID'sini al
 	var user_data = Globals.cache.get("user", {})
 	var char_id = int(user_data.get("character_id", 1))
 	
-	# 2. Dosya yolunu oluştur (Örn: res://assets/characters/resources/char_2.tres)
+	# 👇 KRİTİK KONTROL: Eğer karakter zaten bu ID ile yüklüyse işlemi durdur
+	# Bu sayede kütüphanede yazı yazarken loglar dolmaz ve karakter titremez
+	if char_id == current_visual_id:
+		return
+	
+	# 2. Dosya yolunu oluştur
 	var path = "res://assets/characters/resources/char_%d.tres" % char_id
 	
 	# 3. Dosya varsa yükle ve karaktere giydir
@@ -40,8 +48,10 @@ func load_character_visuals():
 		var new_frames = load(path)
 		if new_frames is SpriteFrames:
 			anim.sprite_frames = new_frames
-			# Görünüm değişince "Idle" moduna geç ki ekranda hemen güncellensin
 			play_animation("idle")
+			
+			# 👇 YENİ: Başarıyla yüklenen ID'yi kaydet
+			current_visual_id = char_id
 			print("🎭 [PLAYER] Görünüm güncellendi: ID ", char_id)
 		else:
 			print("⚠️ Hata: Yüklenen dosya SpriteFrames formatında değil!")
@@ -91,6 +101,4 @@ func play_animation(action_name: String):
 	if anim.sprite_frames.has_animation(final_anim_name):
 		anim.play(final_anim_name)
 	else:
-		# Yeni pakette animasyon ismi hatalıysa konsola yazsın (Debug için)
-		# print_debug("Animasyon bulunamadı: ", final_anim_name)
 		pass
