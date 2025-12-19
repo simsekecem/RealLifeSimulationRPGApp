@@ -172,7 +172,7 @@ script = ExtResource("1_g2els")
 y_sort_enabled = true
 position = Vector2(1, -10)
 sprite_frames = ExtResource("2_g2els")
-animation = &"walk_up"
+animation = &"idle_down"
 offset = Vector2(0, -8)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

@@ -12,6 +12,8 @@ var door_locked: bool = false
 var next_scene_path: String = "" 
 var is_quitting: bool = false 
 var last_scene_path := ""
+var supabase_anon_key: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6c25kdHN0b256dGZ1YXlvZG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyOTg4OTQsImV4cCI6MjA3NTg3NDg5NH0.UPDS44mZl-YP0UNGqnpPzIedyphNptgnXehax5tUi50" 
+var supabase_project_id: String = "rzsndtstonztfuayodmg"
 
 # 👇 GÜNCELLEME: "fcm_token" alanını buraya ekledim.
 var cache := {

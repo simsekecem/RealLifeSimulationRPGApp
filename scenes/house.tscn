@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=4 uid="uid://chaxn0raj3mjl"]
+[gd_scene load_steps=45 format=4 uid="uid://chaxn0raj3mjl"]
 
 [ext_resource type="PackedScene" uid="uid://pwbdgrhl5obe" path="res://scenes/player.tscn" id="1_mhx8p"]
 [ext_resource type="Texture2D" uid="uid://m11ysxjaask1" path="res://assets/new/Interior.png" id="1_se78b"]
@@ -3659,6 +3659,9 @@ sources/2 = SubResource("TileSetAtlasSource_qrght")
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7685u"]
 size = Vector2(29, 70.75)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qcuhb"]
+size = Vector2(53, 68)
+
 [node name="House" type="Node2D"]
 y_sort_enabled = true
 
@@ -3721,7 +3724,18 @@ is_exit_door = true
 
 [node name="CalendarZone" type="Area2D" parent="."]
 script = ExtResource("12_qcuhb")
+wait_time = 1.6
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CalendarZone"]
 position = Vector2(1136, 455.625)
 shape = SubResource("RectangleShape2D_7685u")
+
+[node name="Wardrobe" type="Area2D" parent="."]
+position = Vector2(418, 386)
+script = ExtResource("12_qcuhb")
+interact_type = "Wardrobe"
+wait_time = 1.6
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wardrobe"]
+position = Vector2(-1.5, 15)
+shape = SubResource("RectangleShape2D_qcuhb")

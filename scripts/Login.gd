@@ -50,7 +50,7 @@ func _on_request_completed(_result: int, _code: int, _headers: PackedStringArray
 		Globals.auth_token = json["access_token"]
 		Globals.user_id = json.get("user_id", "")
 		print("✅ Login başarılı.")
-		Globals.load_from_server()
+		await Globals.load_from_server()
 		
 		# 3. Token cache'e işlendi, şimdi sunucuya "gel ben buradayım" de
 		Globals.send_to_server_background()

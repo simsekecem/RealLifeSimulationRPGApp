@@ -1518,7 +1518,7 @@ texture_region_size = Vector2i(32, 32)
 
 [sub_resource type="TileSet" id="TileSet_5q1rr"]
 tile_size = Vector2i(32, 32)
-physics_layer_0/collision_layer = 2
+physics_layer_0/collision_layer = 8
 sources/0 = SubResource("TileSetAtlasSource_cq4yp")
 sources/1 = SubResource("TileSetAtlasSource_yn4qk")
 sources/2 = SubResource("TileSetAtlasSource_v3ani")
@@ -81791,6 +81791,7 @@ tile_set = SubResource("TileSet_pwx13")
 
 [node name="Player" parent="." instance=ExtResource("10_5q1rr")]
 position = Vector2(655, 346)
+collision_mask = 8
 
 [node name="NPC_Interactable" parent="." instance=ExtResource("11_u4arb")]
 position = Vector2(1015, 418)
