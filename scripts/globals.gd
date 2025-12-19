@@ -1,9 +1,9 @@
 extends Node
 
 # ============================================================
-#  GLOBAL STATE
+#   GLOBAL STATE
 # ============================================================
-# 👇 YENİ: UI güncellemesi için bu sinyal kalmalı
+# 👇 UI güncellemesi için sinyal
 signal data_updated 
 
 var auth_token: String = ""
@@ -13,9 +13,17 @@ var next_scene_path: String = ""
 var is_quitting: bool = false 
 var last_scene_path := ""
 
+# 👇 GÜNCELLEME: "fcm_token" alanını buraya ekledim.
 var cache := {
 	"owner_id": "", 
-	"user": { "name": "Rookie", "birthdate": "", "level": 1, "experience": 0, "character_id": 1 },
+	"user": { 
+		"name": "Rookie", 
+		"birthdate": "", 
+		"level": 1, 
+		"experience": 0, 
+		"character_id": 1, 
+		"fcm_token": "" # <-- BURASI ÖNEMLİ
+	},
 	"preferences": { "music_volume": 50 }, 
 	"gym_log": [],
 	"library": [],
@@ -33,21 +41,85 @@ var cache_path := "user://user_cache.json"
 var WEEK_RESET_DAYS := 7
 
 # ============================================================
-#  BAŞLANGIÇ AYARLARI
+#   FIREBASE DEĞİŞKENLERİ
+# ============================================================
+var firebase_core
+var firebase_messaging
+
+# ============================================================
+#   BAŞLANGIÇ AYARLARI
 # ============================================================
 func _ready():
 	load_cache()
 	reset_if_week_passed()
 	get_tree().set_auto_accept_quit(false)
+	
+	# 👇 YENİ: Firebase Kurulumu (Sadece Mobilde)
+	if OS.get_name() == "Android" or OS.get_name() == "iOS":
+		_setup_firebase()
 
 # ============================================================
-#  YEREL KAYIT (LOCAL SAVE)
+#   FIREBASE KURULUMU
+# ============================================================
+func _setup_firebase():
+	print("🔥 Firebase kurulumu başlıyor...")
+	
+	if Engine.has_singleton("GodotxFirebaseCore"):
+		firebase_core = Engine.get_singleton("GodotxFirebaseCore")
+		if not firebase_core.core_initialized.is_connected(_on_core_initialized):
+			firebase_core.core_initialized.connect(_on_core_initialized)
+	
+	if Engine.has_singleton("GodotxFirebaseMessaging"):
+		firebase_messaging = Engine.get_singleton("GodotxFirebaseMessaging")
+		if not firebase_messaging.messaging_token_received.is_connected(_on_fcm_token_received):
+			firebase_messaging.messaging_token_received.connect(_on_fcm_token_received)
+		
+		# Hata loglarını görmek için
+		if not firebase_messaging.messaging_error.is_connected(func(msg): print("❌ FCM Hatası: ", msg)):
+			firebase_messaging.messaging_error.connect(func(msg): print("❌ FCM Hatası: ", msg))
+	
+	# Core başlat
+	if firebase_core:
+		firebase_core.initialize()
+	else:
+		print("❌ GodotxFirebaseCore bulunamadı.")
+
+func _on_core_initialized(success: bool):
+	if success:
+		print("✅ Firebase Core BAŞARILI!")
+		# Messaging başlat
+		if firebase_messaging:
+			firebase_messaging.request_permission()
+			firebase_messaging.get_token()
+	else:
+		print("❌ Firebase Core başlatılamadı.")
+
+# 👇 KRİTİK BÖLÜM: Token Gelince Ne Yapıyoruz?
+func _on_fcm_token_received(token: String):
+	if token.is_empty():
+		return
+
+	print("🔥 FCM TOKEN ALINDI VE CACHE'E YAZILDI: ", token)
+	
+	# 1. Token'ı yerel hafızaya (Cache) yaz
+	if not cache["user"].has("fcm_token"):
+		cache["user"]["fcm_token"] = ""
+	
+	cache["user"]["fcm_token"] = token
+	save_cache()
+	
+	# 2. Eğer kullanıcı ZATEN içerideyse (Auth Token varsa),
+	#    Hiç beklemeden bu yeni token'ı sunucuya "Save All" paketiyle gönder.
+	if auth_token != "":
+		print("🔄 Token sunucuya senkronize ediliyor...")
+		send_to_server_background()
+
+# ============================================================
+#   YEREL KAYIT (LOCAL SAVE)
 # ============================================================
 func mark_dirty():
 	cache["unsynced_changes"] = true
 	save_timer = debounce_seconds
-	
-	# 👇 Veri değişince sinyal gönder (UI güncellensin diye)
 	data_updated.emit()
 
 func _process(delta):
@@ -57,7 +129,7 @@ func _process(delta):
 			save_cache()
 
 # ============================================================
-#  HELPER FONKSİYONLAR
+#   HELPER FONKSİYONLAR
 # ============================================================
 func ensure_list(data) -> Array:
 	if data == null: return []
@@ -69,13 +141,15 @@ func safe_int(value) -> int: return int(float(str(value)))
 func safe_str(value) -> String: return str(value).strip_edges()
 
 func _get_sync_payload() -> Dictionary:
+	# Cache'i kopyala. Token zaten cache["user"] içinde olduğu için
+	# otomatik olarak pakete dahil edilecek!
 	var payload = cache.duplicate(true)
 	if payload.has("preferences"):
 		payload.erase("preferences") 
 	return payload
 
 # ============================================================
-#  ÇIKIŞ VE ARKA PLAN SİNYALLERİ
+#   ÇIKIŞ VE ARKA PLAN SİNYALLERİ
 # ============================================================
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
@@ -94,7 +168,7 @@ func handle_save_and_exit():
 	send_to_server_and_quit()
 
 # ============================================================
-#  SUNUCUYA GÖNDERME (SENKRONİZASYON)
+#   SUNUCUYA GÖNDERME (SENKRONİZASYON)
 # ============================================================
 func send_to_server_and_quit():
 	if auth_token == "": get_tree().quit(); return
@@ -141,7 +215,7 @@ func force_quit():
 	get_tree().quit()
 
 # ============================================================
-#  SUNUCUDAN YÜKLEME
+#   SUNUCUDAN YÜKLEME
 # ============================================================
 func load_from_server():
 	if auth_token == "": return
@@ -179,7 +253,14 @@ func _on_load_complete(_res, code, _headers, body):
 
 # --- Veri Uygulama ---
 func apply_server_data(data):
+	# 👇 KORUMA: Sunucudan veri çekerken elimizdeki güncel FCM Token silinmesin!
+	var current_local_token = cache["user"].get("fcm_token", "")
+	
 	if data.has("user"): cache["user"] = data["user"]
+	
+	# Eğer sunucudaki token boşsa ama bizde varsa, bizdekini geri koyuyoruz.
+	if cache["user"].get("fcm_token", "") == "" and current_local_token != "":
+		cache["user"]["fcm_token"] = current_local_token
 	
 	cache["study_log"] = ensure_list(data.get("study_log"))
 	cache["gym_log"] = ensure_list(data.get("gym_log"))
@@ -197,7 +278,13 @@ func apply_server_data(data):
 
 # --- Veri Birleştirme ---
 func merge_server_with_local(server_data):
+	# 👇 KORUMA: Merge sırasında da token'ı koru
+	var current_local_token = cache["user"].get("fcm_token", "")
+	
 	if server_data.has("user"): cache["user"] = server_data["user"]
+	
+	if cache["user"].get("fcm_token", "") == "" and current_local_token != "":
+		cache["user"]["fcm_token"] = current_local_token
 	
 	merge_list("study_log", ensure_list(server_data.get("study_log")))
 	merge_list("gym_log", ensure_list(server_data.get("gym_log")))
@@ -216,51 +303,39 @@ func merge_server_with_local(server_data):
 	data_updated.emit()
 
 # ============================================================
-# 👇 YENİ GÜNCELLENMİŞ MERGE SİSTEMİ (Çift Kayıt Önleyici)
+# 👇 GÜNCELLENMİŞ MERGE SİSTEMİ (Çift Kayıt Önleyici)
 # ============================================================
 func merge_list(key: String, server_list: Array):
 	var local_list = cache[key]
-	
-	# Sunucudan gelenleri listeye al (Bunlar her zaman "doğru" kabul edilir)
 	var combined_list = server_list.duplicate()
 	
 	for local_item in local_list:
 		var is_duplicate = false
-		
 		for server_item in server_list:
-			
-			# 
-			# 🏋️‍♂️ SADECE SPOR SALONU (gym_log) İÇİN ÖZEL MANTIK
+			# 🏋️‍♂️ SPOR SALONU (gym_log) ÖZEL MANTIK
 			if key == "gym_log":
-				# 1. ID KONTROLÜ: Eğer ikisinin de ID'si var ve aynıysa -> ÇİFT KAYIT
 				if local_item.get("id") != null and server_item.get("id") != null:
 					if str(local_item["id"]) == str(server_item["id"]):
 						is_duplicate = true
 						break
-				
-				# 2. İÇERİK KONTROLÜ: ID yoksa (yeni eklenmişse) Tarih + İsim + Set sayısına bak
-				# (Aynı gün, aynı isimde, aynı set sayısında egzersiz varsa çift say)
 				elif local_item.get("date") == server_item.get("date") and \
 					 local_item.get("exercise_name") == server_item.get("exercise_name") and \
 					 str(local_item.get("sets")) == str(server_item.get("sets")):
 					is_duplicate = true
 					break
-
-			# 📦 DİĞER LİSTELER (MARKET, KİTAPLIK VS.)
+			# 📦 DİĞER LİSTELER
 			else:
-				# Eski usül "Hash" kontrolü (Birebir aynısı mı?)
 				if local_item.hash() == server_item.hash():
 					is_duplicate = true
 					break
 		
-		# Eğer çift kayıt değilse, yerel veriyi listeye ekle
 		if not is_duplicate:
 			combined_list.append(local_item)
 	
 	cache[key] = combined_list
 
 # ============================================================
-#  CACHE YÖNETİMİ
+#   CACHE YÖNETİMİ
 # ============================================================
 func load_cache():
 	if not FileAccess.file_exists(cache_path):
@@ -279,7 +354,7 @@ func save_cache():
 		file.close()
 
 # ============================================================
-#  HAFTALIK RESET
+#   HAFTALIK RESET
 # ============================================================
 func reset_if_week_passed():
 	var meta_path = "user://cache_meta.json"
@@ -303,7 +378,7 @@ func weekly_reset():
 	save_cache()
 
 # ============================================================
-#  SAHNE GEÇİŞİ
+#   SAHNE GEÇİŞİ
 # ============================================================
 func change_scene_with_loading(target_path: String):
 	save_cache()

@@ -19,3 +19,12 @@ head_sampling_rate = 1
 enabled = true
 head_sampling_rate = 1
 invocation_logs = true
+
+[triggers]
+crons = [
+  "10 2 * * *",   # TR 08:00 (Güne başla)
+  "0 9 * * *",   # TR 12:00 (Öğle arası kontrolü)
+  "0 13 * * *",  # TR 16:00 (İkindi darlaması)
+  "0 17 * * *",  # TR 20:00 (Akşam raporu)
+  "10 21 * * *"   # TR 00:00 (Günü bitirirken son çağrı)
+]
