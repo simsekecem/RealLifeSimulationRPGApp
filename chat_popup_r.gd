@@ -41,7 +41,7 @@ func _on_send_button_pressed():
 	input_field.clear()
 	
 	is_waiting_for_response = true
-	input_field.placeholder_text = "Diyetisyen düşünüyor..."
+	input_field.placeholder_text = "Nutritionist is thinking..."
 	input_field.editable = false
 	
 	_send_to_ai_dietitian(user_text)
@@ -69,7 +69,7 @@ func _send_to_ai_dietitian(user_msg: String):
 
 func _on_ai_request_completed(_result, response_code, _headers, body):
 	is_waiting_for_response = false
-	input_field.placeholder_text = "Mesaj yaz..." 
+	input_field.placeholder_text = "Enter your text..." 
 	input_field.editable = true
 	input_field.grab_focus()
 
@@ -78,9 +78,9 @@ func _on_ai_request_completed(_result, response_code, _headers, body):
 		if json and json.has("reply"):
 			add_message_to_chat(json["reply"], false)
 		else:
-			add_message_to_chat("Hata: JSON formatı bozuk.", false)
+			add_message_to_chat("Error: JSON is broken.", false)
 	else:
-		add_message_to_chat("Bağlantı hatası: %d" % response_code, false)
+		add_message_to_chat("Load error: %d" % response_code, false)
 
 func _on_input_field_text_submitted(_new_text: String) -> void:
 	_on_send_button_pressed()

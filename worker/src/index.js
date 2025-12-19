@@ -193,12 +193,65 @@ export default {
                 });
 
                 const data = await response.json();
-                const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Afiyet olsun! Ne dediğini tam anlayamadım.";
+                const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Couldn't understand. Please ask again.";
 
                 return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
 
             } catch (err) {
-                return addCors(new Response(JSON.stringify({ reply: "Hata: " + err.message }), { status: 200 }));
+                return addCors(new Response(JSON.stringify({ reply: "Error: " + err.message }), { status: 200 }));
+            }
+        }
+                // ---------- AI CHAT (LIBRARIAN & STUDY COACH) ----------
+        if (path === "/api/ai_library" && method === "POST") {
+            try {
+                const body = await request.json();
+                const userMessage = body.message;
+                const libraryContext = body.context; // Kitap listesi (Still Reading, Completed vb.)
+                const studySchedule = body.study_schedule; // Yeni: Haftalık ders saatleri verisi
+                const userName = body.user_name || "Kitap Kurdu";
+
+                const systemPrompt = `
+                    You are a wise Librarian and an expert Study Coach in a life simulation game.
+                    
+                    USER PROFILE:
+                    Name: ${userName}
+                    
+                    USER'S LIBRARY (Books):
+                    ${JSON.stringify(libraryContext)}
+                    
+                    WEEKLY STUDY SCHEDULE (Lessons & Hours):
+                    ${JSON.stringify(studySchedule)}
+                    
+                    INSTRUCTIONS:
+                    1. BOOK ADVISOR: Analyze the books. Encourage finishing 'Reading' books and suggest new ones based on 'Completed' titles.
+                    2. STUDY COACH (CRITICAL): Analyze the study schedule. 
+                    - If they are missing study sessions or have very few hours, motivate them firmly but kindly.
+                    - Mention specific hours (e.g., "I see you have a gap between 10:00-12:00, why not study then?").
+                    - Act as a mentor who wants them to reach their academic goals.
+                    3. TONE: Sophisticated, intellectual, encouraging, and slightly disciplined (like a mentor).
+                    4. EMOJIS: 📖, 📚, ✍️, 🎓, ⏳, 💡.
+                    
+                    ⚠️ LANGUAGE CONSTRAINT:
+                    Respond in the SAME LANGUAGE as the user's message: "${userMessage}".
+                `;
+
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+                
+                const response = await fetch(geminiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt + `\n\nUSER QUESTION: ${userMessage}` }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Couldn't understand. Please ask again.";
+
+                return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
+
+            } catch (err) {
+                return addCors(new Response(JSON.stringify({ reply: "Error: " + err.message }), { status: 200 }));
             }
         }
         // =====================================================

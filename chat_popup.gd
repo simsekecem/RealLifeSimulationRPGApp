@@ -57,7 +57,7 @@ func _on_send_button_pressed():
 	
 	# 2. Yükleniyor mesajı (İstersen animasyonlu bir şey yapabilirsin)
 	is_waiting_for_response = true
-	input_field.placeholder_text = "Koç düşünüyor..."
+	input_field.placeholder_text = "Coach is thinking..."
 	input_field.editable = false
 	
 	# 3. VERİLERİ HAZIRLA VE GÖNDER
@@ -93,7 +93,7 @@ func _send_to_ai_coach(user_msg: String):
 
 func _on_ai_request_completed(_result, response_code, _headers, body):
 	is_waiting_for_response = false
-	input_field.placeholder_text = "Mesaj yaz..." # Eski haline getir
+	input_field.placeholder_text = "Enter your text..." # Eski haline getir
 	input_field.editable = true
 	input_field.grab_focus()
 
@@ -103,10 +103,10 @@ func _on_ai_request_completed(_result, response_code, _headers, body):
 			# Gemini'nin cevabını ekle
 			add_message_to_chat(json["reply"], false)
 		else:
-			add_message_to_chat("Cevap anlaşılmadı.", false)
+			add_message_to_chat("Couldnt understand the answer.", false)
 	else:
-		print("❌ AI Hatası: ", response_code)
-		add_message_to_chat("Bağlantı hatası oluştu. (Kod: %d)" % response_code, false)
+		print("❌ AI Error: ", response_code)
+		add_message_to_chat("Load error. (Code: %d)" % response_code, false)
 
 func _on_input_field_text_submitted(_new_text: String) -> void:
 	_on_send_button_pressed()

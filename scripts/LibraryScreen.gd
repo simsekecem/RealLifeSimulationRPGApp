@@ -175,3 +175,8 @@ func get_study_data(target_date: String, target_hour: int) -> String:
 func _on_back_button_pressed():
 	Globals.save_cache()
 	if UI.has_node("UIRoot"): UI.get_node("UIRoot").return_to_town()
+
+
+func _on_texture_button_pressed() -> void:
+	$ChatPopup_L.visible = true
+	$ChatPopup_L/MainWindow/InputField.grab_focus()

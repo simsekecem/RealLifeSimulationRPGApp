@@ -157,6 +157,8 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_7syeu")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_o2ilv")
 text = "Send"
 
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
+
 [connection signal="pressed" from="MainWindow/CloseButton" to="." method="_on_close_button_pressed"]
 [connection signal="text_submitted" from="MainWindow/InputField" to="." method="_on_input_field_text_submitted"]
 [connection signal="pressed" from="MainWindow/SendButton" to="." method="_on_send_button_pressed"]

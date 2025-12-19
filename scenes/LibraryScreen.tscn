@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cd5swl0nqiup6"]
+[gd_scene load_steps=19 format=3 uid="uid://cd5swl0nqiup6"]
 
 [ext_resource type="Texture2D" uid="uid://1r6d4qjhnbcr" path="res://assets/backgrounds/library.png" id="1_kwsf8"]
 [ext_resource type="Script" uid="uid://35k5ed4pxeom" path="res://scripts/LibraryScreen.gd" id="1_rlh3e"]
@@ -7,6 +7,7 @@
 [ext_resource type="Theme" uid="uid://cns8x5gumkdgm" path="res://scenes/LibraryScreen.tres" id="4_juet4"]
 [ext_resource type="Texture2D" uid="uid://d1q8ryr6f4gyh" path="res://assets/ui/library button.png" id="6_cysxn"]
 [ext_resource type="Texture2D" uid="uid://c6sbofl7vg4ne" path="res://assets/ui/balon.png" id="7_w80t8"]
+[ext_resource type="PackedScene" uid="uid://cnh67ta3q18xk" path="res://scenes/chat_popup_l.tscn" id="8_d3r45"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cysxn"]
 bg_color = Color(0.6901961, 0.654902, 0.8235294, 1)
@@ -383,3 +384,8 @@ theme_override_fonts/font = ExtResource("2_o6s3j")
 theme_override_font_sizes/font_size = 10
 text = "Need help?"
 horizontal_alignment = 1
+
+[node name="ChatPopup_L" parent="." instance=ExtResource("8_d3r45")]
+visible = false
+
+[connection signal="pressed" from="TextureButton" to="." method="_on_texture_button_pressed"]
