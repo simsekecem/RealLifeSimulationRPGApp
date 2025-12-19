@@ -7,7 +7,7 @@
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="5_f158r"]
 [ext_resource type="Texture2D" uid="uid://bclscw3s3mjcp" path="res://assets/ui/dinnercharacter.png" id="6_orihb"]
 [ext_resource type="Texture2D" uid="uid://c6sbofl7vg4ne" path="res://assets/ui/balon.png" id="7_dtr25"]
-[ext_resource type="PackedScene" path="res://scenes/chat_popup_r.tscn" id="8_dtr25"]
+[ext_resource type="PackedScene" uid="uid://duv5tekuk2xdu" path="res://scenes/chat_popup_r.tscn" id="8_dtr25"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rvna5"]
 bg_color = Color(0.9607843, 0.79607844, 0.79607844, 1)

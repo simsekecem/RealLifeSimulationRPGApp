@@ -155,7 +155,52 @@ export default {
                 return addCors(new Response(JSON.stringify({ reply: "SERVER ERROR: " + err.message }), { status: 200 }));
             }
         }
+                // ---------- AI CHAT (DIETITIAN - GYM STYLE) ----------
+        if (path === "/api/ai_diet" && method === "POST") {
+            try {
+                const body = await request.json();
+                const userMessage = body.message; // Kullanıcının sorusu
+                const userContext = body.context; // Godot'tan gelen Globals.cache listesi
+                const userName = body.user_name || "Gurme";
 
+                const systemPrompt = `
+                    You are a professional nutritionist in a life simulation game.
+                    
+                    USER PROFILE:
+                    Name: ${userName}
+                    
+                    MEAL DATA FROM GAME (Context):
+                    ${JSON.stringify(userContext)}
+                    
+                    INSTRUCTIONS:
+                    1. Use the provided "Meal Data" to analyze the user's habits.
+                    2. If the user asks about their diet, reference their specific logs.
+                    3. Be supportive, knowledgeable, and professional. 
+                    4. Use food emojis (🥗, 🥑, 🍎).
+                    
+                    ⚠️ LANGUAGE CONSTRAINT:
+                    Respond in the SAME LANGUAGE as the user's message: "${userMessage}".
+                `;
+
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+                
+                const response = await fetch(geminiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt + `\n\nUSER: ${userMessage}` }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Afiyet olsun! Ne dediğini tam anlayamadım.";
+
+                return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
+
+            } catch (err) {
+                return addCors(new Response(JSON.stringify({ reply: "Hata: " + err.message }), { status: 200 }));
+            }
+        }
         // =====================================================
         // AUTH CHECK (Protected Routes)
         // =====================================================

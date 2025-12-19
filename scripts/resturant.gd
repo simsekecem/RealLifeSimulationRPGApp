@@ -190,3 +190,9 @@ func _on_notes_changed():
 func _on_back_button_pressed():
 	Globals.save_cache()
 	if UI.has_node("UIRoot"): UI.get_node("UIRoot").return_to_town()
+# TextureButton'ın 'pressed' sinyaline bağla
+func _on_texture_button_pressed() -> void:
+	# Eğer ChatPopup_R sahneye gömülü ise (Görüntü 8fe72d'deki gibi):
+	$ChatPopup_R.visible = true
+	# Pencere açıldığında inputa odaklanmasını sağlar
+	$ChatPopup_R/MainWindow/InputField.grab_focus()
