@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 @export var speed: float = 150.0  # Karakterin hızı
-@export var accel: float = 20.0   # Hızlanma
+@export var accel: float = 20.0    # Hızlanma
 @export var friction: float = 20.0 # Durma
 
 @onready var anim = $AnimatedSprite2D 
@@ -16,14 +16,19 @@ func _ready():
 	if camera:
 		camera.make_current()
 	
-	# 👇 YENİ: KARAKTER GÖRÜNÜMÜNÜ YÜKLE
-	# Oyun açıldığında Globals'a bakıp doğru kıyafeti (SpriteFrames) giyer.
+	# 2. Karakter Görünümünü Yükle
 	load_character_visuals()
 
-# 👇 YENİ FONKSİYON: Animasyon Paketini Değiştirir
+	# 👇 YENİ: Sinyal Bağlantısı
+	# Menüden karakter değişip "Close" butonuna basıldığında bu sinyal tetiklenir.
+	if Globals.has_signal("data_updated"):
+		if not Globals.data_updated.is_connected(load_character_visuals):
+			Globals.data_updated.connect(load_character_visuals)
+			print("✅ Player, global veri güncellemelerini dinlemeye başladı.")
+
+# --- KARAKTER GÖRÜNÜMÜNÜ YÜKLE ---
 func load_character_visuals():
 	# 1. Global veriden seçili karakter ID'sini al (Yoksa 1 varsay)
-	# cache.user içinden veriyi güvenli şekilde alıyoruz
 	var user_data = Globals.cache.get("user", {})
 	var char_id = int(user_data.get("character_id", 1))
 	
@@ -33,17 +38,15 @@ func load_character_visuals():
 	# 3. Dosya varsa yükle ve karaktere giydir
 	if ResourceLoader.exists(path):
 		var new_frames = load(path)
-		# Eğer yüklenen şey gerçekten SpriteFrames ise
 		if new_frames is SpriteFrames:
 			anim.sprite_frames = new_frames
 			# Görünüm değişince "Idle" moduna geç ki ekranda hemen güncellensin
 			play_animation("idle")
-			print("✅ Player karakteri yüklendi: ID ", char_id)
+			print("🎭 [PLAYER] Görünüm güncellendi: ID ", char_id)
 		else:
 			print("⚠️ Hata: Yüklenen dosya SpriteFrames formatında değil!")
 	else:
 		print("⚠️ Hata: Karakter dosyası bulunamadı -> ", path)
-		# Dosya yoksa oyun çökmesin diye varsayılan (editörde seçili olan) kalır.
 
 func _physics_process(delta):
 	var direction = Vector2.ZERO
@@ -51,7 +54,6 @@ func _physics_process(delta):
 	# 1. JOYSTICK KONTROLÜ
 	if UI.has_node("UIRoot/Joystick"):
 		var joystick = UI.get_node("UIRoot/Joystick")
-		
 		if "direction" in joystick and joystick.direction.length() > 0:
 			direction = (joystick.direction * 1.5).limit_length(1.0)
 
@@ -86,9 +88,9 @@ func play_animation(action_name: String):
 	
 	var final_anim_name = action_name + dir_suffix
 	
-	# Çökme önleyici: Eğer yeni yüklenen pakette bu animasyon yoksa hata vermesin
 	if anim.sprite_frames.has_animation(final_anim_name):
 		anim.play(final_anim_name)
 	else:
 		# Yeni pakette animasyon ismi hatalıysa konsola yazsın (Debug için)
-		print_debug("Animasyon bulunamadı: ", final_anim_name)
+		# print_debug("Animasyon bulunamadı: ", final_anim_name)
+		pass

@@ -23,9 +23,9 @@ extends Control
 @onready var save_button = $EditWindow/SaveButton
 @onready var input_name = $EditWindow/NewNameLE
 
-# Karakter Değiştirme Butonları
-@onready var btn_next = $EditWindow/BtnNext if has_node("EditWindow/BtnNext") else null
-@onready var btn_prev = $EditWindow/BtnPrev if has_node("EditWindow/BtnPrev") else null
+# Karakter Değiştirme Butonları (Hiyerarşine göre düzeltildi)
+@onready var btn_next = $BtnNext
+@onready var btn_prev = $BtnPrev 
 
 # Tarih Seçiciler
 @onready var opt_day = $EditWindow/BirthdayContainer/Day
@@ -36,12 +36,13 @@ extends Control
 # DEĞİŞKENLER
 # -----------------------------------------------
 var temp_char_id: int = 1
-var max_character_count: int = 4
+var max_character_count: int = 2
 
 # =================================================
 # BAŞLANGIÇ
 # =================================================
 func _ready():
+	# Ana buton bağlantıları
 	close_button_main.pressed.connect(hide_avatar_window)
 	edit_button.pressed.connect(show_edit_window)
 	close_button_edit.pressed.connect(hide_edit_window)
@@ -49,15 +50,19 @@ func _ready():
 	if save_button:
 		save_button.pressed.connect(_on_save_pressed)
 	
-	if btn_next: btn_next.pressed.connect(_change_character.bind(1))
-	if btn_prev: btn_prev.pressed.connect(_change_character.bind(-1))
+	# Karakter değiştirme butonlarını bağla
+	if btn_next: 
+		btn_next.pressed.connect(_change_character.bind(1))
+	if btn_prev: 
+		btn_prev.pressed.connect(_change_character.bind(-1))
+		print("✅ Karakter değiştirme butonları bağlandı.")
 	
 	_setup_date_dropdowns()
 	edit_window.visible = false
 	update_ui_from_cache()
 
 # =================================================
-# UI GÜNCELLEME (LOAD) - DÜZELTİLDİ 🛠️
+# UI GÜNCELLEME (LOAD)
 # =================================================
 func update_ui_from_cache():
 	var user_data = Globals.cache.get("user", {})
@@ -65,7 +70,6 @@ func update_ui_from_cache():
 	# Ana Ekranı Doldur
 	if label_name_display: label_name_display.text = str(user_data.get("name", "Player"))
 	
-	# 👇 DÜZELTME: int() içine alarak küsuratları atıyoruz
 	if label_level_display: 
 		var lvl = int(user_data.get("level", 1))
 		label_level_display.text = str(lvl)
@@ -81,7 +85,7 @@ func update_ui_from_cache():
 	if input_name: input_name.text = str(user_data.get("name", ""))
 	_set_date_selectors(birth_str)
 	
-	# Karakteri Yükle
+	# Mevcut Karakteri Yükle
 	temp_char_id = int(user_data.get("character_id", 1))
 	_update_character_visual(temp_char_id)
 
@@ -95,57 +99,81 @@ func _update_character_visual(id: int):
 	if ResourceLoader.exists(path) and preview_sprite:
 		preview_sprite.sprite_frames = load(path)
 		preview_sprite.play("idle_down") 
-		
-		# Karakteri Büyütme (Buradan ayarlayabilirsin)
 		preview_sprite.scale = Vector2(4, 4) 
-		# Piksel bulanıklığını önlemek için (Kodla yapmak istersen):
 		preview_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	else:
 		print("⚠️ Karakter animasyonu bulunamadı: ", path)
 
 func _change_character(direction: int):
+	print("🔘 Ok basıldı! Eski ID: ", temp_char_id)
 	temp_char_id += direction
 	if temp_char_id > max_character_count: temp_char_id = 1
 	elif temp_char_id < 1: temp_char_id = max_character_count
+	print("🆔 Yeni Geçici ID: ", temp_char_id)
 	_update_character_visual(temp_char_id)
 
 # =================================================
 # KAYDETME (SAVE)
 # =================================================
 func _on_save_pressed():
+	# Sadece isim ve doğum günü değişikliklerini kaydet
 	var new_name = input_name.text.strip_edges()
 	var new_birth_date = _get_date_string_from_selectors()
 	
 	if not Globals.cache.has("user"): Globals.cache["user"] = {}
 	Globals.cache["user"]["name"] = new_name
 	Globals.cache["user"]["birthdate"] = new_birth_date
-	Globals.cache["user"]["character_id"] = temp_char_id
-	
-	if not Globals.cache["user"].has("level"): Globals.cache["user"]["level"] = 1
-	if not Globals.cache["user"].has("experience"): Globals.cache["user"]["experience"] = 0
 	
 	Globals.mark_dirty()
 	Globals.save_cache()
-	print("✅ Profil güncellendi: ", new_name)
+	print("✅ Profil (İsim/Tarih) güncellendi.")
 	
-	if Globals.has_signal("data_updated"):
-		Globals.emit_signal("data_updated")
-	
-	if owner and owner.has_method("update_top_left_ui"):
-		owner.update_top_left_ui()
-	else:
-		var parent = get_parent()
-		while parent:
-			if parent.has_method("update_top_left_ui"):
-				parent.update_top_left_ui()
-				break
-			parent = parent.get_parent()
-
 	update_ui_from_cache()
 	hide_edit_window()
 
 # =================================================
-# TARİH YARDIMCILARI
+# PENCERE YÖNETİMİ VE ANA KAYIT 💾
+# =================================================
+func hide_avatar_window():
+	# 🔴 KRİTİK EKLEME: Pencere kapanırken karakteri kaydet
+	if not Globals.cache.has("user"): 
+		Globals.cache["user"] = {}
+	
+	# Geçici olarak seçilen ID'yi asıl kayıt yerine yazıyoruz
+	Globals.cache["user"]["character_id"] = temp_char_id
+	
+	# Verileri kalıcı yap
+	Globals.mark_dirty()
+	Globals.save_cache()
+	
+	print("💾 [AVATAR] Karakter kalıcı olarak seçildi: ", temp_char_id)
+	
+	# Diğer UI elemanlarını (Sol üst ikon vb.) uyar
+	if Globals.has_signal("data_updated"):
+		Globals.emit_signal("data_updated")
+	
+	# Sol üst köşedeki ikonu anında güncellemek için hiyerarşiyi tara
+	_trigger_main_ui_update()
+	
+	self.visible = false
+
+func _trigger_main_ui_update():
+	var p = get_parent()
+	while p:
+		if p.has_method("update_top_left_ui"):
+			p.update_top_left_ui()
+			break
+		p = p.get_parent()
+
+func show_edit_window():
+	update_ui_from_cache()
+	edit_window.visible = true
+
+func hide_edit_window():
+	edit_window.visible = false
+
+# =================================================
+# TARİH YARDIMCILARI (Aynı kalıyor)
 # =================================================
 func _setup_date_dropdowns():
 	if opt_day:
@@ -177,16 +205,3 @@ func _set_date_selectors(date_str: String):
 				if int(opt_year.get_item_text(i)) == y: opt_year.select(i); break
 		if opt_month: opt_month.select(m - 1)
 		if opt_day: opt_day.select(d - 1)
-
-# =================================================
-# PENCERE YÖNETİMİ
-# =================================================
-func hide_avatar_window():
-	self.visible = false
-
-func show_edit_window():
-	update_ui_from_cache()
-	edit_window.visible = true
-
-func hide_edit_window():
-	edit_window.visible = false

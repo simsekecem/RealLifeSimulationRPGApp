@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cfvygcqwkg8yb"]
+[gd_scene load_steps=14 format=3 uid="uid://cfvygcqwkg8yb"]
 
 [ext_resource type="Texture2D" uid="uid://blbtmadk6t0n4" path="res://assets/ui/GUI/Equipment.png" id="1_lochu"]
 [ext_resource type="Texture2D" uid="uid://csepbew64lyh1" path="res://assets/ui/GUI/Settings.png" id="1_obayw"]
@@ -13,6 +13,14 @@ region = Rect2(9.835999, 830.7283, 675.2308, 394.42053)
 [sub_resource type="AtlasTexture" id="AtlasTexture_378xl"]
 atlas = ExtResource("1_obayw")
 region = Rect2(191.61072, 3.9447708, 23.958008, 21.29601)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q31jy"]
+atlas = ExtResource("1_lochu")
+region = Rect2(558.2213, 1379.6436, 21.604248, 36.854126)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hxtmx"]
+atlas = ExtResource("1_lochu")
+region = Rect2(681.8578, 1381.5, 18.30664, 33.14746)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_oh5fi"]
 atlas = ExtResource("1_obayw")
@@ -184,6 +192,24 @@ theme_override_fonts/font = ExtResource("3_378xl")
 theme_override_font_sizes/font_size = 13
 text = "10.10.2010"
 
+[node name="BtnNext" type="TextureButton" parent="."]
+custom_minimum_size = Vector2(18, 33)
+layout_mode = 0
+offset_left = 577.0
+offset_top = 370.0
+offset_right = 598.0
+offset_bottom = 406.0
+texture_normal = SubResource("AtlasTexture_q31jy")
+
+[node name="BtnPrev" type="TextureButton" parent="."]
+custom_minimum_size = Vector2(18, 33)
+layout_mode = 0
+offset_left = 368.0
+offset_top = 370.0
+offset_right = 386.0
+offset_bottom = 403.0
+texture_normal = SubResource("AtlasTexture_hxtmx")
+
 [node name="EditButton" type="TextureButton" parent="."]
 layout_mode = 0
 offset_left = 813.0
@@ -211,6 +237,7 @@ theme_override_fonts/font = ExtResource("3_378xl")
 text = "EDIT"
 
 [node name="EditWindow" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -223,6 +250,7 @@ offset_right = 238.0
 offset_bottom = 103.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 
 [node name="Background" type="NinePatchRect" parent="EditWindow"]
 layout_mode = 1

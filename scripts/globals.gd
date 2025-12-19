@@ -339,6 +339,8 @@ func merge_list(key: String, server_list: Array):
 # ============================================================
 #   CACHE YÖNETİMİ
 # ============================================================
+# globals.gd içindeki load_cache fonksiyonunu bu şekilde güncelle:
+
 func load_cache():
 	if not FileAccess.file_exists(cache_path):
 		save_cache()
@@ -347,7 +349,17 @@ func load_cache():
 	if file:
 		var data = JSON.parse_string(file.get_as_text())
 		if typeof(data) == TYPE_DICTIONARY:
-			cache = data
+			# 👇 GÜVENLİ YÜKLEME: 
+			# Eski cache'i silmek yerine, dosyadaki verileri mevcut cache üzerine yazar.
+			# Böylece yeni eklediğimiz "character_id" gibi alanlar asla kaybolmaz.
+			for key in data.keys():
+				if key == "user" and cache.has("user"):
+					# User içindeki alt verileri (name, character_id vb.) tek tek birleştir
+					for u_key in data["user"].keys():
+						cache["user"][u_key] = data["user"][u_key]
+				else:
+					cache[key] = data[key]
+			print("✅ Yerel cache başarıyla yüklendi ve harmanlandı.")
 
 func save_cache():
 	var file = FileAccess.open(cache_path, FileAccess.WRITE)
