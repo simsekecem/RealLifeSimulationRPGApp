@@ -245,17 +245,17 @@ export default {
                 const userLevel = userBox.level || 1;
                 const userExp = userBox.experience || 0;
                 const charId = userBox.character_id || 1;
+                const fcmToken = userBox.fcm_token || null;
 
                 // 👇 YENİ: İsim boşsa DB'ye "Çaylak" olarak yazılmasını garantile
                 const finalUserName = userName === "" ? "Rookie" : userName;
 
                 await insertOrUpdate(
-                    // INSERT: İlk kayıt yapılırken finalUserName kullanılır
-                    `INSERT INTO users (user_id, name, birthdate, level, experience, character_id) VALUES (?, ?, ?, ?, ?, ?)`,
-                    [userId, finalUserName, userBirth, userLevel, userExp, charId],
-                    // UPDATE: Zaten kayıtlıysa güncel isim kullanılır
-                    `UPDATE users SET name=?, birthdate=?, level=?, experience=?, character_id=? WHERE user_id=?`,
-                    [finalUserName, userBirth, userLevel, userExp, charId, userId]
+                    `INSERT INTO users (user_id, name, birthdate, level, experience, character_id, fcm_token) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [userId, finalUserName, userBirth, userLevel, userExp, charId, fcmToken],
+                    // UPDATE: fcm_token sütununu güncelliyoruz
+                    `UPDATE users SET name=?, birthdate=?, level=?, experience=?, character_id=?, fcm_token=? WHERE user_id=?`,
+                    [finalUserName, userBirth, userLevel, userExp, charId, fcmToken, userId]
                 );
 
                 // 2. PREFERENCES (KALDIRILDI)
@@ -440,5 +440,191 @@ export default {
 
         // Not found
         return addCors(new Response(JSON.stringify({ error: "Not Found" }), { status: 404 }));
+    },
+
+// Worker kodunun en altındaki scheduled fonksiyonunu bununla değiştir:
+
+    async scheduled(event, env, ctx) {
+        const today = new Date().toISOString().split('T')[0];
+        console.log(`🕒 Global Notification Sync Started: ${today}`);
+
+        try {
+            // 1. Auth Hazırlığı
+            const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
+            const accessToken = await getGoogleAccessToken(serviceAccount);
+
+            // 2. FCM Token'ı olan kullanıcıları çek
+            const { results: users } = await env.DB.prepare(
+                "SELECT user_id, fcm_token, name FROM users WHERE fcm_token IS NOT NULL AND fcm_token != ''"
+            ).all();
+
+            for (const user of users) {
+                let summaryParts = [];
+
+                // --- VERİ KONTROLLERİ (BOŞ SATIR FİLTRELİ) ---
+                
+                // A) GYM (Egzersiz adı boş değilse say)
+                const gym = await env.DB.prepare(`
+                    SELECT id FROM gym_log 
+                    WHERE user_id=? AND date=? AND completed=0 
+                    AND exercise_name IS NOT NULL AND exercise_name != ''
+                `).bind(user.user_id, today).all();
+                
+                if (gym.results.length > 0) summaryParts.push(`🏋️ ${gym.results.length} exercises left!`);
+
+                // B) MARKET (Ürün adı boş değilse say)
+                const mkt = await env.DB.prepare(`
+                    SELECT id FROM market_items 
+                    WHERE user_id=? AND date=? AND bought=0 
+                    AND item_name IS NOT NULL AND item_name != ''
+                `).bind(user.user_id, today).all();
+                
+                if (mkt.results.length > 0) summaryParts.push(`🛒 ${mkt.results.length} items to buy.`);
+
+                // C) STUDY (Konu adı boş değilse say)
+                const study = await env.DB.prepare(`
+                    SELECT subject FROM study_log 
+                    WHERE user_id=? AND date=? 
+                    AND subject IS NOT NULL AND subject != ''
+                `).bind(user.user_id, today).all();
+                
+                if (study.results.length > 0) summaryParts.push(`📚 ${study.results.length} study sessions planned.`);
+
+                // D) LIBRARY (Okunuyor durumu ve Kitap adı boş değilse)
+                const book = await env.DB.prepare(`
+                    SELECT title FROM library_books 
+                    WHERE user_id=? AND status='Reading' 
+                    AND title IS NOT NULL AND title != ''
+                `).bind(user.user_id).first();
+                
+                if (book) summaryParts.push(`📖 Reading: "${book.title}"`);
+
+                // E) NOTES (Not içeriği boş değilse)
+                const note = await env.DB.prepare(`
+                    SELECT note FROM calendar_notes 
+                    WHERE user_id=? AND date=? 
+                    AND note IS NOT NULL AND note != ''
+                `).bind(user.user_id, today).first();
+                
+                if (note && note.note.trim() !== "") summaryParts.push(`📝 Note: "${note.note.substring(0, 15)}..."`);
+
+                // F) RESTAURANT (Yemek planı notları veya öğünleri boş değilse)
+                // Burası biraz daha detaylı çünkü 4-5 tane alan var.
+                // Eğer herhangi biri doluysa "Plan Var" sayıyoruz.
+                const meal = await env.DB.prepare(`
+                    SELECT id FROM restaurant_log 
+                    WHERE user_id=? AND date=? 
+                    AND (
+                        (breakfast IS NOT NULL AND breakfast != '') OR
+                        (lunch IS NOT NULL AND lunch != '') OR
+                        (dinner IS NOT NULL AND dinner != '') OR
+                        (snacks IS NOT NULL AND snacks != '')
+                    )
+                `).bind(user.user_id, today).first();
+                
+                if (meal) summaryParts.push(`🍽️ Meal plan is ready.`);
+
+                // --- BİLDİRİM METNİ ---
+                let title = "";
+                let body = "";
+
+                if (summaryParts.length > 0) {
+                    // DURUM 1: Yapılacak işler var
+                    title = `Don't stop now, ${user.name || 'Champ'}! 🚀`;
+                    body = "Unfinished goals for today:\n" + summaryParts.join("\n") + "\n\nLog in now to complete them!";
+                } else {
+                    // DURUM 2: Her şey bitti veya plan yok
+                    // Boş bildirim atmamak için burayı 'return' ile geçebilirsin istersen.
+                    // Ama kullanıcıyı oyuna çekmek için motivasyon atmak daha iyidir:
+                    title = `Your life is waiting! ✨`;
+                    body = `Hey ${user.name || 'Rookie'}, your character needs you. Log in now to plan your next move!`;
+                }
+
+                // 3. GÖNDERİM
+                const fcmUrl = `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`;
+                
+                const payload = {
+                    "message": {
+                        "token": user.fcm_token,
+                        "notification": {
+                            "title": title,
+                            "body": body
+                        },
+                        "android": {
+                            "priority": "high"
+                        }
+                    }
+                };
+
+                await fetch(fcmUrl, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${accessToken}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+            }
+        } catch (e) {
+            console.error("FCM Scheduled Error:", e.message);
+        }
     }
 };
+
+async function getGoogleAccessToken(serviceAccount) {
+  // 1. JWT Header ve Payload hazırla
+  const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const iat = Math.floor(Date.now() / 1000);
+  const exp = iat + 3600;
+
+  const payload = btoa(JSON.stringify({
+    iss: serviceAccount.client_email,
+    scope: "https://www.googleapis.com/auth/firebase.messaging",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: exp,
+    iat: iat
+  }));
+
+  const unsignedToken = `${header}.${payload}`;
+
+  // 2. Özel anahtarı (Private Key) temizle ve import et
+  const pemHeader = "-----BEGIN PRIVATE KEY-----";
+  const pemFooter = "-----END PRIVATE KEY-----";
+  const pemContents = serviceAccount.private_key
+    .replace(/\\n/g, "\n")
+    .replace(pemHeader, "")
+    .replace(pemFooter, "")
+    .replace(/\s+/g, "");
+
+  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "pkcs8",
+    binaryKey,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  // 3. Token'ı imzala
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    cryptoKey,
+    new TextEncoder().encode(unsignedToken)
+  );
+
+  const signedToken = `${unsignedToken}.${btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")}`;
+
+  // 4. Google'dan gerçek Access Token'ı iste
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: signedToken
+    })
+  });
+
+  const data = await response.json();
+  return data.access_token;
+}

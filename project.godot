@@ -30,7 +30,7 @@ window/stretch/aspect="keep_width"
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/godotx_firebase/plugin.cfg")
 
 [input_devices]
 
