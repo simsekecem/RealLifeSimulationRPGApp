@@ -154,23 +154,27 @@ func load_daily_list():
 # 👇 ÇİFT KAYIT TEMİZLEYİCİ HELPER FONKSİYON
 func _clean_duplicates(raw_list: Array) -> Array:
 	var unique_list = []
-	var seen_keys = [] 
+	var seen_fingerprints = []
 	
 	for entry in raw_list:
 		if typeof(entry) != TYPE_DICTIONARY: continue
 		
-		var content_key = ""
-		# ID varsa ID'yi, yoksa (Tarih + İsim + Set) kombinasyonunu anahtar yap
-		if entry.has("id") and entry["id"] != null:
-			content_key = "ID_" + str(entry["id"])
-		else:
-			var e_name = str(entry.get("exercise_name", "")).to_lower().strip_edges()
-			content_key = str(entry.get("date")) + "|" + e_name + "|" + str(entry.get("sets", "0"))
+		# ID'yi hariç tutarak tüm değerleri bir metin haline getiriyoruz (Parmak İzi)
+		var fingerprint = str(entry.get("date", "")) + "|" + \
+						  str(entry.get("exercise_name", "")).to_lower().strip_edges() + "|" + \
+						  str(entry.get("sets", 0)) + "|" + \
+						  str(entry.get("reps", 0)) + "|" + \
+						  str(entry.get("weight", 0)) + "|" + \
+						  str(entry.get("duration", 0)) + "|" + \
+						  str(entry.get("rest", 0)) + "|" + \
+						  str(entry.get("region", "")) + "|" + \
+						  str(entry.get("completed", false))
 		
-		if content_key in seen_keys:
-			continue # Bu zaten var, atla
+		if fingerprint in seen_fingerprints:
+			print("🚫 Birebir aynı olan kopya bulundu ve elendi: ", entry.get("exercise_name"))
+			continue # Eğer bu parmak izini daha önce gördüysek, listeye ekleme
 			
-		seen_keys.append(content_key)
+		seen_fingerprints.append(fingerprint)
 		unique_list.append(entry)
 			
 	return unique_list

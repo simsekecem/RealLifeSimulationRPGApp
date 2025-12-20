@@ -2,6 +2,8 @@ name = "life-sim-worker"
 main = "src/index.js"
 compatibility_date = "2025-10-13"
 
+preview_urls = true
+
 [[d1_databases]]
 binding = "DB"
 database_name = "life_sim_db"

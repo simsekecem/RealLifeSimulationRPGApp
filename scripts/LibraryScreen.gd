@@ -51,55 +51,67 @@ func _ready():
 # ============================================================
 
 func load_books_to_ui():
-	# Globals cache'den ham listeyi al
 	var all_books = Globals.ensure_list(Globals.cache.get("library", []))
 	
-	# Geçici diziler (Boşlukları korumak için array kullanıp sonra birleştireceğiz)
-	var list_reading = PackedStringArray()
-	var list_completed = PackedStringArray()
-	var list_wishlist = PackedStringArray()
+	var list_reading = []
+	var list_completed = []
+	var list_wishlist = []
 	
+	# 👇 Çift görünmeyi engellemek için "zaten görülenler" takibi
+	var seen_books = [] 
+
 	for book in all_books:
-		# Veritabanında başlık boş ("") olsa bile alıyoruz.
-		# Çünkü kullanıcı orayı bilerek boş bırakmış olabilir.
-		var title = book.get("title", "") 
+		var title = Globals.safe_str(book.get("title", ""))
 		var status = Globals.safe_str(book.get("status", "reading"))
 		
+		# Parmak izi oluştur (Başlık + Durum)
+		var fingerprint = title + "|" + status
+		
+		# Eğer bu kitap aynı kategoride zaten listeye eklendiyse, atla
+		if title != "" and fingerprint in seen_books:
+			continue
+		
+		if title != "":
+			seen_books.append(fingerprint)
+
 		if status == "reading": list_reading.append(title)
 		elif status == "completed": list_completed.append(title)
 		elif status == "wishlist": list_wishlist.append(title)
 	
-	# Array'i satır satır birleştirip TextEdit'e bas
+	# UI'a basarken temiz ve eşsiz listeyi basıyoruz
 	if input_reading: input_reading.text = "\n".join(list_reading)
 	if input_completed: input_completed.text = "\n".join(list_completed)
 	if input_wishlist: input_wishlist.text = "\n".join(list_wishlist)
 
 func _on_book_list_changed():
-	# Kullanıcı bir şeyler yazdı/sildi. Tüm listeyi yeniden oluşturuyoruz.
 	var new_library_list = []
 	
-	# Helper: TextEdit içeriğini satır satır okuyan ve listeye ekleyen fonksiyon
+	# Her bir paneli parse ederken eşsizlik korumasıyla ekle
 	_parse_text_edit_to_list(input_reading, "reading", new_library_list)
 	_parse_text_edit_to_list(input_completed, "completed", new_library_list)
 	_parse_text_edit_to_list(input_wishlist, "wishlist", new_library_list)
 	
-	# Global Cache'i güncelle ve "Kaydedilecek" olarak işaretle
 	Globals.cache["library"] = new_library_list
 	Globals.mark_dirty()
 
 func _parse_text_edit_to_list(text_edit: TextEdit, status: String, target_list: Array):
 	if not text_edit: return
 	
-	# split("\n") kullanıyoruz. Parametre vermediğimiz için boş satırları da alır.
-	# Örn: "A\n\nB" -> ["A", "", "B"] olur.
 	var lines = text_edit.text.split("\n")
-	
+	var local_seen = [] # Aynı kutu içinde çift yazılmasını engellemek için
+
 	for line in lines:
-		# strip_edges() ile satırın başındaki/sonundaki görünmez boşlukları temizle.
-		# Ama satır tamamen boşsa, title: "" olarak kalır.
-		# SİLİNCE BOŞLUK KALSIN istediğin için 'if line != "":' KONTROLÜ YOK.
+		var clean_line = line.strip_edges()
+		
+		# Boş satırları kaydetmek istiyorsan burayı tut, 
+		# ama aynı isimdeki kitapları engellemek için local_seen kontrolü yap:
+		if clean_line != "":
+			if clean_line in local_seen:
+				continue # Aynı kutuda bu isim varsa ekleme
+			local_seen.append(clean_line)
+			
 		target_list.append({ 
-			"title": line.strip_edges(), 
+			"title": clean_line, 
 			"status": status 
 		})
 

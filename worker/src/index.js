@@ -388,58 +388,56 @@ export default {
 
                 // 5. GYM LOG
                 // 5. GYM LOG (GÜNCELLENDİ: CRASH-PROOF & ID DESTEKLİ)
+                // =====================================================
+                // 5. GYM LOG (TAM EŞLEŞME KONTROLLÜ & COMPLETED HARİÇ)
+                        // =====================================================
                 const gym_log = safeList(body.gym_log);
+
                 for (const g of gym_log) {
                     
                     // ---------------------------------------------------------
-                    // 1. ADIM: SİLME KONTROLÜ (İsim Boşsa + ID Varsa -> SİL)
+                    // 1. ADIM: SİLME KONTROLÜ
                     // ---------------------------------------------------------
+                    // Eğer ID varsa ama isim silindiyse veya boşsa, veritabanından yok et.
                     if (g.id && (!g.exercise_name || g.exercise_name.trim() === "")) {
                         await env.DB.prepare(`DELETE FROM gym_log WHERE id=? AND user_id=?`)
                             .bind(g.id, userId).run();
                         continue;
                     }
 
-                    // ---------------------------------------------------------
-                    // 2. ADIM: KAYDETME / GÜNCELLEME
-                    // ---------------------------------------------------------
-                    
-                    // A) GÜNCELLEME (ID VARSA)
-                    if (g.id) {
-                        try {
-                            // Var olan ID'yi güncellemeye çalış
-                            await env.DB.prepare(`
-                                UPDATE gym_log 
-                                SET date=?, exercise_name=?, sets=?, reps=?, duration=?, rest=?, weight=?, region=?, completed=? 
-                                WHERE id=? AND user_id=?
-                            `).bind(g.date, g.exercise_name, g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed, g.id, userId).run();
-                        } catch (e) {
-                            // HATA: Eğer ismini değiştirdin ve o tarihte o isimde zaten başka kayıt varsa (Çakışma)
-                            // Eskisini sil (Merge mantığı: yenisi kalsın, eskisi gitsin)
-                            await env.DB.prepare(`DELETE FROM gym_log WHERE id=?`).bind(g.id).run();
-                        }
-                    }
-                    
-                    // B) EKLEME (ID YOKSA)
-                    else {
-                        // İsimsiz yeni kayıtları engelle
-                        if (!g.exercise_name || g.exercise_name.trim() === "") continue;
+                    // İsimsiz yeni kayıtların eklenmesini engelle
+                    if (!g.exercise_name || g.exercise_name.trim() === "") continue;
 
-                        try {
-                            // Yeni eklemeyi dene
-                            await env.DB.prepare(`
-                                INSERT INTO gym_log (user_id, date, exercise_name, sets, reps, duration, rest, weight, region, completed) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            `).bind(userId, g.date, g.exercise_name, g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed).run();
-                        } catch (e) {
-                            // HATA: Eğer "Zaten var" derse, var olan kaydı güncelle
-                            // (Örneğin kullanıcı aynı gün tekrar 'Push Up' eklemiş ama ID'si yok)
-                            await env.DB.prepare(`
-                                UPDATE gym_log 
-                                SET sets=?, reps=?, duration=?, rest=?, weight=?, region=?, completed=? 
-                                WHERE user_id=? AND date=? AND exercise_name=?
-                            `).bind(g.sets, g.reps, g.duration, g.rest, g.weight, g.region, g.completed, userId, g.date, g.exercise_name).run();
-                        }
+                    // ---------------------------------------------------------
+                    // 2. ADIM: UPSERT (EKLE VEYA GÜNCELLE)
+                    // ---------------------------------------------------------
+                    // NOT: Bu sorgunun çalışması için D1 konsolunda şu indeksi oluşturmuş olmalısın:
+                    // CREATE UNIQUE INDEX idx_gym_workout_details ON gym_log(user_id, date, exercise_name, sets, reps, weight, duration, rest, region);
+                    
+                    try {
+                        await env.DB.prepare(`
+                            INSERT INTO gym_log (
+                                user_id, date, exercise_name, sets, reps, 
+                                weight, duration, rest, region, completed
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ON CONFLICT(user_id, date, exercise_name, sets, reps, weight, duration, rest, region) 
+                            DO UPDATE SET 
+                                completed = excluded.completed
+                        `).bind(
+                            userId,
+                            g.date,
+                            g.exercise_name,
+                            g.sets || 0,
+                            g.reps || 0,
+                            g.weight || 0,
+                            g.duration || 0,
+                            g.rest || 0,
+                            g.region || "",
+                            g.completed ? 1 : 0 // SQLite için boolean'ı 1 veya 0'a çeviriyoruz
+                        ).run();
+                    } catch (e) {
+                        console.error("Gym Log Sync Error:", e.message);
+                        // Tekil bir hata tüm döngüyü bozmasın diye burada loglayıp devam ediyoruz.
                     }
                 }
 
@@ -503,11 +501,32 @@ export default {
                 // 7. RESTAURANT LOG
                 const restaurant = safeList(body.restaurant);
                 for (const r of restaurant) {
+                    // Eğer r.notes veya r.breakfast gelmezse (null/undefined ise) || "" sayesinde hata almaz, boş kaydeder.
+                    const params = [
+                        userId, 
+                        r.date, 
+                        r.breakfast || "", 
+                        r.lunch || "", 
+                        r.dinner || "", 
+                        r.snacks || "", 
+                        r.notes || ""
+                    ];
+                    
+                    const updateParams = [
+                        r.breakfast || "", 
+                        r.lunch || "", 
+                        r.dinner || "", 
+                        r.snacks || "", 
+                        r.notes || "", 
+                        userId, 
+                        r.date
+                    ];
+
                     await insertOrUpdate(
                         `INSERT INTO restaurant_log (user_id, date, breakfast, lunch, dinner, snacks, notes) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                        [userId, r.date, r.breakfast, r.lunch, r.dinner, r.snacks, r.notes],
+                        params,
                         `UPDATE restaurant_log SET breakfast=?, lunch=?, dinner=?, snacks=?, notes=? WHERE user_id=? AND date=?`,
-                        [r.breakfast, r.lunch, r.dinner, r.snacks, r.notes, userId, r.date]
+                        updateParams
                     );
                 }
 

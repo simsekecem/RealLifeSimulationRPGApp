@@ -151,29 +151,33 @@ func _save_data(field: String, value: String):
 	if current_day == "": return 
 
 	var list: Array = Globals.ensure_list(Globals.cache.get("restaurant", []))
-	Globals.cache["restaurant"] = list
-	
 	var found = false
+	
 	for i in range(list.size()):
 		if typeof(list[i]) != TYPE_DICTIONARY: continue
 		
-		# Listede bu tarihi bulursan güncelle
 		if Globals.safe_str(list[i].get("date", "")) == current_day:
+			# Mevcut kaydı bulduk, sadece ilgili alanı (not veya yemek) güncelle
 			list[i][field] = value
 			found = true
 			break
 	
-	# Bulamazsan yeni ekle
 	if not found:
+		# 🌟 BURASI KRİTİK: Eğer o güne ait hiç kayıt yoksa, 
+		# tüm alanları boş ("") olan ama tarihi ve senin yazdığın notu içeren yeni bir kayıt oluştur.
 		var new_entry = { 
 			"date": current_day, 
-			"breakfast": "", "lunch": "", "dinner": "", "snacks": "", "notes": "" 
+			"breakfast": "", 
+			"lunch": "", 
+			"dinner": "", 
+			"snacks": "", 
+			"notes": "" 
 		}
 		new_entry[field] = value
 		list.append(new_entry)
 	
+	Globals.cache["restaurant"] = list
 	Globals.mark_dirty()
-
 # =================================================
 # SİNYALLER
 # =================================================
