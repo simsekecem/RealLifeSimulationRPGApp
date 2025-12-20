@@ -47,7 +47,7 @@ func _switch_category(cat_name: String):
 	
 	# Panel scriptindeki yükleme fonksiyonunu çağır
 	panel.load_category(cat_name)
-
+	
 func _on_back_button_pressed():
 	# Çıkarken kaydet
 	if panel.visible and current_category_name != "":

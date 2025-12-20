@@ -14,41 +14,49 @@ func _ready():
 # LOAD (YÜKLEME)
 # ------------------------------------------------------------
 func load_category(cat_name: String):
-	print("\n📂 LOAD CATEGORY BAŞLADI: ", cat_name)
 	active_category = cat_name
 	
+	# 1. UI TEMİZLİĞİ: queue_free gecikmeli siler, remove_child anında temizler.
 	for child in vbox.get_children():
+		vbox.remove_child(child)
 		child.queue_free()
 	
 	var all_items = Globals.cache.get("market_items", [])
 	
-	# Veri Düzeltme
+	# 2. VERİ DÜZELTME (Sessizce yap, sinyal döngüsüne girmesin)
 	if typeof(all_items) == TYPE_DICTIONARY:
-		if all_items.has("results") and typeof(all_items["results"]) == TYPE_ARRAY:
-			all_items = all_items["results"]
-		else:
-			all_items = all_items.values()
+		all_items = all_items.values() if not all_items.has("results") else all_items["results"]
 		Globals.cache["market_items"] = all_items
+		Globals.save_cache() # Sessiz kayıt
 	
 	if typeof(all_items) != TYPE_ARRAY: all_items = []
+	
+	# 3. PARMAK İZİ KONTROLÜ (Çift görünmeyi engelleyen kısım) ✨
+	var seen_fingerprints = []
 	
 	for item in all_items:
 		if typeof(item) != TYPE_DICTIONARY: continue
 		
-		# İsim kontrolü
 		var i_name = str(item.get("item_name", "")).strip_edges()
-		var i_id = item.get("id", "YOK")
+		var i_cat = str(item.get("category", ""))
+		var i_date = str(item.get("date", ""))
 		
-		# LOG EKLEYELİM
-		if i_name == "":
-			print("🙈 LOAD: İsmi boş olan kayıt atlandı. ID: ", i_id)
-			continue
+		# İsim boşsa atla (Save fonksiyonun silme işlemini yapacak zaten)
+		if i_name == "": continue
 
-		if item.get("category") == cat_name:
-			# print("👁️ LOAD: Ekrana ekleniyor -> ", i_name, " | ID: ", i_id)
+		# Sadece seçili kategorideysen işlem yap
+		if i_cat == cat_name:
+			# Parmak İzi: Aynı isim, aynı kategori ve aynı tarihli ürünü bir kez göster
+			var fingerprint = i_name.to_lower() + "|" + i_cat + "|" + i_date
+			
+			if fingerprint in seen_fingerprints:
+				continue # Bu zaten eklendi, atla!
+			
+			seen_fingerprints.append(fingerprint)
 			add_item(false, item)
 	
-	add_item(false) 
+	# 4. En sona boş bir satır ekle (Yeni giriş için)
+	add_item(false)
 
 # ------------------------------------------------------------
 # ADD ITEM
@@ -79,49 +87,42 @@ func _focus_lineedit(le): await get_tree().process_frame; if is_instance_valid(l
 # ------------------------------------------------------------
 func save_items_to_cache():
 	if active_category == "": return
-	print("\n💾 --- SAVE İŞLEMİ BAŞLIYOR: ", active_category, " ---")
 	
 	var new_list = []
 	var all_items = Globals.cache.get("market_items", [])
 	if typeof(all_items) != TYPE_ARRAY: all_items = []
 	
 	# 1. DİĞER KATEGORİLERİ KORU
-	print("1️⃣ Diğer kategoriler korunuyor...")
 	for item in all_items:
 		if typeof(item) != TYPE_DICTIONARY: continue
 		if item.get("category") != active_category:
 			new_list.append(item)
 	
 	# 2. EKRANDAKİLERİ İŞLE
-	print("2️⃣ Ekran taranıyor (VBox Child Sayısı: ", vbox.get_child_count(), ")")
+	# Kaydederken de çiftleşmeyi önlemek için local kontrol
+	var saved_names = []
 	
 	for child in vbox.get_children():
 		if child.has_method("get_data"):
-			var data = child.get_data() # Row'un logu burada çalışacak
-			
+			var data = child.get_data()
 			var name = str(data.get("item_name", "")).strip_edges()
-			var has_id = data.has("id")
-			var id_val = data.get("id", "YOK")
 			
-			print("   👉 İncelenen: '", name, "' | ID Var mı?: ", has_id, " (", id_val, ")")
+			# Çift girişi engelle (Boş değilse)
+			if name != "":
+				if name.to_lower() in saved_names: continue
+				saved_names.append(name.to_lower())
+
+			# Mantıksal Filtreleme
+			if name == "" and not data.has("id"):
+				continue # Yeni boş satır, kaydetme
 			
-			# SENARYO 1: İsim Boş AMA ID Var -> KAYDET (DB'yi boşaltmak için)
-			if name == "" and has_id:
-				print("      ✅ SENARYO 1: Eski kayıt silinmek üzere BOŞ olarak kaydediliyor.")
-				data["category"] = active_category
-				new_list.append(data)
-				
-			# SENARYO 2: İsim Boş VE ID Yok -> ATLA (Yeni açılmış boş satır)
-			elif name == "" and not has_id:
-				print("      ❌ SENARYO 2: Yeni boş satır, kaydedilmiyor.")
-				continue
-				
-			# SENARYO 3: Normal Veri -> KAYDET
-			else:
-				# print("      ✅ SENARYO 3: Normal veri kaydedildi.")
-				data["category"] = active_category
-				new_list.append(data)
+			data["category"] = active_category
+			new_list.append(data)
 	
+	# 3. KAYDET
+	Globals.cache["market_items"] = new_list
+	Globals.mark_dirty()
+	Globals.save_cache()
 	# 3. KAYDET
 	Globals.cache["market_items"] = new_list
 	Globals.mark_dirty()

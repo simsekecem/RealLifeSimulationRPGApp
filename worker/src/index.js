@@ -1,5 +1,6 @@
 export default {
     async fetch(request, env) {
+        const toInt = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
         const url = new URL(request.url);
         const path = url.pathname;
         const method = request.method;
@@ -416,25 +417,26 @@ export default {
                     
                     try {
                         await env.DB.prepare(`
-                            INSERT INTO gym_log (
-                                user_id, date, exercise_name, sets, reps, 
-                                weight, duration, rest, region, completed
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            ON CONFLICT(user_id, date, exercise_name, sets, reps, weight, duration, rest, region) 
-                            DO UPDATE SET 
-                                completed = excluded.completed
-                        `).bind(
-                            userId,
-                            g.date,
-                            g.exercise_name,
-                            g.sets || 0,
-                            g.reps || 0,
-                            g.weight || 0,
-                            g.duration || 0,
-                            g.rest || 0,
-                            g.region || "",
-                            g.completed ? 1 : 0 // SQLite için boolean'ı 1 veya 0'a çeviriyoruz
-                        ).run();
+                        INSERT INTO gym_log (
+                            user_id, date, exercise_name, sets, reps, 
+                            weight, duration, rest, region, completed
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(user_id, date, exercise_name, sets, reps, weight, duration, rest, region) 
+                        DO UPDATE SET 
+                            completed = excluded.completed
+                    `).bind(
+                        userId,
+                        g.date,
+                        g.exercise_name,
+                        toInt(g.sets),
+                        toInt(g.reps),
+                        toInt(g.weight),
+                        toInt(g.duration),
+                        toInt(g.rest),
+                        g.region || "",
+                        g.completed ? 1 : 0
+                    ).run();
+
                     } catch (e) {
                         console.error("Gym Log Sync Error:", e.message);
                         // Tekil bir hata tüm döngüyü bozmasın diye burada loglayıp devam ediyoruz.

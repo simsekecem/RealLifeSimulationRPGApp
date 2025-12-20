@@ -216,7 +216,7 @@ func save_daily_data():
 		if typeof(entry) == TYPE_DICTIONARY and entry.get("date") != target_date:
 			new_log_list.append(entry)
 
-	# 2. Silinenleri ekle
+	# 2. 🔴 SİLİNENLERİ EKLE (EKSİK OLAN BURASI)
 	for del_item in pending_deletes:
 		new_log_list.append(del_item)
 
@@ -229,6 +229,13 @@ func save_daily_data():
 		var name = data.get("exercise_name", "").strip_edges()
 		if name == "" and (not data.has("id") or data["id"] == null): continue
 
+		data["sets"] = int(data.get("sets", 0))
+		data["reps"] = int(data.get("reps", 0))
+		data["weight"] = int(data.get("weight", 0))
+		data["duration"] = int(data.get("duration", 0))
+		data["rest"] = int(data.get("rest", 0))
+		data["completed"] = bool(data.get("completed", false))
+
 		data["date"] = target_date
 		new_log_list.append(data)
 
@@ -236,9 +243,9 @@ func save_daily_data():
 	Globals.cache["gym_log"] = new_log_list
 	Globals.mark_dirty()
 	Globals.save_cache()
-	
+
+	# 5. En sonda temizle
 	pending_deletes.clear()
-	print("✅ Günlük plan kaydedildi ve silme emirleri işlendi.")
 
 # ------------------------------------------------------------
 # WEEKLY
