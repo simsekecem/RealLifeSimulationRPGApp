@@ -255,6 +255,164 @@ export default {
                 return addCors(new Response(JSON.stringify({ reply: "Error: " + err.message }), { status: 200 }));
             }
         }
+
+
+       // ---------- CLOTHING CLASSIFICATION (GEMINI VISION + KEY ROTATION) ----------
+        if (path === "/api/classify_clothing" && method === "POST") {
+            try {
+                const body = await request.json();
+                if (!body.image) {
+                    throw new Error("Missing image");
+                }
+
+                const base64Data = body.image.includes(",") ? body.image.split(",")[1] : body.image;
+
+                const imagePart = {
+                    inline_data: {
+                        mime_type: "image/jpeg",
+                        data: base64Data
+                    }
+                };
+
+                const prompt = `
+Analyze the image carefully. It must contain ONLY ONE single clothing item with a clean, clear view. 
+
+Reject immediately and output only "not clothing" if:
+- There are multiple items
+- The clothing is worn on a person or mannequin
+- There is a complex or distracting background
+- It's an accessory (hat, cap, scarf, belt, bag, glasses, jewelry, watch, socks, gloves, tie, etc.)
+- The item is not clearly visible or the image is blurry/low quality
+
+Only proceed if the image shows exactly one isolated clothing item from these categories:
+
+Allowed categories and examples:
+- upper: t-shirt, shirt, hoodie, sweatshirt, blouse, tank top, crop top, polo shirt
+- lower: jeans, pants, trousers, shorts, skirt, leggings, joggers
+- dress: dress, gown, maxi dress, mini dress
+- outer: jacket, coat, blazer, cardigan, vest, bomber jacket, trench coat
+- shoes: sneakers, boots, heels, sandals, loafers, flats, high heels
+
+If it's a valid clothing item:
+
+1. Choose the EXACT category from: upper, lower, dress, outer, shoes
+2. Detect the dominant (most prominent) color of the clothing. Use only these color names:
+   Black, White, Grey, Red, Blue, Green, Yellow, Orange, Purple, Pink, Brown, Beige, Navy,
+   Light Blue, Light Grey, Light Pink, Dark Red, Dark Blue, Dark Green, Dark Grey, Cream, Gold, Silver
+
+   - Add "Dark" prefix for very dark shades
+   - Add "Light" prefix for very light/pastel shades
+   - If patterned/multicolored, pick the most dominant color
+
+Respond ONLY with this exact JSON format (no extra text, no markdown, no explanations):
+
+{
+  "item": "original_english_label",
+  "category": "upper",
+  "color": "Red",
+  "confidence": 0.XX
+}
+
+Confidence between 0.00 and 1.00 — lower if uncertain.
+Do not write anything else!
+`;
+
+                const keys = (env.GEMINI_KEYS ? env.GEMINI_KEYS.split(",").map(k => k.trim()) : [])
+                    .concat([
+                        env.GEMINI_API_KEY || "",
+                        env.GEMINI_KEY_1 || "",
+                        env.GEMINI_KEY_2 || "",
+                        env.GEMINI_KEY_3 || "",
+                        env.GEMINI_KEY_4 || "",
+                        env.GEMINI_KEY_5 || ""
+                    ])
+                    .filter(k => k.length > 0);
+
+                if (keys.length === 0) {
+                    throw new Error("No Gemini API keys configured");
+                }
+
+                let lastError = null;
+
+                for (const key of keys) {
+                    try {
+                        const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${key}`;
+
+                        const response = await fetch(geminiUrl, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                contents: [{
+                                    parts: [
+                                        { text: prompt },
+                                        imagePart
+                                    ]
+                                }],
+                                safetySettings: [
+                                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                                ]
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.error) {
+                            if (data.error.code === 429 || data.error.message.toLowerCase().includes("quota")) {
+                                console.log(`Quota exceeded for key ending ...${key.slice(-6)}, trying next`);
+                                lastError = new Error("Quota exceeded");
+                                continue;
+                            }
+                            throw new Error("Gemini Error: " + data.error.message);
+                        }
+
+                        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "{}";
+
+                        let result;
+                        try {
+                            result = JSON.parse(replyText);
+                        } catch (parseErr) {
+                            throw new Error("Invalid JSON from Gemini: " + replyText);
+                        }
+
+                        const category = (result.category || "").toLowerCase();
+                        const color = result.color || "Unknown";
+                        const confidence = Number(result.confidence || 0);
+
+                        const validCategories = ["upper", "lower", "dress", "outer", "shoes"];
+
+                        if (!validCategories.includes(category) || confidence < 0.65) {
+                            return addCors(new Response(JSON.stringify({
+                                is_valid: false,
+                                reason: "Unsupported clothing type or low confidence",
+                                confidence
+                            }), { status: 200 }));
+                        }
+
+                        return addCors(new Response(JSON.stringify({
+                            is_valid: true,
+                            item: result.item || "item",
+                            category: category,
+                            color: color,                    // ← YENİ: Renk döndürülüyor
+                            confidence: Number(confidence.toFixed(3)),
+                            model: "gemini-2.5-flash"
+                        }), { status: 200 }));
+
+                    } catch (err) {
+                        lastError = err;
+                        continue;
+                    }
+                }
+
+                throw lastError || new Error("All Gemini keys failed");
+
+            } catch (err) {
+                console.error("Classification Error:", err.message);
+                return addCors(new Response(JSON.stringify({
+                    error: "CLASSIFY_ERROR",
+                    message: err.message.includes("quota") ? "Günlük limit aşıldı, yarın tekrar dene!" : err.message
+                }), { status: 503 }));
+            }
+        }
         // =====================================================
         // AUTH CHECK (Protected Routes)
         // =====================================================
@@ -290,8 +448,7 @@ export default {
                 user: await env.DB.prepare(`SELECT name, birthdate, level, experience, character_id FROM users WHERE user_id=?`)
                     .bind(userId).first(),
 
-                // Preferences satırını buradan kaldırdık. 
-                // Artık cihazlar arası ses senkronizasyonu yok.
+                wardrobe: await env.DB.prepare(`SELECT id, category, item_name, color, image_url, is_favorite FROM wardrobe WHERE user_id=?`).bind(userId).all(),
 
                 library: await env.DB.prepare(`SELECT title, status FROM library_books WHERE user_id=?`)
                     .bind(userId).all(),
@@ -550,16 +707,42 @@ export default {
                     }
                 }
 
+                const wardrobe = safeList(body.wardrobe);
+                for (const w of wardrobe) {
+                    // Silme: ID var ama URL yoksa
+                    if (w.id && (!w.image_url || w.image_url === "")) {
+                        await env.DB.prepare(`DELETE FROM wardrobe WHERE id=? AND user_id=?`).bind(w.id, userId).run();
+                        continue;
+                    }
+                    if (!w.image_url || w.image_url === "") continue;
+
+                    // Ekle / Güncelle (URL Conflict)
+                    try {
+                        await env.DB.prepare(`
+                            INSERT INTO wardrobe (user_id, category, item_name, color, image_url, is_favorite) 
+                            VALUES (?, ?, ?, ?, ?, ?)
+                            ON CONFLICT(user_id, image_url) 
+                            DO UPDATE SET item_name=excluded.item_name, color=excluded.color, is_favorite=excluded.is_favorite
+                        `).bind(
+                            userId, w.category, w.item_name || "Unnamed", w.color || "Unknown", w.image_url, w.is_favorite ? 1 : 0
+                        ).run();
+                    } catch (e) {
+                        console.error("Wardrobe Save Error:", e.message);
+                    }
+                }
+
                 return addCors(new Response(JSON.stringify({ ok: true }), { status: 200 }));
 
             } catch (err) {
                 return addCors(new Response(JSON.stringify({ error: err.message, stack: err.stack }), { status: 500 }));
             }
         }
+        // ---------- HUGGING FACE (KORUMALI VERSİYON) ----------
+    
 
-        // Not found
-        return addCors(new Response(JSON.stringify({ error: "Not Found" }), { status: 404 }));
-    },
+            // Not found
+            return addCors(new Response(JSON.stringify({ error: "Not Found" }), { status: 404 }));
+        },
 
 // Worker kodunun en altındaki scheduled fonksiyonunu bununla değiştir:
 
@@ -688,6 +871,7 @@ export default {
             console.error("FCM Scheduled Error:", e.message);
         }
     }
+    
 };
 
 async function getGoogleAccessToken(serviceAccount) {

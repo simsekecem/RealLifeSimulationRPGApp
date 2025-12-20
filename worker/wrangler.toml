@@ -30,3 +30,6 @@ crons = [
   "0 17 * * *",  # TR 20:00 (Akşam raporu)
   "10 21 * * *"   # TR 00:00 (Günü bitirirken son çağrı)
 ]
+
+[ai]
+binding = "AI"

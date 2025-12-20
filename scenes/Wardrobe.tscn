@@ -1,7 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://dli12jnw5q508"]
+[gd_scene load_steps=6 format=3 uid="uid://dli12jnw5q508"]
 
 [ext_resource type="Texture2D" uid="uid://cwbp7wjla4ewm" path="res://assets/wardrobe.png" id="1_82s2s"]
 [ext_resource type="Script" uid="uid://b53571oq7raw3" path="res://scripts/Wardrobe.gd" id="1_ex7tr"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ex7tr"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b35uj"]
 
 [sub_resource type="ImageTexture" id="ImageTexture_ex7tr"]
 
@@ -65,6 +69,8 @@ text = "<"
 custom_minimum_size = Vector2(196, 0)
 layout_mode = 2
 mouse_filter = 0
+expand_mode = 2
+stretch_mode = 5
 
 [node name="Next" type="Button" parent="HBoxContainer/VBoxContainer2/SlotOuter/HBoxContainer"]
 custom_minimum_size = Vector2(25, 0)
@@ -95,6 +101,7 @@ text = "<"
 custom_minimum_size = Vector2(196, 0)
 layout_mode = 2
 mouse_filter = 0
+stretch_mode = 5
 
 [node name="Next" type="Button" parent="HBoxContainer/VBoxContainer2/SlotDress/HBoxContainer"]
 custom_minimum_size = Vector2(25, 0)
@@ -131,6 +138,7 @@ text = "<"
 custom_minimum_size = Vector2(196, 0)
 layout_mode = 2
 mouse_filter = 0
+stretch_mode = 5
 
 [node name="Next" type="Button" parent="HBoxContainer/VBoxContainer/SlotUpper/HBoxContainer"]
 custom_minimum_size = Vector2(25, 0)
@@ -141,6 +149,7 @@ text = ">"
 [node name="SlotLower" type="Panel" parent="HBoxContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 184)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ex7tr")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/SlotLower"]
 layout_mode = 1
@@ -161,6 +170,7 @@ text = "<"
 custom_minimum_size = Vector2(196, 0)
 layout_mode = 2
 mouse_filter = 0
+stretch_mode = 5
 
 [node name="Next" type="Button" parent="HBoxContainer/VBoxContainer/SlotLower/HBoxContainer"]
 custom_minimum_size = Vector2(25, 0)
@@ -171,6 +181,7 @@ text = ">"
 [node name="SlotShoes" type="Panel" parent="HBoxContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_b35uj")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/SlotShoes"]
 layout_mode = 1
@@ -192,6 +203,8 @@ custom_minimum_size = Vector2(196, 150)
 layout_mode = 2
 mouse_filter = 0
 texture = SubResource("ImageTexture_ex7tr")
+expand_mode = 2
+stretch_mode = 5
 
 [node name="Next" type="Button" parent="HBoxContainer/VBoxContainer/SlotShoes/HBoxContainer"]
 custom_minimum_size = Vector2(25, 0)

@@ -335,11 +335,15 @@ expand_mode = 1
 
 [node name="BackButton" type="Button" parent="."]
 custom_minimum_size = Vector2(47, 38)
-layout_mode = 0
-offset_left = 20.0
-offset_top = 674.0
-offset_right = 67.0
-offset_bottom = 712.0
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 19.0
+offset_top = -56.0
+offset_right = 66.0
+offset_bottom = -18.0
+grow_vertical = 0
 size_flags_horizontal = 0
 theme = ExtResource("4_juet4")
 theme_override_colors/font_color = Color(0.30980393, 0.25882354, 0.23137255, 1)
@@ -355,22 +359,36 @@ toggle_mode = true
 text = "<"
 
 [node name="TextureButton" type="TextureButton" parent="."]
-layout_mode = 0
-offset_left = 1167.0
-offset_top = 622.0
-offset_right = 1297.0
-offset_bottom = 752.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -107.0
+offset_top = -101.0
+offset_right = 23.0
+offset_bottom = 29.0
+grow_horizontal = 0
+grow_vertical = 0
 texture_normal = ExtResource("6_cysxn")
 texture_pressed = ExtResource("6_cysxn")
 texture_hover = ExtResource("6_cysxn")
 stretch_mode = 0
 
 [node name="TextureRect2" type="TextureRect" parent="."]
-layout_mode = 0
-offset_left = 1092.0
-offset_top = 584.0
-offset_right = 1215.0
-offset_bottom = 675.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -186.0
+offset_top = -118.0
+offset_right = -63.0
+offset_bottom = -27.0
+grow_horizontal = 0
+grow_vertical = 0
 texture = ExtResource("7_w80t8")
 
 [node name="Label" type="Label" parent="TextureRect2"]

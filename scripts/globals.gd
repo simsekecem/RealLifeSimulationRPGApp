@@ -37,6 +37,7 @@ var cache := {
 	"market_items": [],
 	"restaurant": [],
 	"calendar_notes": [],
+	"wardrobe": [],
 	"unsynced_changes": false 
 }
 
@@ -338,19 +339,43 @@ func merge_list(key: String, server_list: Array):
 
 func load_cache():
 	if not FileAccess.file_exists(cache_path):
-		save_cache(); return
+		save_cache()
+		return
+
 	var file = FileAccess.open(cache_path, FileAccess.READ)
 	if file:
-		var data = JSON.parse_string(file.get_as_text())
-		if typeof(data) == TYPE_DICTIONARY:
-			# 👇 Güvenli Harmanlama: Yeni eklenen 'character_id' vb. alanları korur
-			for key in data.keys():
-				if key == "user" and cache.has("user"):
-					for u_key in data["user"].keys():
-						cache["user"][u_key] = data["user"][u_key]
-				else:
-					cache[key] = data[key]
-			print("✅ Yerel cache yüklendi.")
+		var text = file.get_as_text()
+		file.close()
+
+		var json = JSON.new()
+		var parse_result = json.parse(text)
+		if parse_result == OK:
+			var data = json.get_data()
+			if typeof(data) == TYPE_DICTIONARY:
+				# Var olan anahtarları güncelle
+				for key in data.keys():
+					if cache.has(key):
+						if key == "user" and typeof(data[key]) == TYPE_DICTIONARY:
+							for u_key in data[key].keys():
+								cache["user"][u_key] = data[key][u_key]
+						else:
+							cache[key] = data[key]
+					else:
+						# Yeni gelen anahtarları ekle (örneğin wardrobe)
+						cache[key] = data[key]
+
+				# wardrobe yoksa boş array oluştur
+				if not cache.has("wardrobe"):
+					cache["wardrobe"] = []
+
+				print("✅ Yerel cache yüklendi (wardrobe dahil).")
+			else:
+				print("❌ Cache dosyası bozuk, sıfırlanıyor.")
+				save_cache()
+		else:
+			print("❌ JSON parse hatası: ", json.get_error_message())
+			save_cache()
+
 
 func save_cache():
 	var file = FileAccess.open(cache_path, FileAccess.WRITE)

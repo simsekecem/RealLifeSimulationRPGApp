@@ -48,7 +48,7 @@ layout_mode = 0
 offset_left = -3.0
 offset_top = -7.0
 offset_right = 1296.0
-offset_bottom = 723.0
+offset_bottom = 729.0
 texture = ExtResource("1_nmixc")
 
 [node name="TabContainer" type="TabContainer" parent="."]
@@ -191,19 +191,33 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="AddButton" type="Button" parent="TabContainer/Daily"]
-layout_mode = 0
-offset_left = 1111.0
-offset_top = 371.0
-offset_right = 1196.0
-offset_bottom = 417.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -125.0
+offset_right = 95.0
+offset_bottom = -79.0
+grow_horizontal = 0
+grow_vertical = 0
 text = "ADD"
 
 [node name="SaveButton" type="Button" parent="TabContainer/Daily"]
-layout_mode = 0
-offset_left = 1103.0
-offset_top = 426.0
-offset_right = 1207.0
-offset_bottom = 472.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -67.0
+offset_right = 112.0
+offset_bottom = -21.0
+grow_horizontal = 0
+grow_vertical = 0
 text = "SAVE"
 
 [node name="Weekly" type="Control" parent="TabContainer"]
@@ -409,11 +423,18 @@ size_flags_vertical = 3
 theme_override_constants/separation = 100
 
 [node name="TextureRect" type="TextureRect" parent="."]
-layout_mode = 0
-offset_left = 1000.0
-offset_top = 560.0
-offset_right = 1285.1334
-offset_bottom = 699.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -277.0
+offset_top = -154.0
+offset_right = 8.133301
+offset_bottom = -15.0
+grow_horizontal = 0
+grow_vertical = 0
 texture = ExtResource("3_v4x2c")
 expand_mode = 3
 
@@ -429,21 +450,35 @@ theme_override_font_sizes/font_size = 18
 text = "<"
 
 [node name="TextureButton" type="TextureButton" parent="."]
-layout_mode = 0
-offset_left = 894.0
-offset_top = 596.0
-offset_right = 1020.0
-offset_bottom = 710.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -367.0
+offset_top = -107.0
+offset_right = -241.0
+offset_bottom = 7.0
+grow_horizontal = 0
+grow_vertical = 0
 texture_normal = ExtResource("7_gh0q6")
 texture_pressed = ExtResource("7_gh0q6")
 texture_hover = ExtResource("7_gh0q6")
 
 [node name="TextureRect2" type="TextureRect" parent="."]
-layout_mode = 0
-offset_left = 809.0
-offset_top = 558.0
-offset_right = 933.0
-offset_bottom = 643.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -457.0
+offset_top = -121.0
+offset_right = -333.0
+offset_bottom = -36.0
+grow_horizontal = 0
+grow_vertical = 0
 texture = ExtResource("8_opj1y")
 
 [node name="Label" type="Label" parent="TextureRect2"]
