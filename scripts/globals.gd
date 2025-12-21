@@ -268,6 +268,7 @@ func apply_server_data(data):
 	cache["market_items"] = ensure_list(data.get("market_items"))
 	cache["calendar_notes"] = ensure_list(data.get("calendar_notes"))
 	cache["restaurant"] = ensure_list(data.get("restaurant"))
+	cache["wardrobe"] = ensure_list(data.get("wardrobe"))
 	
 	cache["owner_id"] = user_id 
 	cache["unsynced_changes"] = false
@@ -290,6 +291,7 @@ func merge_server_with_local(server_data):
 	merge_list("market_items", ensure_list(server_data.get("market_items")))
 	merge_list("calendar_notes", ensure_list(server_data.get("calendar_notes")))
 	merge_list("restaurant", ensure_list(server_data.get("restaurant")))
+	merge_list("wardrobe", ensure_list(server_data.get("wardrobe")))
 	
 	cache["owner_id"] = user_id 
 	cache["unsynced_changes"] = false

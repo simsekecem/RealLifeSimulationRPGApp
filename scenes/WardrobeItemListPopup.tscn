@@ -36,7 +36,7 @@ layout_mode = 2
 size_flags_vertical = 3
 columns = 3
 
-[node name="Button" type="Button" parent="VBoxContainer"]
+[node name="CloseButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 8

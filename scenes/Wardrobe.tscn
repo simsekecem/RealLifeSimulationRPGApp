@@ -101,6 +101,7 @@ text = "<"
 custom_minimum_size = Vector2(196, 0)
 layout_mode = 2
 mouse_filter = 0
+expand_mode = 2
 stretch_mode = 5
 
 [node name="Next" type="Button" parent="HBoxContainer/VBoxContainer2/SlotDress/HBoxContainer"]
@@ -138,6 +139,7 @@ text = "<"
 custom_minimum_size = Vector2(196, 0)
 layout_mode = 2
 mouse_filter = 0
+expand_mode = 2
 stretch_mode = 5
 
 [node name="Next" type="Button" parent="HBoxContainer/VBoxContainer/SlotUpper/HBoxContainer"]
@@ -170,6 +172,7 @@ text = "<"
 custom_minimum_size = Vector2(196, 0)
 layout_mode = 2
 mouse_filter = 0
+expand_mode = 2
 stretch_mode = 5
 
 [node name="Next" type="Button" parent="HBoxContainer/VBoxContainer/SlotLower/HBoxContainer"]
@@ -229,7 +232,7 @@ text = "ADD
 CLOTHES
 "
 
-[node name="Button" type="Button" parent="."]
+[node name="MagicButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 876.0
 offset_top = 378.0

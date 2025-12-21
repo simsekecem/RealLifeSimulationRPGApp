@@ -256,163 +256,205 @@ export default {
             }
         }
 
-
-       // ---------- CLOTHING CLASSIFICATION (GEMINI VISION + KEY ROTATION) ----------
-        if (path === "/api/classify_clothing" && method === "POST") {
+        // ---------- AI OUTFIT GENERATOR (GEMINI) ----------
+        if (path === "/api/generate_outfit" && method === "POST") {
             try {
                 const body = await request.json();
-                if (!body.image) {
-                    throw new Error("Missing image");
+                const wardrobe = body.wardrobe || [];
+                const context = body.context || "daily casual"; // Kullanıcıdan "Düğün", "Spor" vb. de alabiliriz ilerde
+
+                if (wardrobe.length < 2) {
+                    return addCors(new Response(JSON.stringify({ error: "Not enough items" }), { status: 400 }));
                 }
 
-                const base64Data = body.image.includes(",") ? body.image.split(",")[1] : body.image;
+                // Gemini için sadeleştirilmiş liste (Sadece isim, renk ve ID gönderiyoruz, resim URL'ine gerek yok)
+                const simplifiedList = wardrobe.map(item => ({
+                    id: item.id,
+                    name: item.item_name,
+                    category: item.category,
+                    color: item.color
+                }));
 
-                const imagePart = {
-                    inline_data: {
-                        mime_type: "image/jpeg",
-                        data: base64Data
+                const systemPrompt = `
+                    You are a world-class fashion stylist.
+                    
+                    TASK: Create a stylish outfit from the provided list of clothes for a "${context}" occasion.
+                    
+                    RULES:
+                    1. Select 1 Top + 1 Bottom (OR 1 Dress) + 1 Shoes + (Optional) Outerwear.
+                    2. Return ONLY valid JSON. No markdown, no extra text.
+                    3. JSON Format:
+                    {
+                        "selected_ids": [12, 45, 99],
+                        "explanation": "I chose the white shirt to contrast with..."
                     }
-                };
+                    4. "explanation" should be short, friendly, and use emojis. Language: English.
+                    
+                    WARDROBE LIST:
+                    ${JSON.stringify(simplifiedList)}
+                `;
 
-                const prompt = `
-Analyze the image carefully. It must contain ONLY ONE single clothing item with a clean, clear view. 
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+                
+                const response = await fetch(geminiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt }] }]
+                    })
+                });
 
-Reject immediately and output only "not clothing" if:
-- There are multiple items
-- The clothing is worn on a person or mannequin
-- There is a complex or distracting background
-- It's an accessory (hat, cap, scarf, belt, bag, glasses, jewelry, watch, socks, gloves, tie, etc.)
-- The item is not clearly visible or the image is blurry/low quality
+                const data = await response.json();
+                let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+                
+                // Gemini bazen ```json ... ``` içinde döndürür, temizleyelim
+                rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+                
+                const result = JSON.parse(rawText);
 
-Only proceed if the image shows exactly one isolated clothing item from these categories:
-
-Allowed categories and examples:
-- upper: t-shirt, shirt, hoodie, sweatshirt, blouse, tank top, crop top, polo shirt
-- lower: jeans, pants, trousers, shorts, skirt, leggings, joggers
-- dress: dress, gown, maxi dress, mini dress
-- outer: jacket, coat, blazer, cardigan, vest, bomber jacket, trench coat
-- shoes: sneakers, boots, heels, sandals, loafers, flats, high heels
-
-If it's a valid clothing item:
-
-1. Choose the EXACT category from: upper, lower, dress, outer, shoes
-2. Detect the dominant (most prominent) color of the clothing. Use only these color names:
-   Black, White, Grey, Red, Blue, Green, Yellow, Orange, Purple, Pink, Brown, Beige, Navy,
-   Light Blue, Light Grey, Light Pink, Dark Red, Dark Blue, Dark Green, Dark Grey, Cream, Gold, Silver
-
-   - Add "Dark" prefix for very dark shades
-   - Add "Light" prefix for very light/pastel shades
-   - If patterned/multicolored, pick the most dominant color
-
-Respond ONLY with this exact JSON format (no extra text, no markdown, no explanations):
-
-{
-  "item": "original_english_label",
-  "category": "upper",
-  "color": "Red",
-  "confidence": 0.XX
-}
-
-Confidence between 0.00 and 1.00 — lower if uncertain.
-Do not write anything else!
-`;
-
-                const keys = (env.GEMINI_KEYS ? env.GEMINI_KEYS.split(",").map(k => k.trim()) : [])
-                    .concat([
-                        env.GEMINI_API_KEY || "",
-                        env.GEMINI_KEY_1 || "",
-                        env.GEMINI_KEY_2 || "",
-                        env.GEMINI_KEY_3 || "",
-                        env.GEMINI_KEY_4 || "",
-                        env.GEMINI_KEY_5 || ""
-                    ])
-                    .filter(k => k.length > 0);
-
-                if (keys.length === 0) {
-                    throw new Error("No Gemini API keys configured");
-                }
-
-                let lastError = null;
-
-                for (const key of keys) {
-                    try {
-                        const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${key}`;
-
-                        const response = await fetch(geminiUrl, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                contents: [{
-                                    parts: [
-                                        { text: prompt },
-                                        imagePart
-                                    ]
-                                }],
-                                safetySettings: [
-                                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                                ]
-                            })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.error) {
-                            if (data.error.code === 429 || data.error.message.toLowerCase().includes("quota")) {
-                                console.log(`Quota exceeded for key ending ...${key.slice(-6)}, trying next`);
-                                lastError = new Error("Quota exceeded");
-                                continue;
-                            }
-                            throw new Error("Gemini Error: " + data.error.message);
-                        }
-
-                        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "{}";
-
-                        let result;
-                        try {
-                            result = JSON.parse(replyText);
-                        } catch (parseErr) {
-                            throw new Error("Invalid JSON from Gemini: " + replyText);
-                        }
-
-                        const category = (result.category || "").toLowerCase();
-                        const color = result.color || "Unknown";
-                        const confidence = Number(result.confidence || 0);
-
-                        const validCategories = ["upper", "lower", "dress", "outer", "shoes"];
-
-                        if (!validCategories.includes(category) || confidence < 0.65) {
-                            return addCors(new Response(JSON.stringify({
-                                is_valid: false,
-                                reason: "Unsupported clothing type or low confidence",
-                                confidence
-                            }), { status: 200 }));
-                        }
-
-                        return addCors(new Response(JSON.stringify({
-                            is_valid: true,
-                            item: result.item || "item",
-                            category: category,
-                            color: color,                    // ← YENİ: Renk döndürülüyor
-                            confidence: Number(confidence.toFixed(3)),
-                            model: "gemini-2.5-flash"
-                        }), { status: 200 }));
-
-                    } catch (err) {
-                        lastError = err;
-                        continue;
-                    }
-                }
-
-                throw lastError || new Error("All Gemini keys failed");
+                return addCors(new Response(JSON.stringify(result), { status: 200 }));
 
             } catch (err) {
-                console.error("Classification Error:", err.message);
-                return addCors(new Response(JSON.stringify({
-                    error: "CLASSIFY_ERROR",
-                    message: err.message.includes("quota") ? "Günlük limit aşıldı, yarın tekrar dene!" : err.message
-                }), { status: 503 }));
+                return addCors(new Response(JSON.stringify({ error: err.message }), { status: 500 }));
             }
         }
+
+
+
+// ---------- CLOTHING CLASSIFICATION (ViT MODEL - DOĞRU ROUTER URL) ----------
+if (path === "/api/classify_clothing_vit" && method === "POST") {
+	try {
+		const { image } = await request.json();
+		if (!image || typeof image !== "string") {
+			return addCors(new Response(JSON.stringify({
+				is_valid: false,
+				reason: "Missing image"
+			}), { status: 200 }));
+		}
+
+		const imageBase64 = image.startsWith("data:")
+			? image.split(",")[1]
+			: image;
+
+		const binary = atob(imageBase64);
+		const bytes = new Uint8Array(binary.length);
+		for (let i = 0; i < binary.length; i++) {
+			bytes[i] = binary.charCodeAt(i);
+		}
+
+		const aiResponse = await env.AI.run("@cf/microsoft/resnet-50", {
+			image: [...bytes]
+		});
+
+		if (!Array.isArray(aiResponse) || aiResponse.length === 0) {
+			return addCors(new Response(JSON.stringify({
+				is_valid: false,
+				reason: "No predictions"
+			}), { status: 200 }));
+		}
+
+		const top = aiResponse[0];
+		const label = top.label.toLowerCase();
+		const confidence = Number(top.score.toFixed(4));
+
+		// ❌ Çok düşük confidence direkt elensin
+		if (confidence < 0.45) {
+			return addCors(new Response(JSON.stringify({
+				is_valid: false,
+				reason: "Low confidence",
+				confidence
+			}), { status: 200 }));
+		}
+
+		/* --------------------------------------------------
+		   👕 KIYAFET ANAHTAR KELİMELERİ (GENİŞLETİLDİ)
+		-------------------------------------------------- */
+		const clothingKeywords = [
+			// upper
+			"shirt", "t-shirt", "tshirt", "top", "blouse",
+			"sweater", "hoodie", "sweatshirt", "suit",
+
+			// lower
+			"jean", "pants", "trousers", "shorts",
+			"skirt", "legging",
+
+			// dress
+			"dress", "gown",
+
+			// outer
+			"jacket", "coat", "blazer", "parka",
+			"overcoat", "windbreaker",
+
+			// shoes
+			"shoe", "sneaker", "boot", "sandal",
+			"heel", "slipper"
+		];
+
+		const isClothing = clothingKeywords.some(k => label.includes(k));
+
+		if (!isClothing) {
+			return addCors(new Response(JSON.stringify({
+				is_valid: false,
+				reason: "Not a clothing item",
+				item_name: top.label,
+				confidence
+			}), { status: 200 }));
+		}
+
+		/* --------------------------------------------------
+		   📦 CATEGORY MAP (SENİN SİSTEMİN)
+		   outer | dress | upper | lower | shoes
+		-------------------------------------------------- */
+		let category = "upper";
+
+		if (
+			label.includes("jacket") ||
+			label.includes("coat") ||
+			label.includes("blazer") ||
+			label.includes("parka") ||
+			label.includes("overcoat") ||
+			label.includes("windbreaker")
+		) category = "outer";
+
+		else if (label.includes("dress") || label.includes("gown"))
+			category = "dress";
+
+		else if (
+			label.includes("pants") ||
+			label.includes("jean") ||
+			label.includes("trousers") ||
+			label.includes("shorts") ||
+			label.includes("skirt") ||
+			label.includes("legging")
+		) category = "lower";
+
+		else if (
+			label.includes("shoe") ||
+			label.includes("sneaker") ||
+			label.includes("boot") ||
+			label.includes("sandal") ||
+			label.includes("heel") ||
+			label.includes("slipper")
+		) category = "shoes";
+
+		return addCors(new Response(JSON.stringify({
+			is_valid: true,
+			item_name: top.label,   // örn: "running shoe", "jacket"
+			category,               // outer / dress / upper / lower / shoes
+			confidence,
+			raw_predictions: aiResponse.slice(0, 5)
+		}), { status: 200 }));
+
+	} catch (err) {
+		console.error("AI ERROR:", err);
+		return addCors(new Response(JSON.stringify({
+			is_valid: false,
+			error: "AI_ERROR",
+			message: err.message
+		}), { status: 500 }));
+	}
+}
+
         // =====================================================
         // AUTH CHECK (Protected Routes)
         // =====================================================
@@ -438,6 +480,41 @@ Do not write anything else!
 
         const user = await userRes.json();
         const userId = user.id;
+
+        if (path === "/api/delete_item" && method === "POST") {
+            try {
+                const body = await request.json();
+                const imageUrl = body.image_url;
+                
+                if (!imageUrl) return addCors(new Response(JSON.stringify({ error: "No image URL" }), { status: 400 }));
+
+                // 1. D1'den Sil (GÜVENLİK GÜNCELLEMESİ: Sadece user_id eşleşirse sil!)
+                const result = await env.DB.prepare("DELETE FROM wardrobe WHERE user_id=? AND image_url=?")
+                    .bind(userId, imageUrl).run();
+
+                // Eğer veritabanından bir şey silinmediyse, demek ki o resim bu kullanıcının değil!
+                if (result.meta.changes === 0) {
+                     // Supabase'e gitmeye gerek yok, çünkü yetkisi yok.
+                     return addCors(new Response(JSON.stringify({ success: true, note: "Item not found or not yours" }), { status: 200 }));
+                }
+
+                // 2. Supabase'den Sil
+                const fileName = imageUrl.split("/wardrobe/").pop(); 
+                if (fileName) {
+                    await fetch(`${env.SUPABASE_URL}/storage/v1/object/wardrobe/${fileName}`, {
+                        method: "DELETE",
+                        headers: { 
+                            "Authorization": `Bearer ${env.SUPABASE_ANON_KEY}`, 
+                            "apikey": env.SUPABASE_ANON_KEY 
+                        }
+                    });
+                }
+
+                return addCors(new Response(JSON.stringify({ success: true }), { status: 200 }));
+            } catch (err) {
+                return addCors(new Response(JSON.stringify({ error: err.message }), { status: 500 }));
+            }
+        }
 
         // =====================================================
         // LOAD ALL DATA
@@ -709,22 +786,27 @@ Do not write anything else!
 
                 const wardrobe = safeList(body.wardrobe);
                 for (const w of wardrobe) {
-                    // Silme: ID var ama URL yoksa
                     if (w.id && (!w.image_url || w.image_url === "")) {
                         await env.DB.prepare(`DELETE FROM wardrobe WHERE id=? AND user_id=?`).bind(w.id, userId).run();
                         continue;
                     }
                     if (!w.image_url || w.image_url === "") continue;
 
-                    // Ekle / Güncelle (URL Conflict)
                     try {
+                        // CONFIDENCE EKLENDİ 🚀
                         await env.DB.prepare(`
-                            INSERT INTO wardrobe (user_id, category, item_name, color, image_url, is_favorite) 
-                            VALUES (?, ?, ?, ?, ?, ?)
+                            INSERT INTO wardrobe (user_id, category, item_name, color, image_url, is_favorite, confidence) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
                             ON CONFLICT(user_id, image_url) 
-                            DO UPDATE SET item_name=excluded.item_name, color=excluded.color, is_favorite=excluded.is_favorite
+                            DO UPDATE SET item_name=excluded.item_name, color=excluded.color, is_favorite=excluded.is_favorite, confidence=excluded.confidence
                         `).bind(
-                            userId, w.category, w.item_name || "Unnamed", w.color || "Unknown", w.image_url, w.is_favorite ? 1 : 0
+                            userId, 
+                            w.category, 
+                            w.item_name || "Unnamed", 
+                            w.color || "Unknown", 
+                            w.image_url, 
+                            w.is_favorite ? 1 : 0,
+                            w.confidence || 0 // Confidence değeri burada bağlanıyor
                         ).run();
                     } catch (e) {
                         console.error("Wardrobe Save Error:", e.message);
