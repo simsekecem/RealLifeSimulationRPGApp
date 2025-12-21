@@ -13,7 +13,7 @@ var door_locked: bool = false
 var next_scene_path: String = "" 
 var is_quitting: bool = false 
 var last_scene_path := ""
-
+var texture_cache: Dictionary = {}
 var is_initial_sync_done: bool = false
 
 var supabase_anon_key: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6c25kdHN0b256dGZ1YXlvZG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyOTg4OTQsImV4cCI6MjA3NTg3NDg5NH0.UPDS44mZl-YP0UNGqnpPzIedyphNptgnXehax5tUi50" 
@@ -183,7 +183,7 @@ func send_to_server_and_quit():
 	var http = HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(_on_exit_save_completed)
-	get_tree().create_timer(3.0).timeout.connect(force_quit)
+	get_tree().create_timer(17.0).timeout.connect(force_quit)
 
 	var headers = ["Content-Type: application/json", "Authorization: Bearer " + auth_token]
 	print("📡 Kapanış verisi gönderiliyor...")
@@ -433,6 +433,44 @@ func weekly_reset():
 	cache["calendar_notes"].clear()
 	mark_dirty()
 	save_cache()
+	
+func prepare_for_user(new_user_id: String):
+	var local_owner = cache.get("owner_id", "")
+	
+	# Eğer cache'in bir sahibi varsa VE bu sahip yeni giren kişi değilse:
+	if local_owner != "" and local_owner != new_user_id:
+		print("⚠️ GÜVENLİK: Farklı bir kullanıcı tespit edildi! Eski veriler temizleniyor...")
+		_reset_cache_to_default()
+	
+	# Yeni ID'yi güvenle ata
+	user_id = new_user_id
+	cache["owner_id"] = new_user_id
+
+func _reset_cache_to_default():
+	# Cache'i varsayılan, boş bir oyuncu haline getiriyoruz.
+	# Böylece internet olmasa bile B kişisi, A kişisinin eşyalarını görmez.
+	cache = {
+		"owner_id": "", 
+		"user": { 
+			"name": "Rookie", 
+			"birthdate": "",
+			"level": 1, 
+			"experience": 0, 
+			"character_id": 1,
+			"fcm_token": "" 
+		},
+		"preferences": { "music_volume": 50 }, 
+		"gym_log": [],
+		"library": [],
+		"study_log": [],
+		"market_items": [],
+		"restaurant": [],
+		"calendar_notes": [],
+		"wardrobe": [],
+		"unsynced_changes": false 
+	}
+	# İstersen dosyayı da fiziksel olarak silebilirsin ama RAM'i temizlemek yeterlidir.
+	# DirAccess.remove_absolute(cache_path)
 
 # ============================================================
 #   SAHNE GEÇİŞİ

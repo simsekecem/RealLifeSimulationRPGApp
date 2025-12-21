@@ -30,6 +30,8 @@ func _on_login_pressed() -> void:
 	}
 	send_request(http, "/api/login", body)
 
+# login.gd içindeki _on_request_completed fonksiyonu:
+
 func _on_request_completed(_result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	var json = JSON.parse_string(body.get_string_from_utf8())
 	
@@ -39,22 +41,28 @@ func _on_request_completed(_result: int, code: int, _headers: PackedStringArray,
 		return
 
 	if json.has("access_token"):
-		# --- 1. TOKEN VE ID KAYDI ---
+		# --- 1. TOKEN AL ---
 		Globals.auth_token = json["access_token"]
-		Globals.user_id = json.get("user_id", "")
 		
-		# --- 2. YENİ: SENKRONİZASYON BAYRAĞINI SIFIRLA ---
-		# Yeni giriş yapıldığı için eski verilerin beklenmediğinden emin olmalıyız.
+		# 👇 DEĞİŞİKLİK BURADA BAŞLIYOR 👇
+		var new_user_id = json.get("user_id", "")
+		
+		# 🛡️ GÜVENLİK DUVARI: Kullanıcı değiştiyse hafızayı temizle!
+		Globals.prepare_for_user(new_user_id)
+		
+		# (Artık Globals.user_id'yi yukarıdaki fonksiyonda ayarladık ama
+		# garanti olsun diye veya okunabilirlik için burada kalabilir, zararı yok)
+		
+		# --- 2. SENKRONİZASYON AYARLARI ---
 		Globals.is_initial_sync_done = false
 		
-		print("✅ Login başarılı. Yükleme ekranına geçiliyor...")
+		print("✅ Login başarılı. Kullanıcı: ", new_user_id)
+		print("🔄 Yükleme ekranına geçiliyor...")
 		
 		# --- 3. SAHNE GEÇİŞİ ---
-		# Artık veriyi burada beklemiyoruz; LoadingScreen hem sahneyi hem veriyi bekleyecek.
 		Globals.change_scene_with_loading("res://scenes/MainGame.tscn")
 		
 	else:
-		# --- BAŞARISIZ GİRİŞ ---
 		_handle_login_error(json)
 
 # Hata yönetimi için ayrı fonksiyon (Daha temiz kod)
