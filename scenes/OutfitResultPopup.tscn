@@ -1,17 +1,19 @@
-[gd_scene load_steps=2 format=3 uid="uid://lkhgo5o2lmtv"]
+[gd_scene load_steps=3 format=3 uid="uid://lkhgo5o2lmtv"]
 
 [ext_resource type="Script" uid="uid://y1yretxybjkp" path="res://scripts/OutfitResultPopup.gd" id="1_lm26w"]
+[ext_resource type="Theme" uid="uid://d2xlhbn3wik57" path="res://scenes/Wardrobe.tres" id="1_t7ouc"]
 
 [node name="OutfitResultPopup" type="PopupPanel"]
 oversampling_override = 1.0
 size = Vector2i(600, 400)
 visible = true
 min_size = Vector2i(600, 400)
+theme = ExtResource("1_t7ouc")
 script = ExtResource("1_lm26w")
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
-offset_left = 4.0
-offset_top = 4.0
+offset_left = 2.0
+offset_top = 2.0
 offset_right = 596.0
 offset_bottom = 396.0
 
@@ -33,9 +35,11 @@ size_flags_vertical = 3
 custom_minimum_size = Vector2(200, 100)
 layout_mode = 2
 size_flags_vertical = 3
+text = "Selam naber"
 fit_content = true
 
 [node name="Button" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4

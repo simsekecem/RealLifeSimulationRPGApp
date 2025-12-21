@@ -306,34 +306,59 @@ func merge_server_with_local(server_data):
 # 👇 GÜNCELLENMİŞ MERGE SİSTEMİ (Çift Kayıt Önleyici)
 # ============================================================
 func merge_list(key: String, server_list: Array):
-	var local_list = cache[key]
+	var local_list = cache.get(key, [])
+	
+	# Başlangıçta server listesini kopyala (Eski veriler burada)
 	var combined_list = server_list.duplicate()
 	
 	for local_item in local_list:
-		var is_duplicate = false
+		var is_match_found = false
 		
-		# 🛡️ Dictionary kontrolü: String verilerin patlatmasını önler
+		# Veri tipi kontrolü (Hata önleyici)
 		if typeof(local_item) != TYPE_DICTIONARY:
-			if local_item in server_list: is_duplicate = true
-			if not is_duplicate: combined_list.append(local_item)
+			# Basit veriyse (string vs) direkt listede var mı bak
+			if local_item in server_list: is_match_found = true
+			if not is_match_found: combined_list.append(local_item)
 			continue
 
 		for server_item in server_list:
 			if typeof(server_item) != TYPE_DICTIONARY: continue
 
+			# --- GYM LOG MANTIĞI ---
 			if key == "gym_log":
 				var l_id = local_item.get("id"); var s_id = server_item.get("id")
 				if l_id != null and s_id != null:
-					if str(l_id) == str(s_id): is_duplicate = true; break
+					if str(l_id) == str(s_id): is_match_found = true
 				elif local_item.get("date") == server_item.get("date") and \
 					 local_item.get("exercise_name") == server_item.get("exercise_name"):
-					is_duplicate = true; break
-			else:
-				if local_item.hash() == server_item.hash(): is_duplicate = true; break
-		
-		if not is_duplicate: combined_list.append(local_item)
-	cache[key] = combined_list
+					is_match_found = true
+			
+			# --- 🔥 WARDROBE MANTIĞI (Edit Sorunu Çözümü) ---
+			elif key == "wardrobe":
+				# Kıyafetlerde kimlik kartımız "image_url"dir.
+				if local_item.get("image_url") == server_item.get("image_url"):
+					is_match_found = true
+					
+					# 🔥 KRİTİK NOKTA: Eşleşme varsa, LOCAL veriyi kullan!
+					# Çünkü Local veri, kullanıcının az önce yaptığı düzenlemeyi içerir.
+					# Server verisi henüz güncellenmemiş eski veridir.
+					var idx = combined_list.find(server_item)
+					if idx != -1:
+						combined_list[idx] = local_item # Eski veriyi yenisiyle ez
+					break
 
+			# --- DİĞERLERİ (Hash Kontrolü) ---
+			else:
+				if local_item.hash() == server_item.hash(): 
+					is_match_found = true
+			
+			if is_match_found: break
+		
+		# Eğer serverda hiç yoksa (Yeni eklenen eşya), listeye ekle
+		if not is_match_found:
+			combined_list.append(local_item)
+			
+	cache[key] = combined_list
 # ============================================================
 #   CACHE YÖNETİMİ
 # ============================================================
