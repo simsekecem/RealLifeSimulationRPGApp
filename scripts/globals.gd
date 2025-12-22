@@ -528,23 +528,47 @@ func change_scene_with_loading(target_path: String):
 # ============================================================
 #   LEVEL & XP SİSTEMİ
 # ============================================================
+func get_required_xp(lvl: int) -> int:
+	return (lvl * 200) + 100
+
 func add_xp(amount: int):
-	cache["user"]["experience"] += amount
-	print("🌟 XP Kazanıldı: ", amount, " | Toplam: ", cache["user"]["experience"])
+	var current_xp = int(cache["user"].get("experience", 0))
+	var current_lvl = int(cache["user"].get("level", 1))
 	
-	# Level Atlama Kontrolü (Her 300 XP = 1 Level)
-	var xp_needed = 300
-	while cache["user"]["experience"] >= xp_needed:
-		cache["user"]["experience"] -= xp_needed
-		cache["user"]["level"] += 1
-		print("🎉 TEBRİKLER! Level Atladın: ", cache["user"]["level"])
+	current_xp += amount
+	print("🌟 XP Kazanıldı: ", amount, " | Mevcut: ", current_xp)
+	
+	# Bir sonraki seviye sınırı
+	var xp_needed = get_required_xp(current_lvl)
+	
+	# LEVEL ATLAMA DÖNGÜSÜ
+	while current_xp >= xp_needed:
+		current_xp -= xp_needed
+		current_lvl += 1
+		print("🎉 LEVEL UP! Yeni Seviye: ", current_lvl)
 		
-		# Level 2 Ödülü Kontrolü (MC Değişimi)
-		if cache["user"]["level"] == 2:
-			print("🎁 Ödül: Yeni Karakter Kilidi Açıldı!")
-			# Örnek: Karakter ID'sini değiştiriyoruz
-			# cache["user"]["character_id"] = 2 
+		# ============================================================
+		# 👇 YENİ: LEVEL 2 ÖDÜLÜ (KARAKTER EVRİMİ) 🎭
+		# ============================================================
+		if current_lvl == 2:
+			print("✨ ÖZEL ÖDÜL: Karakter 2 kilidi açıldı ve aktif edildi!")
+			cache["user"]["character_id"] = 2
 			
-	# Değişikliği kaydet ve UI'ı güncelle
+			# İstersen buraya bir ses efekti veya particle sinyali de ekleyebilirsin
+			# SoundManager.play_evolution_sound() gibi
+		# ============================================================
+		
+		# Yeni sınır hesapla
+		xp_needed = get_required_xp(current_lvl)
+	
+	# Verileri kaydet
+	cache["user"]["experience"] = current_xp
+	cache["user"]["level"] = current_lvl
+	
 	save_cache()
-	emit_signal("data_updated")
+	
+	# 👇 BU SİNYAL ÇOK ÖNEMLİ
+	# Bu sinyal gidince senin Player.gd dosyan "Aaa veri değişti" diyip
+	# load_character_visuals() fonksiyonunu çalıştıracak ve
+	# yeni ID (2) olduğu için char_2.tres dosyasını yükleyecek.
+	data_updated.emit()

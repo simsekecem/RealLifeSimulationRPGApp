@@ -126,11 +126,36 @@ func _update_character_visual(id: int):
 		print("⚠️ Karakter animasyonu bulunamadı: ", path)
 
 func _change_character(direction: int):
-	print("🔘 Ok basıldı! Eski ID: ", temp_char_id)
-	temp_char_id += direction
-	if temp_char_id > max_character_count: temp_char_id = 1
-	elif temp_char_id < 1: temp_char_id = max_character_count
-	print("🆔 Yeni Geçici ID: ", temp_char_id)
+	# 1. Mevcut Level'i Öğren
+	var user_data = Globals.cache.get("user", {})
+	var current_level = int(user_data.get("level", 1))
+	
+	# 2. Yeni Hedef ID'yi Hesapla
+	var target_id = temp_char_id + direction
+	
+	# Döngüsel geçiş (1 -> 2 -> 1)
+	if target_id > max_character_count: target_id = 1
+	elif target_id < 1: target_id = max_character_count
+	
+	# 3. 🛑 KİLİT KONTROLÜ (BURASI EKSİKTİ)
+	# Kural: Karakter ID'si, Level'den büyük olamaz.
+	# (Örn: Level 1 ise sadece Char 1 seçilebilir. Char 2 için Level 2 lazım.)
+	if target_id > current_level:
+		print("🔒 KİLİTLİ! Bu karakter için Level ", target_id, " gerekli.")
+		
+		# Görsel bir uyarı verelim (Ekrana "LOCKED" yazısı veya sarsıntı efekti)
+		if preview_sprite:
+			# Kırmızı yanıp sönsün
+			preview_sprite.modulate = Color.RED
+			var tween = get_tree().create_tween()
+			tween.tween_property(preview_sprite, "modulate", Color.WHITE, 0.3)
+			
+		# Değişikliği iptal et, fonksiyondan çık
+		return
+
+	# 4. Engel Yoksa Değiştir
+	print("🔘 Karakter Değişiyor: ", temp_char_id, " -> ", target_id)
+	temp_char_id = target_id
 	_update_character_visual(temp_char_id)
 
 # =================================================

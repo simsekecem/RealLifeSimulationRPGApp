@@ -594,8 +594,15 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     .bind(userId).all(),
 
                 calendar_notes: await env.DB.prepare(`SELECT date, note FROM calendar_notes WHERE user_id=?`)
-                    .bind(userId).all()
+                    .bind(userId).all(),
+
+                quests: await env.DB.prepare(`SELECT id, type, description, target_action, xp_reward, is_completed FROM quests WHERE user_id=?`).bind(userId).all()
             };
+
+            // Boolean dönüşümü (Godot için 1 -> true)
+            if (result.quests && result.quests.results) {
+                result.quests = result.quests.results.map(q => ({ ...q, is_completed: q.is_completed === 1 }));
+            }
 
             return addCors(new Response(JSON.stringify(result), { status: 200 }));
         }
@@ -859,6 +866,32 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     if (updateRes.meta.changes === 0) {
                          await env.DB.prepare(`INSERT INTO calendar_notes (user_id, date, note) VALUES (?, ?, ?)`)
                             .bind(userId, c.date, noteContent).run();
+                    }
+                }
+
+                const quests = safeList(body.quests);
+                for (const q of quests) {
+                    // ID'si olmayan bozuk veriyi atla
+                    if (!q.id) continue;
+
+                    try {
+                        // UPSERT: Varsa güncelle, yoksa ekle
+                        await env.DB.prepare(`
+                            INSERT INTO quests (user_id, id, type, description, target_action, xp_reward, is_completed)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
+                            ON CONFLICT(user_id, id) 
+                            DO UPDATE SET is_completed = excluded.is_completed
+                        `).bind(
+                            userId,
+                            q.id,
+                            q.type || "static",
+                            q.description || "",
+                            q.target_action || "",
+                            q.xp_reward || 0,
+                            q.is_completed ? 1 : 0 // Boolean'ı Integer'a çevir (SQL için)
+                        ).run();
+                    } catch (e) {
+                        console.error("Quest Save Error:", e.message);
                     }
                 }
 

@@ -45,9 +45,10 @@ func update_top_left_ui():
 		# ❌ ESKİSİ: xp_bar.max_value = current_lvl * 100 
 		# (Logic 300 isterken bu 100 gösterdiği için bar erken doluyordu)
 		
-		# ✅ YENİSİ: Logic'teki değerle aynısı olmalı
-		xp_bar.max_value = 300
-		
+		if Globals.has_method("get_required_xp"):
+			xp_bar.max_value = Globals.get_required_xp(current_lvl)
+		else:
+			xp_bar.max_value = (current_lvl * 200) + 100
 		xp_bar.value = current_xp
 		xp_bar.tooltip_text = "Level: %d | XP: %d / %d" % [current_lvl, current_xp, xp_bar.max_value]
 
