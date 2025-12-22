@@ -575,7 +575,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 
                 wardrobe: await env.DB.prepare(`SELECT id, category, item_name, color, image_url, is_favorite FROM wardrobe WHERE user_id=?`).bind(userId).all(),
 
-                library: await env.DB.prepare(`SELECT title, status FROM library_books WHERE user_id=?`)
+                library: await env.DB.prepare(`SELECT id, title, status FROM library_books WHERE user_id=?`)
                     .bind(userId).all(),
 
                 study_log: await env.DB.prepare(`SELECT date, start_time, end_time, subject FROM study_log WHERE user_id=?`)
@@ -643,18 +643,48 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 // Artık sunucuya kaydedilmiyor.
 
                 // 3. LIBRARY
+                // 3. LIBRARY (ID TABANLI GÜVENLİ SENKRONİZASYON)
+                // 3. LIBRARY (ID TABANLI GÜVENLİ SENKRONİZASYON)
                 if (body.library !== undefined) {
                     const library = safeList(body.library);
-                    
-                    // A) Önce eski listeyi tamamen temizle (En temiz senkronizasyon)
-                    await env.DB.prepare(`DELETE FROM library_books WHERE user_id=?`).bind(userId).run();
 
-                    // B) Listeyi olduğu gibi (boşluklar dahil) kaydet
+                    // A) SİLİNENLERİ TEMİZLE
+                    // Gelen listedeki ID'leri topla (sadece eski kayıtlar)
+                    const validIds = library
+                        .filter(b => b.id !== undefined && b.id !== null && b.id !== 0)
+                        .map(b => b.id);
+
+                    if (validIds.length > 0) {
+                        // Client listesinde olmayan ID'leri veritabanından sil
+                        const placeholders = validIds.map(() => '?').join(',');
+                        await env.DB.prepare(`
+                            DELETE FROM library_books 
+                            WHERE user_id = ? 
+                            AND id NOT IN (${placeholders})
+                        `).bind(userId, ...validIds).run();
+                    } else {
+                        // Güvenlik: Liste boşsa hepsini sil
+                        await env.DB.prepare(`DELETE FROM library_books WHERE user_id=?`).bind(userId).run();
+                    }
+
+                    // B) EKLE veya GÜNCELLE
                     for (const b of library) {
-                        // 👇 DEĞİŞİKLİK: 'if' kontrolünü kaldırdık. 
-                        // Başlık boş olsa bile ('') veritabanına kaydediyoruz.
-                         await env.DB.prepare(`INSERT INTO library_books (user_id, title, status) VALUES (?, ?, ?)`)
-                            .bind(userId, b.title || "", b.status).run();
+                        if (!b.title || b.title.trim() === "") continue;
+
+                        if (b.id) {
+                            // ID VARSA -> GÜNCELLE
+                            await env.DB.prepare(`
+                                UPDATE library_books 
+                                SET title = ?, status = ? 
+                                WHERE id = ? AND user_id = ?
+                            `).bind(b.title, b.status, b.id, userId).run();
+                        } else {
+                            // ID YOKSA -> YENİ EKLE
+                            await env.DB.prepare(`
+                                INSERT INTO library_books (user_id, title, status) 
+                                VALUES (?, ?, ?)
+                            `).bind(userId, b.title, b.status).run();
+                        }
                     }
                 }
 

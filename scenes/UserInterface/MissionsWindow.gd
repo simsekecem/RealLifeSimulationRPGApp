@@ -29,13 +29,12 @@ func load_missions(missions: Array):
 	for quest in missions:
 		var row = mission_row_scene.instantiate()
 		
-		# --- DÜĞÜM YOLLARI (Hiyerarşine göre güncellendi) ---
+		# --- DÜĞÜM YOLLARI ---
 		var name_label = row.get_node("MissionList/MissionName")
 		var detail_label = row.get_node("MissionList/MissionDetail")
 		var xp_label = row.get_node("MissionList/HBoxContainer/XP")
 		
-		# 👇 Senin görselindeki düğüm adı: "Completed" 
-		# MissionRow'a direkt bağlı olduğu için başına yol eklemiyoruz
+		# "Completed" düğümü (CheckBox olduğunu varsayıyoruz)
 		var tick_icon = row.get_node_or_null("Completed") 
 		
 		# Verileri ata
@@ -45,18 +44,28 @@ func load_missions(missions: Array):
 		var type_text = "[DAILY]" if quest.get("type") == "daily" else "[STORY]"
 		detail_label.text = type_text + " Task"
 		
-		# --- TAMAMLANMA KONTROLÜ ---
-		if quest.get("is_completed", false):
-			# Eğer görev bittiyse "Completed" düğümünü göster
-			if tick_icon:
-				tick_icon.visible = true
+		var is_done = quest.get("is_completed", false)
+
+		# --- TİK İKONU AYARLARI ---
+		if tick_icon:
+			# 1. Her zaman görünür olsun
+			tick_icon.visible = true
 			
-			# İsteğe bağlı: İsmi de yeşil yapalım ki net anlaşılsın
+			# 2. Eğer görev bittiyse tikli olsun, bitmediyse boş olsun
+			# (Eğer tick_icon bir CheckBox ise 'button_pressed' özelliğini kullanırız)
+			if "button_pressed" in tick_icon:
+				tick_icon.button_pressed = is_done
+				
+				# Kullanıcı elle tıklayıp değiştirmesin diye sadece görüntü yapalım:
+				tick_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		
+		# --- RENK AYARI ---
+		if is_done:
+			# Tamamlananların yazısı yeşil olsun
 			name_label.add_theme_color_override("font_color", Color.GREEN)
 		else:
-			# Bitmediyse gizle
-			if tick_icon:
-				tick_icon.visible = false
+			# Tamamlanmayanlar normal (beyaz) kalsın
+			name_label.add_theme_color_override("font_color", Color.WHITE)
 		
 		missions_list.add_child(row)
 

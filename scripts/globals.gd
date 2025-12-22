@@ -307,18 +307,19 @@ func merge_server_with_local(server_data):
 # ============================================================
 # 👇 GÜNCELLENMİŞ MERGE SİSTEMİ (Çift Kayıt Önleyici)
 # ============================================================
+# Globals.gd içindeki merge_list fonksiyonunu bununla değiştir:
+
 func merge_list(key: String, server_list: Array):
 	var local_list = cache.get(key, [])
 	
-	# Başlangıçta server listesini kopyala (Eski veriler burada)
+	# Başlangıçta server listesini kopyala
 	var combined_list = server_list.duplicate()
 	
 	for local_item in local_list:
 		var is_match_found = false
 		
-		# Veri tipi kontrolü (Hata önleyici)
+		# Veri tipi kontrolü
 		if typeof(local_item) != TYPE_DICTIONARY:
-			# Basit veriyse (string vs) direkt listede var mı bak
 			if local_item in server_list: is_match_found = true
 			if not is_match_found: combined_list.append(local_item)
 			continue
@@ -326,7 +327,7 @@ func merge_list(key: String, server_list: Array):
 		for server_item in server_list:
 			if typeof(server_item) != TYPE_DICTIONARY: continue
 
-			# --- GYM LOG MANTIĞI ---
+			# --- 1. GYM LOG MANTIĞI ---
 			if key == "gym_log":
 				var l_id = local_item.get("id"); var s_id = server_item.get("id")
 				if l_id != null and s_id != null:
@@ -335,28 +336,57 @@ func merge_list(key: String, server_list: Array):
 					 local_item.get("exercise_name") == server_item.get("exercise_name"):
 					is_match_found = true
 			
-			# --- 🔥 WARDROBE MANTIĞI (Edit Sorunu Çözümü) ---
+			# --- 2. WARDROBE MANTIĞI ---
 			elif key == "wardrobe":
-				# Kıyafetlerde kimlik kartımız "image_url"dir.
 				if local_item.get("image_url") == server_item.get("image_url"):
 					is_match_found = true
-					
-					# 🔥 KRİTİK NOKTA: Eşleşme varsa, LOCAL veriyi kullan!
-					# Çünkü Local veri, kullanıcının az önce yaptığı düzenlemeyi içerir.
-					# Server verisi henüz güncellenmemiş eski veridir.
 					var idx = combined_list.find(server_item)
-					if idx != -1:
-						combined_list[idx] = local_item # Eski veriyi yenisiyle ez
+					if idx != -1: combined_list[idx] = local_item 
 					break
 
-			# --- DİĞERLERİ (Hash Kontrolü) ---
+			# --- 🔥 3. LIBRARY ID MANTIĞI (ÇAKIŞMA ÖNLEYİCİ) 🔥 ---
+			elif key == "library":
+				var l_id = local_item.get("id")
+				var s_id = server_item.get("id")
+				var l_title = local_item.get("title", "")
+				var s_title = server_item.get("title", "")
+
+				# A) ID Eşleşmesi (En Güvenli)
+				if l_id != null and s_id != null and str(l_id) == str(s_id):
+					is_match_found = true
+					# Server'daki eski veriyi, Local'deki güncel veriyle ez (Durum değiştiyse güncel kalsın)
+					var idx = combined_list.find(server_item)
+					if idx != -1: combined_list[idx] = local_item
+					break
+				
+				# B) İsim Eşleşmesi (ID Yoksa)
+				elif l_title == s_title:
+					is_match_found = true
+					# Eğer Local'de ID yoksa Server'ın ID'sini al
+					if l_id == null and s_id != null:
+						local_item["id"] = s_id
+					
+					var idx = combined_list.find(server_item)
+					if idx != -1: combined_list[idx] = local_item
+					break
+
+			# --- 4. QUESTS MANTIĞI ---
+			elif key == "quests":
+				if str(local_item.get("id")) == str(server_item.get("id")):
+					is_match_found = true
+					var l_done = local_item.get("is_completed", false)
+					if l_done: 
+						var idx = combined_list.find(server_item)
+						if idx != -1: combined_list[idx] = local_item
+					break
+
+			# --- 5. DİĞERLERİ (Hash) ---
 			else:
 				if local_item.hash() == server_item.hash(): 
 					is_match_found = true
 			
 			if is_match_found: break
 		
-		# Eğer serverda hiç yoksa (Yeni eklenen eşya), listeye ekle
 		if not is_match_found:
 			combined_list.append(local_item)
 			

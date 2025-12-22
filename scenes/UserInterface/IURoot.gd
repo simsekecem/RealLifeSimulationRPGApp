@@ -41,7 +41,13 @@ func update_top_left_ui():
 	if xp_bar:
 		var current_xp = int(user_data.get("experience", 0))
 		var current_lvl = int(user_data.get("level", 1))
-		xp_bar.max_value = current_lvl * 100 
+		
+		# ❌ ESKİSİ: xp_bar.max_value = current_lvl * 100 
+		# (Logic 300 isterken bu 100 gösterdiği için bar erken doluyordu)
+		
+		# ✅ YENİSİ: Logic'teki değerle aynısı olmalı
+		xp_bar.max_value = 300
+		
 		xp_bar.value = current_xp
 		xp_bar.tooltip_text = "Level: %d | XP: %d / %d" % [current_lvl, current_xp, xp_bar.max_value]
 

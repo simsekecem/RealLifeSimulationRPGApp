@@ -89,38 +89,60 @@ func load_books_to_ui():
 	if input_completed: input_completed.text = "\n".join(list_completed)
 	if input_wishlist: input_wishlist.text = "\n".join(list_wishlist)
 
+# ============================================================
+#  KİTAP LİSTESİ YÖNETİMİ (ÇAKIŞMA KORUMALI)
+# ============================================================
+
 func _on_book_list_changed():
 	var new_library_list = []
 	
-	# Her bir paneli parse ederken eşsizlik korumasıyla ekle
-	_parse_text_edit_to_list(input_reading, "reading", new_library_list)
-	_parse_text_edit_to_list(input_completed, "completed", new_library_list)
-	_parse_text_edit_to_list(input_wishlist, "wishlist", new_library_list)
+	# 👇 TÜM KUTULAR İÇİN ORTAK "GÖRÜLENLER" LİSTESİ
+	# Bu liste sayesinde bir kitap bir kutuya girdiyse, diğerine giremez.
+	var global_seen_titles = {} 
+	
+	# Listeleri sırayla işle. (Sıra önemli: Reading -> Completed -> Wishlist)
+	# Eğer aynı kitap hepsine yazıldıysa, sadece ilk sırada (Reading) kabul edilir.
+	_parse_text_edit_to_list(input_reading, "reading", new_library_list, global_seen_titles)
+	_parse_text_edit_to_list(input_completed, "completed", new_library_list, global_seen_titles)
+	_parse_text_edit_to_list(input_wishlist, "wishlist", new_library_list, global_seen_titles)
 	
 	Globals.cache["library"] = new_library_list
 	Globals.mark_dirty()
 
-func _parse_text_edit_to_list(text_edit: TextEdit, status: String, target_list: Array):
+# 👇 Parametre olarak 'global_seen_titles' ekledik
+func _parse_text_edit_to_list(text_edit: TextEdit, status: String, target_list: Array, seen_map: Dictionary):
 	if not text_edit: return
 	
 	var lines = text_edit.text.split("\n")
-	var local_seen = [] # Aynı kutu içinde çift yazılmasını engellemek için
+
+	# ID Haritasını çıkar (Eski ID'leri korumak için)
+	var existing_ids = {}
+	var old_library = Globals.cache.get("library", [])
+	for item in old_library:
+		if item.has("title") and item.has("id"):
+			existing_ids[item["title"]] = item["id"]
 
 	for line in lines:
 		var clean_line = line.strip_edges()
 		
-		# Boş satırları kaydetmek istiyorsan burayı tut, 
-		# ama aynı isimdeki kitapları engellemek için local_seen kontrolü yap:
 		if clean_line != "":
-			if clean_line in local_seen:
-				continue # Aynı kutuda bu isim varsa ekleme
-			local_seen.append(clean_line)
+			# 🔥 KRİTİK KONTROL: Bu kitap ismi daha önce (başka kutuda bile olsa) görüldü mü?
+			if seen_map.has(clean_line):
+				continue # Görüldüyse bu kutuya ekleme, pas geç!
 			
-		target_list.append({ 
-			"title": clean_line, 
-			"status": status 
-		})
-
+			# Görülmediyse haritaya ekle
+			seen_map[clean_line] = true
+			
+			var book_data = { 
+				"title": clean_line, 
+				"status": status 
+			}
+			
+			# Eski ID'yi koru
+			if existing_ids.has(clean_line):
+				book_data["id"] = existing_ids[clean_line]
+			
+			target_list.append(book_data)
 # ============================================================
 #  ÇALIŞMA SAATLERİ (SAĞ PANEL - MEVCUT KOD) 🕒
 # ============================================================
