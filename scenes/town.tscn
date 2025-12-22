@@ -81795,7 +81795,6 @@ collision_mask = 8
 
 [node name="NPC_Interactable" parent="." instance=ExtResource("11_u4arb")]
 position = Vector2(1015, 418)
-dialog_text = "Study math for 2 hours today"
 
 [node name="Duck" parent="." instance=ExtResource("12_u4arb")]
 position = Vector2(989, 216)
