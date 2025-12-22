@@ -24,73 +24,102 @@ export default {
         // =====================================================
         // PUBLIC ENDPOINTS
         // =====================================================
-// ---------- GÜNLÜK GÖREV ÜRET (GEMINI AI) ----------
-		if (path === "/api/daily_quests" && method === "POST") {
-			try {
-				const prompt = `
-					Generate 4 daily tasks for a life sim game in JSON format.
-					NPCs/Locations: Gym, Library, Market, Restaurant.
-					Language: English.
-					Format: Return ONLY a JSON array like this:
-					[
-						{"category": "gym", "text": "Do 2 sets of bench press", "target": "gym_action"},
-						{"category": "library", "text": "Study between 10-12 AM", "target": "study_action"},
-						{"category": "market", "text": "Add detergent to list", "target": "market_add"},
-						{"category": "restaurant", "text": "Eat eggs for breakfast", "target": "eat_action"}
-					]
-				`;
+// ---------- GÜNLÜK GÖREV ÜRET (GEMINI AI - GÜNCELLENDİ) ----------
+if (path === "/api/daily_quests" && method === "POST") {
+    try {
+        // 👇 BURASI TAMAMEN YENİLENDİ
+        const prompt = `
+            You are a quest generator for a Life Simulation Game. 
+            Generate exactly 4 daily quests (one for each category: Gym, Library, Market, Restaurant).
+            
+            STRICT GAME LOGIC CONSTRAINTS:
 
-				const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
-				
-				const response = await fetch(geminiUrl, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						contents: [{ parts: [{ text: prompt }] }]
-					})
-				});
+            1. MARKET (Category: "market"):
+               - Valid Sub-Categories: "Groceries", "Home Goods", "Clothing", "Personal Care", "Household Essentials".
+               - Task Format: "Add [Item Name] to [Sub-Category] list".
+               - Example: "Add Apple to Groceries list".
+               - Target Action: "market_add"
 
-				const data = await response.json();
-				let generatedText = data.candidates[0].content.parts[0].text;
-				generatedText = generatedText.replace(/```json/g, "").replace(/```/g, "").trim();
-				
-				const quests = JSON.parse(generatedText);
+            2. RESTAURANT (Category: "restaurant"):
+               - Valid Meals: "Breakfast", "Lunch", "Dinner", "Snacks".
+               - Task Format: "Eat [Food Name] for [Meal]".
+               - Example: "Eat Toast for Breakfast".
+               - Target Action: "eat_action"
 
-				const finalQuests = quests.map((q, index) => ({
-					id: `daily_${Date.now()}_${index}`,
-					type: "daily",
-					category: q.category,
-					description: q.text,
-					target_action: q.target,
-					xp_reward: 50,
-					is_completed: false
-				}));
+            3. GYM (Category: "gym"):
+               - Valid Regions: "Chest", "Back", "Legs", "Arms", "Shoulders", "Abs", "Cardio", "Full Body", "Stretching".
+               - Task Format Options:
+                 a) "Do [Sets] sets of [Exercise Name]"
+                 b) "Do [Region/Exercise] for [Duration] mins"
+                 c) "Train [Region] region"
+               - Example: "Do Cardio for 20 mins" or "Train Back region".
+               - Target Action: "gym_action"
 
-				return addCors(new Response(JSON.stringify(finalQuests), {
-					headers: { "Content-Type": "application/json" }
-				}));
-			} catch (err) {
-				return addCors(new Response(JSON.stringify({ error: err.message }), { status: 500 }));
-			}
-		}
-        // ---------- SIGNUP ----------
-        if (path === "/api/signup" && method === "POST") {
-            const body = await request.json();
-            const res = await fetch(`${env.SUPABASE_URL}/auth/v1/signup`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "apikey": env.SUPABASE_ANON_KEY,
-                },
-                body: JSON.stringify({
-                    email: body.email,
-                    password: body.password,
-                    email_redirect_to: "https://web.life-simulation.workers.dev/signup-confirmed",
-                }),
-            });
+            4. LIBRARY (Category: "library"):
+               - Valid Time Slots: 1-hour intervals between 09:00 and 24:00 (e.g., "09:00-10:00", "15:00-16:00").
+               - Task Format: "Study [Subject] between [Time Slot]".
+               - Example: "Study Coding between 10:00-11:00".
+               - Target Action: "study_action"
 
-            return addCors(new Response(await res.text(), { status: res.status }));
+            OUTPUT FORMAT:
+            Return ONLY a raw JSON array. Do not use Markdown (no \`\`\`json).
+            [
+                {"category": "gym", "text": "...", "target": "gym_action"},
+                {"category": "library", "text": "...", "target": "study_action"},
+                {"category": "market", "text": "...", "target": "market_add"},
+                {"category": "restaurant", "text": "...", "target": "eat_action"}
+            ]
+        `;
+        // 👆 YENİ PROMPT SONU
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+        
+        const response = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        const data = await response.json();
+        
+        // Gemini bazen hata veya boş dönebilir, kontrol ekleyelim
+        let generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+        
+        // Markdown temizliği (```json ve ``` temizler)
+        generatedText = generatedText.replace(/```json/g, "").replace(/```/g, "").trim();
+        
+        let quests = [];
+        try {
+            quests = JSON.parse(generatedText);
+        } catch (e) {
+            // Eğer JSON bozuk gelirse manuel fallback (yedek) görevler
+            quests = [
+                {"category": "gym", "text": "Run for 15 mins", "target": "gym_action"},
+                {"category": "market", "text": "Add Milk to Groceries list", "target": "market_add"},
+                {"category": "restaurant", "text": "Eat Salad for Lunch", "target": "eat_action"},
+                {"category": "library", "text": "Study History between 12:00-13:00", "target": "study_action"}
+            ];
         }
+
+        const finalQuests = quests.map((q, index) => ({
+            id: `daily_${Date.now()}_${index}`,
+            type: "daily",
+            category: q.category,
+            description: q.text,       // Godot tarafında description olarak görünecek
+            target_action: q.target,   // Godot tarafında target_action olarak kullanılacak
+            xp_reward: 50,
+            is_completed: false
+        }));
+
+        return addCors(new Response(JSON.stringify(finalQuests), {
+            headers: { "Content-Type": "application/json" }
+        }));
+    } catch (err) {
+        return addCors(new Response(JSON.stringify({ error: err.message }), { status: 500 }));
+    }
+}
         // ---------- LOGIN ----------
         if (path === "/api/login" && method === "POST") {
             const body = await request.json();
@@ -869,26 +898,27 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     }
                 }
 
+                // Worker içindeki save_all kısmında quests döngüsünü bul ve burayı şu şekilde değiştir:
                 const quests = safeList(body.quests);
                 for (const q of quests) {
-                    // ID'si olmayan bozuk veriyi atla
                     if (!q.id) continue;
 
                     try {
-                        // UPSERT: Varsa güncelle, yoksa ekle
                         await env.DB.prepare(`
                             INSERT INTO quests (user_id, id, type, description, target_action, xp_reward, is_completed)
                             VALUES (?, ?, ?, ?, ?, ?, ?)
                             ON CONFLICT(user_id, id) 
-                            DO UPDATE SET is_completed = excluded.is_completed
+                            DO UPDATE SET 
+                                is_completed = excluded.is_completed,
+                                type = excluded.type -- Tipi de güncelle ki 'daily' ise 'daily' kalsın
                         `).bind(
                             userId,
                             q.id,
-                            q.type || "static",
+                            q.type, // Varsayılan "static" atamasını kaldırdık, neyse o gitsin
                             q.description || "",
                             q.target_action || "",
                             q.xp_reward || 0,
-                            q.is_completed ? 1 : 0 // Boolean'ı Integer'a çevir (SQL için)
+                            q.is_completed ? 1 : 0
                         ).run();
                     } catch (e) {
                         console.error("Quest Save Error:", e.message);

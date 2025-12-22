@@ -70,32 +70,43 @@ func fetch_daily_quests_from_worker(today_str):
 	var err = http.request(url, [], HTTPClient.METHOD_POST, "{}")
 	if err != OK:
 		print("❌ QuestManager: HTTP isteği başlatılamadı!")
-
+		
 func _on_daily_received(result, response_code, headers, body, today_str, http_node):
 	if response_code == 200:
 		var json = JSON.parse_string(body.get_string_from_utf8())
 		if json and json is Array:
 			var new_list = []
-			# Mevcut listeden sadece statik olanları koru
+			
+			# 1. Mevcut listeden SADECE senin yukarıda tanımladığın 9 statik görevi tut
+			var static_ids = []
+			for s_def in static_quest_definitions:
+				static_ids.append(s_def["id"])
+				
 			for q in Globals.cache["quests"]:
-				if q.get("type") != "daily":
+				# Eğer görevin ID'si statik listedeyse koru
+				if q.get("id") in static_ids:
 					new_list.append(q)
 			
-			# Worker'dan gelen yeni günlükleri ekle
+			# 2. Worker'dan gelen 4 yeni görevi ekle
 			for dq in json:
+				# GÜVENLİK: Tipi ne gelirse gelsin 'daily' yapıyoruz ki karışmasın
+				dq["type"] = "daily" 
 				new_list.append(dq)
 			
+			# 3. Cache'i güncelle ve kaydet
 			Globals.cache["quests"] = new_list
 			Globals.cache["last_quest_gen_date"] = today_str
 			Globals.save_cache()
 			
 			if Globals.has_signal("data_updated"):
 				Globals.data_updated.emit()
-			print("✅ QuestManager: Günlük görevler başarıyla güncellendi.")
+			
+			print("✅ QuestManager: Liste senkronize edildi. (9 Statik + ", json.size(), " Günlük)")
 	else:
 		print("❌ QuestManager: Worker hatası! Kod: ", response_code)
 	
-	http_node.queue_free()
+	if http_node:
+		http_node.queue_free()
 
 func trigger_action(action_name: String):
 	var updated = false
