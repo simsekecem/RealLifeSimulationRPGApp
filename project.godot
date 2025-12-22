@@ -20,6 +20,7 @@ config/icon="uid://br5bn73oss0kg"
 Globals="*res://scripts/globals.gd"
 UI="*res://scenes/UserInterface/UI.tscn"
 MusicController="*res://scenes/Autoloads/music_controller.tscn"
+QuestManager="*res://questmanager.gd"
 
 [display]
 

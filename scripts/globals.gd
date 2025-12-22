@@ -38,6 +38,8 @@ var cache := {
 	"restaurant": [],
 	"calendar_notes": [],
 	"wardrobe": [],
+	"quests": [],             # 👈 BU SATIR EKSİKTİ
+	"last_quest_gen_date": "", # 👈 BU SATIR EKSİKTİ
 	"unsynced_changes": false 
 }
 
@@ -467,6 +469,12 @@ func _reset_cache_to_default():
 		"restaurant": [],
 		"calendar_notes": [],
 		"wardrobe": [],
+		
+		# --- YENİ EKLENECEKLER ---
+		"quests": [], # Tüm görevler (statik ve günlük) burada duracak
+		"last_quest_gen_date": "", # Günlük görevlerin en son ne zaman üretildiği
+		# -------------------------
+		
 		"unsynced_changes": false 
 	}
 	# İstersen dosyayı da fiziksel olarak silebilirsin ama RAM'i temizlemek yeterlidir.
@@ -486,3 +494,27 @@ func change_scene_with_loading(target_path: String):
 	last_scene_path = target_path
 	next_scene_path = target_path
 	get_tree().change_scene_to_file("res://scenes/UserInterface/LoadingScreen.tscn")
+	
+# ============================================================
+#   LEVEL & XP SİSTEMİ
+# ============================================================
+func add_xp(amount: int):
+	cache["user"]["experience"] += amount
+	print("🌟 XP Kazanıldı: ", amount, " | Toplam: ", cache["user"]["experience"])
+	
+	# Level Atlama Kontrolü (Her 300 XP = 1 Level)
+	var xp_needed = 300
+	while cache["user"]["experience"] >= xp_needed:
+		cache["user"]["experience"] -= xp_needed
+		cache["user"]["level"] += 1
+		print("🎉 TEBRİKLER! Level Atladın: ", cache["user"]["level"])
+		
+		# Level 2 Ödülü Kontrolü (MC Değişimi)
+		if cache["user"]["level"] == 2:
+			print("🎁 Ödül: Yeni Karakter Kilidi Açıldı!")
+			# Örnek: Karakter ID'sini değiştiriyoruz
+			# cache["user"]["character_id"] = 2 
+			
+	# Değişikliği kaydet ve UI'ı güncelle
+	save_cache()
+	emit_signal("data_updated")

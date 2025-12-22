@@ -67,6 +67,14 @@ func _ready():
 
 	# ❌ OTOMATİK SEÇİM YOK: Kullanıcı tıklayana kadar her şey gizli kalacak.
 
+	# 👇 GÖREV TETİKLEYİCİLERİ EKLEME
+	# QuestManager Autoload olarak ekliyse doğrudan çağırıyoruz:
+	if has_node("/root/QuestManager"):
+		# 1. Statik Görev: Restorana ilk giriş
+		QuestManager.trigger_action("first_restaurant")
+		# 2. Günlük Görev: Gemini'den gelen genel restoran aksiyonu
+		QuestManager.trigger_action("restaurant_action")
+	
 # =================================================
 # GÜN SEÇİMİ (BURASI TARİHİ HESAPLAR VE AÇAR)
 # =================================================
@@ -95,7 +103,7 @@ func _on_day_button_pressed(selected_day_name: String):
 	# 👇 4. Adım: Veritabanından o tarihe ait veriyi getir ve doldur
 	var day_data = _get_data_for_day(current_day)
 	_set_inputs_quietly(day_data)
-
+	
 
 # =================================================
 # TARİH HESAPLAMA MOTORU ⚙️

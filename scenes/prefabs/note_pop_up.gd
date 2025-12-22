@@ -24,7 +24,10 @@ func open_for_date(date):
 	text_edit.text = _get_note_from_cache(current_date_str)
 
 	popup_centered()
-	
+	# 👇 TAKVİM GÖREV TETİKLEYİCİSİ
+	var q_manager = get_node_or_null("/root/QuestManager")
+	if q_manager:
+		q_manager.trigger_action("first_calendar")
 	# Klavyeyi açması için bir kare bekle
 	await get_tree().process_frame
 	text_edit.grab_focus()

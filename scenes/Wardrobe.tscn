@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://dli12jnw5q508"]
 
 [ext_resource type="Texture2D" uid="uid://cwbp7wjla4ewm" path="res://assets/wardrobe.png" id="1_82s2s"]
-[ext_resource type="Theme" uid="uid://d2xlhbn3wik57" path="res://scenes/Wardrobe.tres" id="1_b35uj"]
+[ext_resource type="Theme" uid="uid://mr6t081trkg2" path="res://scenes/Wardrobe.tres" id="1_b35uj"]
 [ext_resource type="Script" uid="uid://b53571oq7raw3" path="res://scripts/Wardrobe.gd" id="1_ex7tr"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_l7dub"]

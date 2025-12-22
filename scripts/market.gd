@@ -33,7 +33,13 @@ func _ready():
 	if Globals.has_signal("data_updated"):
 		if not Globals.data_updated.is_connected(_on_global_data_updated):
 			Globals.data_updated.connect(_on_global_data_updated)
-
+# 👇 GÖREV TETİKLEYİCİLERİ EKLEME
+	# QuestManager Autoload olarak ekliyse doğrudan çağırıyoruz:
+	if has_node("/root/QuestManager"):
+		# 1. Statik Görev: Restorana ilk giriş
+		QuestManager.trigger_action("first_market")
+		# 2. Günlük Görev: Gemini'den gelen genel restoran aksiyonu
+		QuestManager.trigger_action("market_action")
 func _switch_category(cat_name: String):
 	# Eğer zaten açıksa ve panel görünürse işlem yapma (veya yenile)
 	# Önceki kategoriyi kaydet (Panel açıksa)

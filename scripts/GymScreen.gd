@@ -62,7 +62,13 @@ func _ready():
 			Globals.data_updated.connect(_on_global_data_updated)
 
 	go_to_today()
-
+# 👇 GÖREV TETİKLEYİCİLERİ EKLEME
+	# QuestManager Autoload olarak ekliyse doğrudan çağırıyoruz:
+	if has_node("/root/QuestManager"):
+		# 1. Statik Görev: Restorana ilk giriş
+		QuestManager.trigger_action("first_gym")
+		# 2. Günlük Görev: Gemini'den gelen genel restoran aksiyonu
+		QuestManager.trigger_action("gym_action")
 func _on_global_data_updated():
 	load_daily_list()
 	if tab_container.current_tab == 1:

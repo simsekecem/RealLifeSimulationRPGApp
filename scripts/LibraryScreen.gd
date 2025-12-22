@@ -45,7 +45,13 @@ func _ready():
 	if input_reading: input_reading.text_changed.connect(_on_book_list_changed)
 	if input_completed: input_completed.text_changed.connect(_on_book_list_changed)
 	if input_wishlist: input_wishlist.text_changed.connect(_on_book_list_changed)
-
+# 👇 GÖREV TETİKLEYİCİLERİ EKLEME
+	# QuestManager Autoload olarak ekliyse doğrudan çağırıyoruz:
+	if has_node("/root/QuestManager"):
+		# 1. Statik Görev: Restorana ilk giriş
+		QuestManager.trigger_action("first_library")
+		# 2. Günlük Görev: Gemini'den gelen genel restoran aksiyonu
+		QuestManager.trigger_action("library_action")
 # ============================================================
 #  KİTAP LİSTESİ YÖNETİMİ (SOL PANEL) 📚
 # ============================================================

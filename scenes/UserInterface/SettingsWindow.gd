@@ -43,6 +43,10 @@ func _on_volume_slider_value_changed(value):
 	# (Henüz diske kaydetmiyoruz, sadece hafızada güncelliyoruz)
 	if Globals.cache.has("preferences"):
 		Globals.cache["preferences"]["music_volume"] = value
+		# 👇 GÖREV TETİKLEYİCİSİ
+	var q_manager = get_node_or_null("/root/QuestManager")
+	if q_manager:
+		q_manager.trigger_action("first_music")
 
 # Yardımcı fonksiyon: Sesi AudioServer'a uygular
 func _apply_volume(value):

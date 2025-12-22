@@ -66,6 +66,9 @@ func _ready():
 
 	# 2. EDIT PENCERESİ
 	create_edit_dialog()
+	var q_manager = get_node_or_null("/root/QuestManager")
+	if q_manager:
+		q_manager.trigger_action("first_wardrobe")
 
 # 🔥 PENCERE VE BUTON STİLİ
 func apply_window_style(window_node: Window):

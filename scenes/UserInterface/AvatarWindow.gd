@@ -38,6 +38,8 @@ extends Control
 var temp_char_id: int = 1
 var max_character_count: int = 2
 
+# ... Mevcut @onready değişkenlerin (btn_prev, opt_day vb.) aynen kalıyor ...
+
 # =================================================
 # BAŞLANGIÇ
 # =================================================
@@ -50,19 +52,23 @@ func _ready():
 	if save_button:
 		save_button.pressed.connect(_on_save_pressed)
 	
+	# 👇 EKLEME: Globals'daki veriler güncellendiğinde (QuestManager XP eklediğinde) 
+	# bu pencere açık olmasa bile veriyi yenilemesi için sinyali bağlıyoruz.
+	if Globals.has_signal("data_updated"):
+		Globals.data_updated.connect(update_ui_from_cache)
+	
 	# Karakter değiştirme butonlarını bağla
 	if btn_next: 
 		btn_next.pressed.connect(_change_character.bind(1))
 	if btn_prev: 
 		btn_prev.pressed.connect(_change_character.bind(-1))
-		print("✅ Karakter değiştirme butonları bağlandı.")
 	
 	_setup_date_dropdowns()
 	edit_window.visible = false
 	update_ui_from_cache()
 
 # =================================================
-# UI GÜNCELLEME (LOAD)
+# UI GÜNCELLEME (GÜNCELLENDİ 🌟)
 # =================================================
 func update_ui_from_cache():
 	var user_data = Globals.cache.get("user", {})
@@ -70,14 +76,27 @@ func update_ui_from_cache():
 	# Ana Ekranı Doldur
 	if label_name_display: label_name_display.text = str(user_data.get("name", "Player"))
 	
-	if label_level_display: 
-		var lvl = int(user_data.get("level", 1))
-		label_level_display.text = str(lvl)
-		
-	if label_xp_display: 
-		var xp = int(user_data.get("experience", 0))
-		label_xp_display.text = str(xp)
+	# --- LEVEL & XP HESAPLAMA ---
+	var total_xp = int(user_data.get("experience", 0))
 	
+	# 300 XP = 1 Level mantığı
+	# Level 1: 0-299 XP | Level 2: 300-599 XP ...
+	var current_level = (total_xp / 300) + 1
+	var xp_in_current_level = total_xp % 300
+	
+	# Level Yazısını Güncelle
+	if label_level_display: 
+		label_level_display.text = "LEVEL " + str(current_level)
+		
+	# XP Yazısını veya Barını Güncelle
+	if label_xp_display: 
+		# İstersen sadece sayı (örn: 120), istersen formatlı (örn: 120 / 300) yazdırabilirsin
+		label_xp_display.text = str(xp_in_current_level) + " / 300"
+	
+	# Eğer sahnende bir Progress Bar varsa onu da buradan güncelleyebilirsin:
+	if get_node_or_null("XPBar"): get_node("XPBar").value = xp_in_current_level
+	
+	# --- DİĞER VERİLER ---
 	var birth_str = str(user_data.get("birthdate", "2000-01-01"))
 	if label_birth_display: label_birth_display.text = birth_str
 	
@@ -88,6 +107,8 @@ func update_ui_from_cache():
 	# Mevcut Karakteri Yükle
 	temp_char_id = int(user_data.get("character_id", 1))
 	_update_character_visual(temp_char_id)
+
+# ... Kodun geri kalanı (Karakter değiştirme, Save, Tarih seçiciler) AYNI KALIYOR ...
 
 # =================================================
 # KARAKTER GÖRSEL YÖNETİMİ
@@ -127,7 +148,16 @@ func _on_save_pressed():
 	Globals.mark_dirty()
 	Globals.save_cache()
 	print("✅ Profil (İsim/Tarih) güncellendi.")
-	
+	# 👇 GÖREV TETİKLEYİCİLERİ BURAYA GELMELİ
+	var q_manager = get_node_or_null("/root/QuestManager")
+	if q_manager:
+		# İsim değiştirme görevi (Eğer isim varsayılan "Player" veya boş değilse)
+		if new_name != "" and new_name != "Player" and new_name != "Rookie":
+			q_manager.trigger_action("first_name")
+		
+		# Doğum günü görevi (Eğer bir tarih seçildiyse)
+		if new_birth_date != "":
+			q_manager.trigger_action("first_birthday")
 	update_ui_from_cache()
 	hide_edit_window()
 

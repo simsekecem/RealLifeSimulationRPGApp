@@ -24,7 +24,55 @@ export default {
         // =====================================================
         // PUBLIC ENDPOINTS
         // =====================================================
+// ---------- GÜNLÜK GÖREV ÜRET (GEMINI AI) ----------
+		if (path === "/api/daily_quests" && method === "POST") {
+			try {
+				const prompt = `
+					Generate 4 daily tasks for a life sim game in JSON format.
+					NPCs/Locations: Gym, Library, Market, Restaurant.
+					Language: English.
+					Format: Return ONLY a JSON array like this:
+					[
+						{"category": "gym", "text": "Do 2 sets of bench press", "target": "gym_action"},
+						{"category": "library", "text": "Study between 10-12 AM", "target": "study_action"},
+						{"category": "market", "text": "Add detergent to list", "target": "market_add"},
+						{"category": "restaurant", "text": "Eat eggs for breakfast", "target": "eat_action"}
+					]
+				`;
 
+				const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+				
+				const response = await fetch(geminiUrl, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						contents: [{ parts: [{ text: prompt }] }]
+					})
+				});
+
+				const data = await response.json();
+				let generatedText = data.candidates[0].content.parts[0].text;
+				generatedText = generatedText.replace(/```json/g, "").replace(/```/g, "").trim();
+				
+				const quests = JSON.parse(generatedText);
+
+				const finalQuests = quests.map((q, index) => ({
+					id: `daily_${Date.now()}_${index}`,
+					type: "daily",
+					category: q.category,
+					description: q.text,
+					target_action: q.target,
+					xp_reward: 50,
+					is_completed: false
+				}));
+
+				return addCors(new Response(JSON.stringify(finalQuests), {
+					headers: { "Content-Type": "application/json" }
+				}));
+			} catch (err) {
+				return addCors(new Response(JSON.stringify({ error: err.message }), { status: 500 }));
+			}
+		}
         // ---------- SIGNUP ----------
         if (path === "/api/signup" && method === "POST") {
             const body = await request.json();
