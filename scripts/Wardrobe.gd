@@ -11,6 +11,7 @@ const WORKER_URL_DELETE = "https://life-sim-worker.life-simulation.workers.dev/a
 const WORKER_URL_OUTFIT = "https://life-sim-worker.life-simulation.workers.dev/api/generate_outfit"
 
 # 🔵 POPUP SCENES
+var popup_font = preload("res://assets/fonts/PressStart2P-Regular.ttf")
 var popup_scene := preload("res://scenes/WardrobeItemListPopup.tscn")
 var outfit_popup_scene := preload("res://scenes/OutfitResultPopup.tscn")
 var popup: Node
@@ -37,7 +38,7 @@ func _ready():
 
 	# Placeholder oluştur
 	var ph_img = Image.create(200, 200, false, Image.FORMAT_RGBA8)
-	ph_img.fill(Color(0, 0, 0, 0)) # R:0, G:0, B:0, Alpha:0 (Görünmez)
+	ph_img.fill(Color(0, 0, 0, 0))
 	placeholder_texture = ImageTexture.create_from_image(ph_img)
 
 	# Popup Kurulumları
@@ -56,50 +57,71 @@ func _ready():
 
 	connect_category_buttons()
 
-	# 🔥 1. Sahne değişimlerini dinle
+	# 🔥 1. SAHNE DEĞİŞİMİNİ DİNLE (Town -> House geçişi için)
 	get_tree().node_added.connect(_on_scene_changed)
 
-	# 🔥 2. Debug (Direkt evde başlarsa)
-	if get_tree().current_scene and get_tree().current_scene.scene_file_path == "res://scenes/house.tscn":
-		print("🏠 Oyun direkt Ev'de başladı! İndirme başlatılıyor...")
-		_start_background_loading_v2()
+	# 🔥 2. BAŞLANGIÇ KONTROLÜ
+	# Eğer bu script Ev'in bir parçasıysa, _ready çalıştığında zaten evdeyiz demektir.
+	# Yine de sahne adını kontrol edip başlatıyoruz.
+	check_start_loading()
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	call_deferred("refresh_wardrobe_ui")
 	Globals.data_updated.connect(refresh_wardrobe_ui)
 
 # ------------------------------------------------------------
-# 🔥 SAHNE KONTROLÜ
+# 🔥 SAHNE KONTROLÜ (OTOMATİK İNDİRME TETİKLEYİCİSİ)
 # ------------------------------------------------------------
-func _on_scene_changed(node: Node):
-	if node.scene_file_path.is_empty():
-		return
-	if node.scene_file_path == "res://scenes/house.tscn":
-		print("🏠 Ev sahresine girildi! Dolap resimleri arka planda indiriliyor...")
+func check_start_loading():
+	var current_scene = get_tree().current_scene
+	# Eğer şu anki sahne HOUSE ise indirmeyi başlat
+	if current_scene and current_scene.scene_file_path.contains("house.tscn"):
+		print("🏠 Evdeyiz! Arka plan indirmesi başlatılıyor...")
 		_start_background_loading_v2()
+
+func _on_scene_changed(node: Node):
+	# Sadece ROOT'a eklenen ana sahneleri kontrol et (Performans için)
+	if node.get_parent() == get_tree().root:
+		# Eğer yüklenen sahne 'house.tscn' ise
+		if "house.tscn" in node.scene_file_path:
+			print("🏠 Town'dan Eve Girildi! İndirme başlatılıyor...")
+			_start_background_loading_v2()
 
 # ------------------------------------------------------------
 # 🔥 ARKA PLAN YÜKLEME SİSTEMİ (V2)
 # ------------------------------------------------------------
 func _start_background_loading_v2():
 	var wardrobe = Globals.cache.get("wardrobe", [])
+	
+	# Zaten indiriliyor mu?
+	if is_downloading and not download_queue.is_empty():
+		return
+
+	# Cache'de olmayanları sıraya diz
 	for item in wardrobe:
 		var url = item.get("image_url", "")
+		# URL var mı? VE Hafızada (Texture Cache) YOK mu?
 		if url != "" and not Globals.texture_cache.has(url):
+			# Sırada da yoksa ekle
 			if not download_queue.has(url):
 				download_queue.append(url)
 	
+	print("📥 İndirilecek resim sayısı: ", download_queue.size())
+	
+	# Sıra boş değilse ve şu an indirmiyorsak -> Başla
 	if not download_queue.is_empty() and not is_downloading:
 		_process_next_download_v2()
 
 func _process_next_download_v2():
 	if download_queue.is_empty():
 		is_downloading = false
+		print("✅ Tüm indirmeler tamamlandı.")
 		return
 		
 	is_downloading = true
 	var url = download_queue.pop_front()
 	
+	# Belki sırada beklerken başka bir yerden yüklenmiştir, kontrol et
 	if Globals.texture_cache.has(url):
 		_process_next_download_v2()
 		return
@@ -109,7 +131,10 @@ func _process_next_download_v2():
 	http.request_completed.connect(func(result, code, headers, body): 
 		_on_single_image_downloaded(url, code, body, http)
 	)
-	http.request(url)
+	var err = http.request(url)
+	if err != OK:
+		http.queue_free()
+		_process_next_download_v2()
 
 func _on_single_image_downloaded(url, code, body, http_node):
 	http_node.queue_free()
@@ -121,13 +146,16 @@ func _on_single_image_downloaded(url, code, body, http_node):
 		
 		if err == OK:
 			var tex = ImageTexture.create_from_image(img)
+			# 🔥 GLOBALS CACHE'E KAYDET
 			Globals.texture_cache[url] = tex 
+			# UI açıksa hemen orayı da güncelle (canlı görünür)
 			refresh_wardrobe_ui()
 	
+	# Sunucuyu boğmamak için çok kısa (0.05s) bekle sonra diğerine geç
 	get_tree().create_timer(0.05).timeout.connect(_process_next_download_v2)
 
 # ------------------------------------------------------------
-# GÖRÜNTÜLEME VE NAVİGASYON (Label ve Renkler SİLİNDİ)
+# GÖRÜNTÜLEME VE NAVİGASYON
 # ------------------------------------------------------------
 func update_category_display(category: String):
 	var items = get_items_in_category(category)
@@ -135,7 +163,6 @@ func update_category_display(category: String):
 	var slot_path = get_slot_path(category)
 	if not has_node(slot_path): return
 
-	# ❌ Label node'unu aramayı sildik. Sadece Texture ve Butonlar var.
 	var texture_rect = get_node(slot_path + "/HBoxContainer/TextureRect")
 	var back_button = get_node(slot_path + "/HBoxContainer/Back")
 	var next_button = get_node(slot_path + "/HBoxContainer/Next")
@@ -151,16 +178,15 @@ func update_category_display(category: String):
 	var current_item = items[index]
 	var image_url = current_item["image_url"]
 
-	# 🔥 GLOBAL CACHE KONTROLÜ
+	# Cache kontrolü: Varsa hemen koy, yoksa placeholder koy ve indiriliyor mu bak
 	if Globals.texture_cache.has(image_url):
 		texture_rect.texture = Globals.texture_cache[image_url]
 	else:
 		texture_rect.texture = placeholder_texture
+		# Eğer bu resim sırada yoksa, acil olarak en başa ekle
 		if not download_queue.has(image_url):
 			download_queue.push_front(image_url) 
 			if not is_downloading: _process_next_download_v2()
-
-	# ❌ Buradaki Label text atama ve renk değiştirme kodlarının hepsi silindi.
 
 	back_button.disabled = (index == 0)
 	next_button.disabled = (index == items.size() - 1)
@@ -179,7 +205,6 @@ func get_items_in_category(category: String) -> Array:
 	for item in Globals.cache["wardrobe"]:
 		if item.get("category", "") == category and item.get("image_url", "") != "":
 			filtered.append(item)
-	# Confidence sıralaması kalabilir (arka planda çalışır, UI'a etkisi yok)
 	filtered.sort_custom(func(a, b): return a.get("confidence", 1.0) > b.get("confidence", 1.0))
 	return filtered
 
@@ -243,6 +268,7 @@ func _on_popup_item_edited(old_data, new_data):
 		if list[i].get("image_url") == old_data.get("image_url"):
 			index = i; break
 	if index != -1:
+		new_data["confidence"] = 1.0
 		list[index] = new_data
 		Globals.cache["wardrobe"] = list
 		Globals.save_cache() 
@@ -343,16 +369,29 @@ func _on_file_selected(status: bool, paths: PackedStringArray, _idx: int):
 	current_classify_request.request_completed.connect(_on_classification_complete.bind(img, buffer))
 	current_classify_request.request(WORKER_URL, ["Content-Type: application/json"], HTTPClient.METHOD_POST, JSON.stringify({ "image": base64_str }))
 
+# 👇 CLASSIFICATION (RENK VE İSİM DÜZELTME AKTİF ✅)
 func _on_classification_complete(_r, code, _h, body, original_img: Image, image_buffer: PackedByteArray):
 	if current_classify_request: current_classify_request.queue_free()
 	if code != 200: OS.alert("AI Error."); return
 	var json = JSON.parse_string(body.get_string_from_utf8())
 	if not json.get("is_valid", false): OS.alert("Not a clothing item."); return
 	
+	# 1. Ham İsim
+	var raw_name = json.get("item_name", "Item")
+	
+	# 2. Yerel Fonksiyonla Renk Bulma (FONKSİYON GERİ GELDİ)
+	var color = detect_dominant_color(original_img)
+	
+	# 3. İsim Birleştirme (Blue + Running Shoe = Blue Running Shoe)
+	var final_name = raw_name
+	if color != "Grey" and color != "" and not raw_name.to_lower().contains(color.to_lower()):
+		final_name = color + " " + raw_name
+	
 	var item_data = {
 		"category": json.get("category", "upper"),
-		"item_name": json.get("item_name", "Item"),
-		"confidence": json.get("confidence", 1.0),
+		"item_name": final_name, # ✅ Düzeltilmiş isim
+		"color": color,
+		"confidence": json.get("confidence", 0.0),
 		"is_favorite": false
 	}
 	upload_to_supabase(image_buffer, item_data)
@@ -366,12 +405,106 @@ func upload_to_supabase(image_buffer: PackedByteArray, item_data: Dictionary):
 
 func _on_upload_completed(_r, code, _h, body, item_data):
 	if current_upload_request: current_upload_request.queue_free()
-	if code != 200 and code != 201: OS.alert("Upload Failed."); return
+	
+	if code != 200 and code != 201: 
+		OS.alert("Upload Failed.")
+		return
+		
 	var json = JSON.parse_string(body.get_string_from_utf8())
 	var key = json.get("Key", "")
 	item_data["image_url"] = PUBLIC_URL_BASE + key.replace("wardrobe/", "")
 	
 	if not Globals.cache.has("wardrobe"): Globals.cache["wardrobe"] = []
 	Globals.cache["wardrobe"].append(item_data)
-	Globals.mark_dirty(); Globals.save_cache()
+	Globals.mark_dirty()
+	Globals.save_cache()
 	refresh_wardrobe_ui()
+	
+	# ✅ BİLDİRİM GÖSTER (YEŞİL TEMA)
+	show_success_popup(item_data.get("item_name", "New Item"))
+	
+	# ✅ GÖREV TETİKLE
+	var qm = get_node_or_null("/root/QuestManager")
+	if qm and qm.has_method("trigger_action"):
+		qm.trigger_action("first_wardrobe")
+	
+func show_success_popup(item_name: String):
+	var layer = CanvasLayer.new()
+	layer.layer = 105 
+	get_tree().root.add_child(layer)
+	
+	var panel = PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	panel.offset_left = 40; panel.offset_right = -40
+	panel.position.y = -150 
+	
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.2, 0.05, 0.95) 
+	style.border_width_bottom = 4
+	style.border_color = Color(0.2, 0.8, 0.2) 
+	style.corner_radius_bottom_left = 10
+	style.corner_radius_bottom_right = 10
+	style.content_margin_top = 15
+	style.content_margin_bottom = 15
+	panel.add_theme_stylebox_override("panel", style)
+	
+	layer.add_child(panel)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 8)
+	panel.add_child(vbox)
+	
+	var lbl_title = Label.new()
+	lbl_title.text = "WARDROBE UPDATED!"
+	lbl_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_title.add_theme_color_override("font_color", Color(0.2, 0.8, 0.2)) 
+	lbl_title.add_theme_font_override("font", popup_font)
+	lbl_title.add_theme_font_size_override("font_size", 16)
+	vbox.add_child(lbl_title)
+	
+	var lbl_desc = Label.new()
+	lbl_desc.text = "Added: " + item_name
+	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_desc.add_theme_color_override("font_color", Color.WHITE)
+	lbl_desc.add_theme_font_override("font", popup_font)
+	lbl_desc.add_theme_font_size_override("font_size", 12)
+	vbox.add_child(lbl_desc)
+	
+	var tween = create_tween()
+	tween.tween_property(panel, "position:y", 80.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(2.5)
+	tween.tween_property(panel, "position:y", -200.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	tween.tween_callback(layer.queue_free)
+
+# ==========================================================
+# 👇 RENK ALGILAMA (TEKRAR EKLENDİ)
+# ==========================================================
+func detect_dominant_color(img: Image) -> String:
+	img.convert(Image.FORMAT_RGB8)
+	var data = img.get_data()
+	var r_total = 0; var g_total = 0; var b_total = 0; var pixel_count = 0
+	var w = img.get_width(); var h = img.get_height()
+	var start_x = int(w * 0.2); var end_x = int(w * 0.8)
+	var start_y = int(h * 0.2); var end_y = int(h * 0.8)
+
+	for y in range(start_y, end_y, 4):
+		for x in range(start_x, end_x, 4):
+			var idx = (y * w + x) * 3
+			r_total += data[idx]; g_total += data[idx + 1]; b_total += data[idx + 2]
+			pixel_count += 1
+
+	if pixel_count == 0: return "Grey"
+	var r_avg = r_total / pixel_count / 255.0
+	var g_avg = g_total / pixel_count / 255.0
+	var b_avg = b_total / pixel_count / 255.0
+
+	if r_avg > 0.7 and g_avg > 0.7 and b_avg > 0.7: return "White"
+	if r_avg < 0.3 and g_avg < 0.3 and b_avg < 0.3: return "Black"
+	if r_avg > g_avg + 0.2 and r_avg > b_avg + 0.2: return "Red"
+	if g_avg > r_avg + 0.2 and g_avg > b_avg + 0.2: return "Green"
+	if b_avg > r_avg + 0.2 and b_avg > g_avg + 0.2: return "Blue"
+	if r_avg > 0.6 and g_avg > 0.4 and b_avg < 0.4: return "Orange"
+	if r_avg > 0.5 and g_avg > 0.4 and b_avg > 0.5: return "Pink"
+	if r_avg > 0.5 and g_avg > 0.4 and b_avg < 0.3: return "Brown"
+	if r_avg > 0.6 and g_avg > 0.5 and b_avg > 0.4: return "Beige"
+	return "Grey"

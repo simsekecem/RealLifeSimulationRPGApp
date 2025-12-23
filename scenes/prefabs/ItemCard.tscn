@@ -1,13 +1,14 @@
 [gd_scene load_steps=4 format=3 uid="uid://w2a8qtsyvscg"]
 
 [ext_resource type="Script" uid="uid://cso5xrevtt7pl" path="res://scripts/ItemCard.gd" id="1_jxadr"]
-[ext_resource type="Theme" uid="uid://d2xlhbn3wik57" path="res://scenes/Wardrobe.tres" id="1_lroro"]
+[ext_resource type="Theme" uid="uid://mr6t081trkg2" path="res://scenes/Wardrobe.tres" id="1_lroro"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yucqt"]
 bg_color = Color(0.21, 0.13030499, 0.0020999978, 0.59607846)
 
 [node name="ItemCard" type="Panel"]
 custom_minimum_size = Vector2(180, 162)
+size_flags_vertical = 3
 theme = ExtResource("1_lroro")
 theme_override_styles/panel = SubResource("StyleBoxFlat_yucqt")
 script = ExtResource("1_jxadr")
@@ -31,8 +32,11 @@ custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 
 [node name="Label" type="Label" parent="VBoxContainer"]
+custom_minimum_size = Vector2(13, 13)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
+text = "kıy"
+autowrap_mode = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
