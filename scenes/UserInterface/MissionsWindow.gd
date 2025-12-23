@@ -18,8 +18,23 @@ func _ready():
 
 func refresh_mission_list():
 	var all_quests = Globals.cache.get("quests", [])
-	print("🔍 Görev Listeleniyor: ", all_quests.size(), " adet bulundu.")
-	load_missions(all_quests)
+	
+	# --- SIRALAMA MANTIĞI ---
+	var daily_quests = []
+	var other_quests = []
+	
+	# Görevleri türüne göre iki ayrı listeye ayırıyoruz
+	for q in all_quests:
+		if q.get("type") == "daily":
+			daily_quests.append(q)
+		else:
+			other_quests.append(q)
+	
+	# Önce Daily olanları, sonra diğerlerini birleştirip gönderiyoruz
+	var sorted_quests = daily_quests + other_quests
+	
+	print("🔍 Görev Listeleniyor: ", sorted_quests.size(), " adet. (Daily öncelikli)")
+	load_missions(sorted_quests)
 
 func load_missions(missions: Array):
 	# Eski listeyi temizle
