@@ -334,3 +334,111 @@ Bu Godot Sahne (`.tscn`) dosyası, oyunun ana kullanıcı arayüzü (UI) kökün
     *   **Kombin Sonuç Pop-up'ı (`OutfitResultPopup.tscn`):** Otomatik kombin oluşturma sonuçlarını göstermek için bir açılır pencere.
     *   **Bildirim (`Notification`):** Geçici oyun içi bildirimleri göstermek için bir `Control` düğümü.
 *   **Betik İşlevi:** `UI.gd` betiği, bu pencereleri gösterme/gizleme, aralarında veri aktarımı ve sinyalleri bağlama gibi işlemleri yöneterek genel kullanıcı arayüzü akışını sağlar.
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\scenes\UserInterface\AvatarWindow.gd`
+
+Bu GDScript dosyası, oyuncunun avatar özelleştirme penceresini yönetir.
+
+*   **Ana İşlevler:** 
+    *   **Arayüz Yönetimi:** Karakter istatistiklerini gösteren bir ana ekran ve değişiklik yapmak için bir düzenleme ekranı olmak üzere iki ana görünümü kontrol eder.
+    *   **Veri Gösterimi:** Oyuncunun adını, seviyesini, XP'sini, doğum gününü ve karakter görünümünü `Globals` singleton'undan alıp gösterir.
+    *   **XP ve Seviye Hesaplaması:** Oyuncunun seviyesini ve bir sonraki seviye için gereken XP'yi doğru bir şekilde hesaplayıp gösterir ve bir XP ilerleme çubuğunu günceller.
+    *   **Karakter Seçimi:** 
+        *   Oyuncunun mevcut karakterler arasında geçiş yapmasına olanak tanır (`char_1.tres`, `char_2.tres`, vb.).
+        *   **Seviye Kilidi:** Karakterlerin oyuncunun seviyesine göre kilitli olduğu kritik bir özellik içerir. Örneğin, 2. karakteri seçebilmek için oyuncunun en az 2. seviyede olması gerekir. Kilitli bir karakter seçildiğinde görsel bir geri bildirim (kırmızı bir parlama) verir.
+    *   **Veri Kalıcılığı:** 
+        *   Düzenleme penceresindeki "Kaydet" düğmesine tıklandığında, oyuncunun adını ve doğum gününü `Globals.cache`'e kaydeder.
+        *   Avatar penceresi kapatıldığında, seçilen `character_id`'yi `Globals.cache`'e kaydeder.
+        *   Değişikliklerin sunucu ile senkronize edilmesi ve yerel olarak kaydedilmesi için `Globals.mark_dirty()` ve `Globals.save_cache()` fonksiyonlarını kullanır.
+    *   **Görev Entegrasyonu:** Oyuncu adını ilk kez değiştirdiğinde (`first_name`) veya doğum gününü ayarladığında (`first_birthday`) `QuestManager` aracılığıyla ilgili görevleri tetikler.
+    *   **Dinamik Arayüz Güncellemeleri:** `Globals.data_updated` sinyaline bağlanır. Bu sayede, oyunun başka bir yerinde veri (XP veya seviye gibi) değiştiğinde, avatar penceresinin arayüzü otomatik olarak ve anında güncellenir.
+    *   **Tarih Seçiciler:** Kullanıcının doğum tarihini (gün, ay, yıl) seçmesi için açılır menüler sunar.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\market.tres`
+
+Bu bir Godot Tema kaynak dosyasıdır (`.tres`) ve Market (Pazar) sahnesinin kullanıcı arayüzü (UI) elemanlarının görsel stilini tanımlar.
+
+*   **Türü:** `Theme`
+*   **Amacı:** Market sahnesindeki UI kontrolleri için tutarlı bir görünüm ve his sağlamak.
+*   **Font:** Projedeki diğer UI temalarıyla tutarlı olarak "Press Start 2P" piksel sanat fontunu (`res://assets/fonts/PressStart2P-Regular.ttf`) kullanır.
+*   **Renk Paleti:** Tema, mavi ve mor tonlarının hakimiyetindedir:
+    *   Normal düğmeler açık, grimsi mavi bir arka plana sahiptir (`#B5CDEB`).
+    *   Üzerine gelinen/odaklanılan düğmeler orta tonda bir mavi rengi paylaşır (`#94ADe3`).
+    *   Basılan düğmeler daha koyu bir mavidir (`#77B1D4`).
+    *   Font rengi koyu, doygunluğu azaltılmış bir mavidir (`#496580`).
+    *   Kaydırma çubuğu elemanları çok koyu ve orta tonlarda maviler kullanır.
+*   **Stil:**
+    *   **Düğmeler (`Button`):** Tüm düğme durumları (normal, üzerine gelindiğinde, basıldığında, odaklanıldığında) `StyleBoxFlat` ile, yani düz renkli panellerle şekillendirilmiştir. Önemli bir özellik, tüm köşelerdeki 15 piksellik `corner_radius` (köşe yuvarlaklığı) olup, düğmelere belirgin, yuvarlak bir görünüm kazandırır.
+    *   **Onay Kutuları (`CheckBox`):** Ayrıca düz renklerle şekillendirilmiştir.
+    *   **Kaydırma Çubukları (`HScrollBar`, `VScrollBar`):** Hem yatay hem de dikey kaydırma çubuklarının "tutamacı" (tıklanıp sürüklenen kısım), yine 15 piksellik yuvarlak köşelere sahip olan koyu ve orta mavi `StyleBoxFlat` kaynakları ile şekillendirilmiştir.
+
+Özetle, bu dosya, mavi/mor bir renk şemasına ve UI elemanları için belirgin şekilde yuvarlak köşelere sahip, uyumlu bir "Market" teması oluşturur.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\assets\characters\resources\char_1.tres`
+
+Bu bir Godot `SpriteFrames` kaynak dosyasıdır. "1. karakter" olarak adlandırılan bir oyun karakteri için animasyonları tanımlar.
+
+*   **Türü:** `SpriteFrames`
+*   **Amacı:** Bir karakter spriti için tüm animasyon dizilimlerini depolayarak bir `AnimatedSprite2D` düğümünde kolayca yönetilmesini ve kullanılmasını sağlamak.
+*   **Bağımlılık:** `res://assets/characters/character_5_frame64x64.png` konumundaki tek bir doku atlasına (bir spritesheet) dayanır. `character_5` dosya adı, kaynak adı olan `char_1` ile çelişkili görünmektedir; bu durum bir isimlendirme tutarsızlığına veya birden fazla karakter kaynağının aynı temel spritesheet'i paylaştığına işaret edebilir.
+*   **Yapısı:** 
+    *   **`ext_resource`**: Ana resim dosyasının yolunu tanımlar.
+    *   **`sub_resource` (`AtlasTexture`)**: 18 adet `AtlasTexture` alt kaynağı bulunmaktadır. Her biri, ana doku atlası içinde belirli bir dikdörtgen bölgeyi (tek bir 64x64 kare) tanımlar. Bu, bireysel karelerin spritesheet'ten "kesilip" çıkarılma yöntemidir.
+    *   **`resource` (`animations`)**: Dosyanın çekirdeğidir. Animasyon tanımlarını içeren bir dizidir.
+*   **Tanımlanan Animasyonlar:** 
+    *   **Boşta Kalma Animasyonları:** `idle_down`, `idle_left`, `idle_right`, `idle_up`. Her biri tek karelik bir animasyondur, yani karakter boştayken sabittir.
+    *   **Yürüme Animasyonları:** `walk_down`, `walk_left`, `walk_right`, `walk_up`. Her biri üç kareden oluşarak basit bir yürüme döngüsü oluşturur.
+*   **Animasyon Özellikleri:** Tüm animasyonlar `loop = true` (döngü açık) olarak ayarlanmış ve saniyede 5.0 kare hızına (`speed`) sahiptir.
+
+Özetle, bu dosya, bir spritesheet'ten kareleri ayırarak ve onları isimlendirilmiş animasyon dizilimleri halinde düzenleyerek ilk oyuncu karakteri için sekiz yönlü (dört yönde boşta durma ve yürüme) animasyon setini tanımlar.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\scenes\Wardrobe.tres`
+
+Bu, `Wardrobe` (Gardırop) sahnesi ve onunla ilişkili açılır pencereler (popup) için özel olarak tasarlanmış bir Godot `Theme` (Tema) kaynak dosyasıdır.
+
+*   **Türü:** `Theme`
+*   **Amacı:** Gardırop kullanıcı arayüzü elemanlarına benzersiz ve tutarlı bir görünüm kazandırmak.
+*   **Fontlar:** İki farklı font ailesi kullanır:
+    *   `PressStart2P-Regular.ttf`: `Button` ve `Label` gibi standart UI elemanları için kullanılan ana piksel-art fontu.
+    *   `CherrySwash-Bold.ttf` ve `CherrySwash-Regular.ttf`: Sadece `RichTextLabel` kontrolü için kullanılan daha dekoratif, el yazısı benzeri fontlar. Bu, oyunun diğer bölümlerinden farklı olarak, gardırop içinde daha süslü metinlerin gösterilmesine olanak tanır.
+*   **Renk Paleti:** Tema, ahşap, deri veya rahat bir dolap hissi uyandıran sıcak, altın-kahverengi ve sarı bir palet etrafında şekillendirilmiştir.
+    *   **Kenarlıklar:** Hakim renk, koyu, pirinç benzeri bir sarı/altın rengidir (örneğin, `#c48605`, `#a06c03`). Çoğu eleman, özellikle düğmeler, arka plan rengi olmadan (`bg_color` şeffaf) bu altın rengini kenarlık olarak kullanır.
+    *   **Kaydırma Çubukları ve Açılır Pencereler:** Kaydırma çubuğu tutamaçları ve açılır pencere panelleri, koyu kahverengi/bronz (`#553801`) ve aynı altın-sarı tonlarının bir karışımını kullanır.
+    *   **Font Renkleri:** Düğme font renkleri de bu altın-sarı aralığındadır ve üzerine gelme veya basılma durumlarında parlaklıkları hafifçe değişir.
+*   **Stil:**
+    *   **Düğmeler (`Button`):** Stil, öncelikli olarak 2 piksel genişliğinde, harmanlanmış altın rengi bir kenarlık ve 7 piksellik bir köşe yuvarlaklığı ile tanımlanır, bu da onlara daha yumuşak, çerçeveli bir görünüm kazandırır. Arka planın şeffaf olması, kenarlığı en belirgin özellik haline getirir.
+    *   **Açılır Pencereler (`PopupPanel`, `Window`):** Bunlar, koyu kahverengi, yarı şeffaf bir arka plana, kalın, harmanlanmış altın rengi bir kenarlığa ve daha büyük bir köşe yuvarlaklığına (15 piksel) sahiptir, bu da onlara sağlam, "çerçevelenmiş" bir görünüm verir.
+    *   **Kaydırma Çubukları (`HScrollBar`, `VScrollBar`):** Tutamaçlar, 20 piksellik büyük bir köşe yuvarlaklığına sahip düz altın-sarı renktedir ve bu da onlara yuvarlak bir pastil görünümü kazandırır. Ayrıca hafif bir gölge efektine sahiptirler.
+    *   **`RichTextLabel`:** Diğer UI elemanlarından farklı olarak, çeşitli metin stilleri (normal, kalın, italik) için `CherrySwash` font ailesini kullanacak şekilde özel olarak yapılandırılmıştır.
+
+Özetle, bu dosya, çerçeveli, altın-sarı ve kahverengi renk şeması, yuvarlak köşeler ve zengin metinler için özel bir dekoratif font kullanımıyla karakterize edilen benzersiz bir "Gardırop" teması oluşturur. Bu, gardıroba oyunun diğer UI temalarına kıyasla daha sıcak, biraz rustik ve daha premium bir his verir.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\project.godot`
+
+Bu, tüm uygulama için temel ayarları tanımlayan ana Godot proje yapılandırma dosyasıdır (`project.godot`).
+
+*   **`config_version=5`**: Bu projenin Godot 4 için olduğunu belirtir.
+*   **`[application]` bölümü:**
+    *   `config/name`: Uygulamanın adını "RealLifeSimulationRPGApp" olarak ayarlar.
+    *   `run/main_scene`: Oyunun giriş noktasını, benzersiz kimliği (`uid://by5fgbvxh4h1j`) ile belirtilen bir sahne dosyası olarak tanımlar. Bu, oyun başlatıldığında yüklenen ilk sahnedir.
+    *   `config/features`: Projenin Godot 4.5 ve geniş donanım desteği sağlayan "GL Uyumluluğu" (GL Compatibility) render motorunu kullandığını bildirir.
+    *   `config/icon`: Uygulamanın ikonuna bir UID aracılığıyla işaret eder.
+*   **`[autoload]` bölümü:** Bu, projenin mimarisini anlamak için en kritik bölümlerden biridir. Oyun başlangıcında yüklenen ve oyunun her yerinden erişilebilen global "Singleton"ları tanımlar.
+    *   `Globals`: `*res://scripts/globals.gd` konumundaki global bir betik. Daha önce görüldüğü gibi, bu, tüm oyuncu verilerini ve oyun durumunu yöneten oyunun "beyni"dir.
+    *   `UI`: Ana kullanıcı arayüzü sahnesi olan `*res://scenes/UserInterface/UI.tscn` de bir singleton'dur. Bu, herhangi bir betiğin pencereler ve HUD bileşenleri gibi UI elemanlarına kolayca erişip kontrol etmesini sağlar.
+    *   `MusicController`: `*res://scenes/Autoloads/music_controller.tscn` konumundaki bir sahne, arka plan müziğini ve muhtemelen ses efektlerini küresel olarak yönetmekten sorumludur.
+    *   `QuestManager`: `*res://questmanager.gd` betiği de bir autoload'dur, bu da tüm görevle ilgili mantığı yöneten merkezi sistem rolünü doğrular.
+*   **`[display]` bölümü:**
+    *   `window/size/viewport_width` ve `height`: Oyunun temel çözünürlüğünü 1280x720 olarak ayarlar.
+    *   `window/stretch/mode="canvas_items"` ve `aspect="keep_width"`: Bu ayarlar, oyunun farklı ekran boyutlarında nasıl ölçekleneceğini tanımlar. Genişliği sabit tutarak orijinal en-boy oranını korurken UI elemanlarını ölçekler; bu, çeşitli çözünürlükleri desteklemesi gereken 2D oyunlar için yaygın bir kurulumdur.
+*   **`[editor_plugins]` bölümü:**
+    *   `enabled=PackedStringArray("res://addons/godotx_firebase/plugin.cfg")`: `godotx_firebase` eklentisini açıkça etkinleştirir, projenin kimlik doğrulama, mesajlaşma vb. özellikler için Firebase ile entegrasyonunu onaylar.
+*   **`[input_devices]` bölümü:**
+    *   `pointing/emulate_touch_from_mouse=true`: Fare tıklamalarının dokunma olayları olarak kabul edilmesini sağlar, bu da mobil öncelikli kullanıcı arayüzlerini bir masaüstü bilgisayarda test etmek için gereklidir.
+*   **`[rendering]` bölümü:**
+    *   `textures/canvas_textures/default_texture_filter=0`: Varsayılan doku filtrelemesini "En Yakın Komşu" (Nearest Neighbor) olarak ayarlar. Bu, piksel sanatı oyunlarında piksellerin bulanıklık olmadan keskin ve net görünmesini sağlamak için kasıtlı bir seçimdir.
+    *   `renderer/rendering_method="gl_compatibility"`: Hem masaüstü hem de mobil için Uyumluluk render motorunun kullanıldığını yeniden onaylar, bu da oyunun daha eski ve daha az güçlü donanımlarda çalışmasını sağlar.
+    *   `textures/vram_compression/import_etc2_astc=true`: Mobil cihazlar için verimli bir doku sıkıştırma formatını etkinleştirir, bu da mobil hedefli bir oyun için iyi bir optimizasyondur.
+
+**Özet:**
+
+Bu dosya, projenin üst düzey bir planını sunar. 720p temel çözünürlüğe sahip, mobil öncelikli, 2D bir piksel sanatı oyunu kurar. Mimari, durum, UI, ses ve oyun mantığını yönetmek için dört ana singleton'a (`Globals`, `UI`, `MusicController`, `QuestManager`) büyük ölçüde dayanır. Ayrıca Firebase ve GL Uyumluluk render motorunun kullanıldığını doğrular.
