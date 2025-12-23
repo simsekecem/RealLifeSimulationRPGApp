@@ -398,7 +398,7 @@ if (path === "/api/daily_quests" && method === "POST") {
 
 
 
-// ---------- CLOTHING CLASSIFICATION (ViT MODEL - DOĞRU ROUTER URL) ----------
+// ---------- CLOTHING CLASSIFICATION ----------
 if (path === "/api/classify_clothing_vit" && method === "POST") {
 	try {
 		const { image } = await request.json();
@@ -447,25 +447,162 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 		   👕 KIYAFET ANAHTAR KELİMELERİ (GENİŞLETİLDİ)
 		-------------------------------------------------- */
 		const clothingKeywords = [
-			// upper
-			"shirt", "t-shirt", "tshirt", "top", "blouse",
-			"sweater", "hoodie", "sweatshirt", "suit",
+	// -------------------------------------------------
+	// 👕 TOPS (ÜST GİYİM + SUIT)
+	// -------------------------------------------------
+	"t-shirt", "tshirt", "tee", "graphic tee",
+	"long sleeve", "longsleeve",
+	"shirt", "dress shirt", "button-up", "button down",
+	"blouse", "peasant blouse",
+	"sweater", "jumper", "knit sweater",
+	"sweatshirt",
+	"hoodie", "zip hoodie",
+	"cardigan", "long cardigan",
+	"tank top", "muscle tank",
+	"crop top",
+	"polo shirt",
+	"camisole", "cami",
+	"tube top", "strapless top",
+	"halter top",
+	"tunic",
+	"vest",
+	"waistcoat",
+	"kimono top",
+	"wrap top",
+	"off-shoulder top",
+	"one-shoulder top",
+	"peplum top",
+	"mock neck top",
+	"turtleneck",
+	"bodysuit",
 
-			// lower
-			"jean", "pants", "trousers", "shorts",
-			"skirt", "legging",
+	// 👔 SUIT → UPPER WEAR’DE
+	"suit",
+	"business suit",
+	"formal suit",
+	"casual suit",
+	"pantsuit",
+	"skirt suit",
+	"tuxedo",
+	"dinner jacket",
+	"three-piece suit",
+	"two-piece suit",
+	"tailcoat",
+	"morning suit",
 
-			// dress
-			"dress", "gown",
+	// -------------------------------------------------
+	// 👖 BOTTOMS (ALT GİYİM)
+	// -------------------------------------------------
+	"jeans", "skinny jeans", "straight jeans",
+	"wide leg jeans", "bootcut jeans",
+	"pants", "trousers",
+	"slacks",
+	"chinos",
+	"cargo pants",
+	"parachute pants",
+	"shorts", "denim shorts",
+	"bermuda shorts",
+	"leggings", "yoga pants",
+	"joggers",
+	"sweatpants",
+	"track pants",
+	"palazzo pants",
+	"harem pants",
+	"culottes",
+	"skirt",
+	"mini skirt",
+	"midi skirt",
+	"maxi skirt",
+	"pleated skirt",
+	"wrap skirt",
+	"pencil skirt",
+	"a-line skirt",
 
-			// outer
-			"jacket", "coat", "blazer", "parka",
-			"overcoat", "windbreaker",
+	// -------------------------------------------------
+	// 👗 DRESSES & ONE-PIECE
+	// -------------------------------------------------
+	"dress",
+	"day dress",
+	"evening dress",
+	"cocktail dress",
+	"formal dress",
+	"maxi dress",
+	"mini dress",
+	"midi dress",
+	"wrap dress",
+	"bodycon dress",
+	"shift dress",
+	"shirt dress",
+	"slip dress",
+	"smock dress",
+	"gown",
+	"ball gown",
+	"jumpsuit",
+	"romper",
+	"playsuit",
+	"boiler suit",
+	"overalls",
+	"dungarees",
 
-			// shoes
-			"shoe", "sneaker", "boot", "sandal",
-			"heel", "slipper"
-		];
+	// -------------------------------------------------
+	// 🧥 OUTERWEAR (DIŞ GİYİM)
+	// -------------------------------------------------
+	"jacket",
+	"light jacket",
+	"denim jacket",
+	"leather jacket",
+	"bomber jacket",
+	"varsity jacket",
+	"puffer jacket",
+	"quilted jacket",
+	"down jacket",
+	"coat",
+	"long coat",
+	"overcoat",
+	"trench coat",
+	"parka",
+	"blazer",
+	"double breasted blazer",
+	"windbreaker",
+	"raincoat",
+	"mackintosh",
+	"poncho",
+	"cape",
+	"fleece jacket",
+	"shearling jacket",
+	"anorak",
+
+	// -------------------------------------------------
+	// 👟 FOOTWEAR (AYAKKABI)
+	// -------------------------------------------------
+	"sneakers", "running shoes",
+	"trainers",
+	"shoes",
+	"formal shoes",
+	"boots",
+	"ankle boots",
+	"knee-high boots",
+	"combat boots",
+	"chelsea boots",
+	"cowboy boots",
+	"sandals",
+	"slides",
+	"heels",
+	"high heels",
+	"kitten heels",
+	"platform heels",
+	"flats",
+	"ballet flats",
+	"loafers",
+	"oxfords",
+	"derbies",
+	"mules",
+	"clogs",
+	"espadrilles",
+	"slippers",
+	"flip flops"
+];
+
 
 		const isClothing = clothingKeywords.some(k => label.includes(k));
 
@@ -483,36 +620,110 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 		   outer | dress | upper | lower | shoes
 		-------------------------------------------------- */
 		let category = "upper";
+const l = label.toLowerCase();
 
-		if (
-			label.includes("jacket") ||
-			label.includes("coat") ||
-			label.includes("blazer") ||
-			label.includes("parka") ||
-			label.includes("overcoat") ||
-			label.includes("windbreaker")
-		) category = "outer";
+// -------------------------------------------------
+// 🧥 OUTERWEAR (suit ile çakışanlar hariç)
+// -------------------------------------------------
+if (
+	l.includes("jacket") &&
+	!l.includes("dinner jacket") &&   // 🔥 fix
+	!l.includes("suit")
+) {
+	category = "outer";
+}
+else if (
+	l.includes("coat") ||
+	l.includes("parka") ||
+	l.includes("overcoat") ||
+	l.includes("trench") ||
+	l.includes("windbreaker") ||
+	l.includes("raincoat") ||
+	l.includes("poncho") ||
+	l.includes("cape") ||
+	l.includes("anorak") ||
+	l.includes("puffer") ||
+	l.includes("fleece") ||
+	l.includes("shearling") ||
+	l.includes("blazer")
+) {
+	category = "outer";
+}
 
-		else if (label.includes("dress") || label.includes("gown"))
-			category = "dress";
+// -------------------------------------------------
+// 👗 DRESS / ONE-PIECE (ÖNCELİKLİ)
+// -------------------------------------------------
+else if (
+	l.includes("dress") ||
+	l.includes("gown") ||
+	l.includes("jumpsuit") ||
+	l.includes("romper") ||
+	l.includes("playsuit") ||
+	l.includes("boiler suit") ||
+	l.includes("overalls") ||
+	l.includes("dungarees")
+) {
+	category = "dress";
+}
 
-		else if (
-			label.includes("pants") ||
-			label.includes("jean") ||
-			label.includes("trousers") ||
-			label.includes("shorts") ||
-			label.includes("skirt") ||
-			label.includes("legging")
-		) category = "lower";
+// -------------------------------------------------
+// 👔 SUIT (pants / skirt override)
+// -------------------------------------------------
+else if (
+	l.includes("suit") ||
+	l.includes("tuxedo") ||
+	l.includes("tailcoat") ||
+	l.includes("morning suit")
+) {
+	category = "upper";
+}
 
-		else if (
-			label.includes("shoe") ||
-			label.includes("sneaker") ||
-			label.includes("boot") ||
-			label.includes("sandal") ||
-			label.includes("heel") ||
-			label.includes("slipper")
-		) category = "shoes";
+// -------------------------------------------------
+// 👖 LOWER WEAR
+// -------------------------------------------------
+else if (
+	l.includes("pants") ||
+	l.includes("trousers") ||
+	l.includes("jean") ||
+	l.includes("denim") ||
+	l.includes("shorts") ||
+	l.includes("bermuda") ||
+	l.includes("legging") ||
+	l.includes("jogger") ||
+	l.includes("sweatpants") ||
+	l.includes("track pants") ||
+	l.includes("skirt") ||
+	l.includes("culottes") ||
+	l.includes("palazzo") ||
+	l.includes("harem")
+) {
+	category = "lower";
+}
+
+// -------------------------------------------------
+// 👟 FOOTWEAR
+// -------------------------------------------------
+else if (
+	l.includes("shoe") ||
+	l.includes("shoes") ||
+	l.includes("sneaker") ||
+	l.includes("trainer") ||
+	l.includes("boot") ||
+	l.includes("sandal") ||
+	l.includes("heel") ||
+	l.includes("flat") ||
+	l.includes("loafer") ||
+	l.includes("oxford") ||
+	l.includes("derby") ||
+	l.includes("mule") ||
+	l.includes("clog") ||
+	l.includes("espadrille") ||
+	l.includes("slipper") ||
+	l.includes("flip flop") ||
+	l.includes("slide")
+) {
+	category = "shoes";
+}
 
 		return addCors(new Response(JSON.stringify({
 			is_valid: true,
