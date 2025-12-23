@@ -571,8 +571,16 @@ func add_xp(amount: int):
 		# 👇 YENİ: LEVEL 2 ÖDÜLÜ (KARAKTER EVRİMİ) 🎭
 		# ============================================================
 		if current_lvl == 2:
-			print("✨ ÖZEL ÖDÜL: Karakter 2 kilidi açıldı ve aktif edildi!")
+			print("✨ ÖZEL ÖDÜL: Karakter 2 kilidi açıldı!")
 			cache["user"]["character_id"] = 2
+			
+			# QuestManager'daki havalı pencereyi çağır
+			var qm = get_node_or_null("/root/QuestManager")
+			if qm and qm.has_method("show_unlock_popup"):
+				# Hemen çıkmasın, görev bildirimiyle çakışmasın diye 2 saniye bekletelim
+				get_tree().create_timer(2.0).timeout.connect(
+					qm.show_unlock_popup.bind(2)
+				)
 			
 			# İstersen buraya bir ses efekti veya particle sinyali de ekleyebilirsin
 			# SoundManager.play_evolution_sound() gibi

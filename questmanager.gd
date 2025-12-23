@@ -180,3 +180,82 @@ func show_mission_popup(desc: String, xp: int):
 	tween.tween_interval(3.0) # Ekranda kalma süresi
 	tween.tween_property(panel, "position:y", -200.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	tween.tween_callback(layer.queue_free)
+
+func show_unlock_popup(char_id: int):
+	# 1. CanvasLayer
+	var layer = CanvasLayer.new()
+	layer.layer = 101 # Görev bildiriminin de üstüne çıksın (Önemli!)
+	get_tree().root.add_child(layer)
+	
+	# 2. Ana Panel (Mor Tema)
+	var panel = PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER) # Ekranın tam ortasında dursun
+	# Başlangıçta biraz küçük ve görünmez olsun (Animasyon için)
+	panel.scale = Vector2(0, 0)
+	panel.pivot_offset = Vector2(150, 100) # Tahmini orta nokta
+	
+	# Stil
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.0, 0.15, 0.95) # Koyu Mor Arka Plan
+	style.border_width_left = 4; style.border_width_top = 4
+	style.border_width_right = 4; style.border_width_bottom = 4
+	style.border_color = Color.MAGENTA # Parlak Mor Çerçeve
+	style.corner_radius_top_left = 20; style.corner_radius_top_right = 20
+	style.corner_radius_bottom_left = 20; style.corner_radius_bottom_right = 20
+	style.content_margin_left = 20; style.content_margin_right = 20
+	style.content_margin_top = 20; style.content_margin_bottom = 20
+	panel.add_theme_stylebox_override("panel", style)
+	
+	layer.add_child(panel)
+	
+	# 3. İçerik (Dikey Sıralama)
+	var vbox = VBoxContainer.new()
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 10)
+	panel.add_child(vbox)
+	
+	# -- Başlık --
+	var lbl_title = Label.new()
+	lbl_title.text = "NEW CHARACTER UNLOCKED!"
+	lbl_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_title.add_theme_color_override("font_color", Color.MAGENTA)
+	lbl_title.add_theme_font_size_override("font_size", 22)
+	lbl_title.uppercase = true
+	vbox.add_child(lbl_title)
+	
+	# -- Karakter Resmi (TextureRect) --
+	var tex_rect = TextureRect.new()
+	tex_rect.custom_minimum_size = Vector2(128, 128) # Resim boyutu
+	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	
+	# İkonu yükle
+	var path = "res://assets/characters/icons/char_icon_%d.png" % char_id
+	if not ResourceLoader.exists(path):
+		path = "res://assets/characters/char_%d.png" % char_id # İkon yoksa normal sprite dene
+	
+	if ResourceLoader.exists(path):
+		tex_rect.texture = load(path)
+	
+	vbox.add_child(tex_rect)
+	
+	# -- Alt Metin --
+	var lbl_desc = Label.new()
+	lbl_desc.text = "You can now switch to this character\nfrom the Avatar menu."
+	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_desc.add_theme_color_override("font_color", Color.WHITE)
+	vbox.add_child(lbl_desc)
+	
+	# 4. Animasyon (POP Efekti) 💥
+	var tween = create_tween()
+	
+	# Büyüyerek açıl (Scale 0 -> 1)
+	tween.tween_property(panel, "scale", Vector2(1, 1), 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	
+	# 4 Saniye ekranda kalsın
+	tween.tween_interval(4.0)
+	
+	# Küçülerek kaybol (Scale 1 -> 0)
+	tween.tween_property(panel, "scale", Vector2(0, 0), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	
+	# Temizlik
+	tween.tween_callback(layer.queue_free)
