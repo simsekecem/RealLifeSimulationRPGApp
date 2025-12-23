@@ -1,5 +1,6 @@
 extends Node
 
+# Statik görev tanımları
 var static_quest_definitions = [
 	{"id": "static_rest", "desc": "Restaurant first entry", "target": "first_restaurant", "xp": 20},
 	{"id": "static_mark", "desc": "Market first entry", "target": "first_market", "xp": 20},
@@ -15,13 +16,10 @@ var static_quest_definitions = [
 func _ready():
 	print("🚀 QuestManager: Hazır, görevler kontrol ediliyor...")
 	call_deferred("check_and_init_quests")
-	
 
 func check_and_init_quests():
-	# 1. Güvenlik: Globals.cache içinde 'quests' yoksa oluştur
 	if not Globals.cache.has("quests"):
 		Globals.cache["quests"] = []
-		print("ℹ️ QuestManager: Cache içinde 'quests' dizisi oluşturuldu.")
 		
 	var current_quests = Globals.cache["quests"]
 	var existing_ids = []
@@ -45,11 +43,8 @@ func check_and_init_quests():
 	if updated:
 		print("✅ QuestManager: Yeni statik görevler eklendi.")
 		Globals.save_cache() 
-		# UI'ı güncellemesi için sinyal gönder
 		if Globals.has_signal("data_updated"):
 			Globals.data_updated.emit()
-	else:
-		print("ℹ️ QuestManager: Eklenecek yeni statik görev yok, hepsi mevcut.")
 	
 	check_daily_quests()
 
@@ -71,56 +66,117 @@ func fetch_daily_quests_from_worker(today_str):
 	if err != OK:
 		print("❌ QuestManager: HTTP isteği başlatılamadı!")
 		
-func _on_daily_received(result, response_code, headers, body, today_str, http_node):
+func _on_daily_received(_result, response_code, _headers, body, today_str, http_node):
 	if response_code == 200:
 		var json = JSON.parse_string(body.get_string_from_utf8())
 		if json and json is Array:
 			var new_list = []
-			
-			# 1. Mevcut listeden SADECE senin yukarıda tanımladığın 9 statik görevi tut
 			var static_ids = []
 			for s_def in static_quest_definitions:
 				static_ids.append(s_def["id"])
 				
 			for q in Globals.cache["quests"]:
-				# Eğer görevin ID'si statik listedeyse koru
 				if q.get("id") in static_ids:
 					new_list.append(q)
 			
-			# 2. Worker'dan gelen 4 yeni görevi ekle
 			for dq in json:
-				# GÜVENLİK: Tipi ne gelirse gelsin 'daily' yapıyoruz ki karışmasın
 				dq["type"] = "daily" 
 				new_list.append(dq)
 			
-			# 3. Cache'i güncelle ve kaydet
 			Globals.cache["quests"] = new_list
 			Globals.cache["last_quest_gen_date"] = today_str
 			Globals.save_cache()
 			
 			if Globals.has_signal("data_updated"):
 				Globals.data_updated.emit()
-			
-			print("✅ QuestManager: Liste senkronize edildi. (9 Statik + ", json.size(), " Günlük)")
+			print("✅ QuestManager: Liste senkronize edildi.")
 	else:
 		print("❌ QuestManager: Worker hatası! Kod: ", response_code)
 	
-	if http_node:
-		http_node.queue_free()
+	if http_node: http_node.queue_free()
 
+# ==========================================================
+# 👇 GÜNCELLENEN TRIGGER ACTION (GECİKMELİ)
+# ==========================================================
 func trigger_action(action_name: String):
 	var updated = false
 	if not Globals.cache.has("quests"): return
 
 	for q in Globals.cache["quests"]:
-		# .to_lower() ekleyerek büyük/küçük harf hatasını engelliyoruz
 		if q["target_action"].to_lower() == action_name.to_lower() and not q["is_completed"]:
+			# 1. State'i hemen güncelle (Güvenlik için)
 			q["is_completed"] = true
 			Globals.add_xp(q["xp_reward"])
 			updated = true
-			print("🎯 Görev Tamamlandı: ", q["description"])
+			print("🎯 Görev Tamamlandı (Saved): ", q["description"])
+			
+			# 2. Bildirimi 5 saniye sonra göster (Görsel keyif için)
+			# 'bind' fonksiyonu ile parametreleri şimdi paketliyoruz, 5 sn sonra açılacak.
+			get_tree().create_timer(3.0).timeout.connect(
+				show_mission_popup.bind(q["description"], q["xp_reward"])
+			)
 			
 	if updated:
+		# Veriyi anında kaydet, oyuncu 5 saniye beklemeden çıksa bile görev sayılmış olsun.
 		Globals.save_cache()
 		if Globals.has_signal("data_updated"):
 			Globals.data_updated.emit()
+
+# ==========================================================
+# 👇 DİNAMİK BİLDİRİM PENCERESİ (CODE ONLY)
+# ==========================================================
+func show_mission_popup(desc: String, xp: int):
+	# 1. CanvasLayer (Ekranda en üstte dursun diye)
+	var layer = CanvasLayer.new()
+	layer.layer = 100 # Z-Index gibi, en öne alır
+	get_tree().root.add_child(layer)
+	
+	# 2. Arka Plan Kutusu (Panel)
+	var panel = PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	panel.offset_left = 20; panel.offset_right = -20
+	panel.position.y = -150 # Başlangıçta yukarıda gizli
+	
+	# Stil
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.1, 0.1, 0.95)
+	style.border_width_bottom = 4
+	style.border_color = Color.GOLD
+	style.corner_radius_bottom_left = 10
+	style.corner_radius_bottom_right = 10
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	panel.add_theme_stylebox_override("panel", style)
+	
+	layer.add_child(panel)
+	
+	# 3. İçerik Düzeni
+	var vbox = VBoxContainer.new()
+	panel.add_child(vbox)
+	
+	var lbl_title = Label.new()
+	lbl_title.text = "MISSION COMPLETED!"
+	lbl_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_title.add_theme_color_override("font_color", Color.GOLD)
+	lbl_title.add_theme_font_size_override("font_size", 20)
+	vbox.add_child(lbl_title)
+	
+	var lbl_desc = Label.new()
+	lbl_desc.text = desc
+	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_desc.add_theme_font_size_override("font_size", 16)
+	vbox.add_child(lbl_desc)
+	
+	var lbl_xp = Label.new()
+	lbl_xp.text = "+ " + str(xp) + " XP"
+	lbl_xp.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_xp.add_theme_color_override("font_color", Color.GREEN)
+	lbl_xp.add_theme_font_size_override("font_size", 18)
+	vbox.add_child(lbl_xp)
+	
+	# 4. Animasyon (Tween)
+	var tween = create_tween()
+	tween.tween_property(panel, "position:y", 20.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(3.0) # Ekranda kalma süresi
+	tween.tween_property(panel, "position:y", -200.0, 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	tween.tween_callback(layer.queue_free)

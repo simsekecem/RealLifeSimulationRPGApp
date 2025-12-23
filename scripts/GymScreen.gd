@@ -305,7 +305,7 @@ func refresh_weekly_view():
 				row.custom_minimum_size.y = 40
 				
 				var duration_text := ""
-				if entry.has("duration"): duration_text = "%d dk" % int(entry.duration)
+				if entry.has("duration"): duration_text = "%d min" % int(entry.duration)
 				var is_done = entry.get("completed", false)
 				var is_past = loop_date_str < today_str
 
