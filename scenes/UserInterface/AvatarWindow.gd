@@ -76,35 +76,41 @@ func update_ui_from_cache():
 	# Ana Ekranı Doldur
 	if label_name_display: label_name_display.text = str(user_data.get("name", "Player"))
 	
-	# --- LEVEL & XP HESAPLAMA ---
+	# --- LEVEL & XP HESAPLAMA (DÜZELTİLDİ) ---
 	var total_xp = int(user_data.get("experience", 0))
 	
-	# 300 XP = 1 Level mantığı
-	# Level 1: 0-299 XP | Level 2: 300-599 XP ...
-	var current_level = (total_xp / 300) + 1
-	var xp_in_current_level = total_xp % 300
+	# ❌ ESKİSİ: var current_level = (total_xp / 300) + 1
+	# (Bu formül artık geçerli değil, doğrudan kayıtlı leveli alıyoruz)
+	
+	# ✅ YENİSİ: Kayıtlı leveli kullan
+	var current_level = int(user_data.get("level", 1))
+	
+	# Şu anki levelde ne kadar XP lazım?
+	var xp_needed_for_next = 300 # Varsayılan
+	if Globals.has_method("get_required_xp"):
+		xp_needed_for_next = Globals.get_required_xp(current_level)
 	
 	# Level Yazısını Güncelle
 	if label_level_display: 
 		label_level_display.text = "LEVEL " + str(current_level)
 		
-	# XP Yazısını veya Barını Güncelle
+	# XP Yazısını Güncelle
 	if label_xp_display: 
-		# İstersen sadece sayı (örn: 120), istersen formatlı (örn: 120 / 300) yazdırabilirsin
-		label_xp_display.text = str(xp_in_current_level) + " / 300"
+		label_xp_display.text = "%d / %d" % [total_xp, xp_needed_for_next]
 	
-	# Eğer sahnende bir Progress Bar varsa onu da buradan güncelleyebilirsin:
-	if get_node_or_null("XPBar"): get_node("XPBar").value = xp_in_current_level
+	# Progress Bar varsa güncelle
+	if get_node_or_null("XPBar"):
+		var bar = get_node("XPBar")
+		bar.max_value = xp_needed_for_next
+		bar.value = total_xp
 	
-	# --- DİĞER VERİLER ---
+	# --- DİĞER VERİLER (AYNEN KALIYOR) ---
 	var birth_str = str(user_data.get("birthdate", "2000-01-01"))
 	if label_birth_display: label_birth_display.text = birth_str
 	
-	# Edit Penceresini Doldur
 	if input_name: input_name.text = str(user_data.get("name", ""))
 	_set_date_selectors(birth_str)
 	
-	# Mevcut Karakteri Yükle
 	temp_char_id = int(user_data.get("character_id", 1))
 	_update_character_visual(temp_char_id)
 

@@ -161,14 +161,34 @@ func _get_sync_payload() -> Dictionary:
 #   ÇIKIŞ VE ARKA PLAN SİNYALLERİ
 # ============================================================
 func _notification(what):
+	# 1. ÇIKIŞ İSTEĞİ (X TUŞU veya SEKME KAPATMA)
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		print("🛑 (PC) Çıkış. Veriler sunucuya gönderiliyor...")
-		handle_save_and_exit()
+		# Web için tarayıcı genellikle beklemeyeceği için burası %100 garanti değildir.
+		# Ama yine de şansımızı deneriz.
+		if OS.has_feature("web"):
+			print("🌐 (WEB) Sekme kapanıyor. Hızlı kayıt deneniyor...")
+			save_cache()
+			# Web'de 'await' veya uzun timer'lar çalışmayabilir,
+			# bu yüzden background save çağırıyoruz ama garantisi yok.
+			send_to_server_background() 
+		else:
+			# PC'de güvenli çıkış
+			print("🛑 (PC) Çıkış İsteği. Veriler sunucuya gönderiliyor...")
+			handle_save_and_exit()
 
+	# 2. ODAK KAYBI (Tab Değiştirme / Alt-Tab / Mobil Arka Plan)
 	elif what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		print("📱 (MOBİL) Arka plan. Yerel kayıt alınıyor...")
-		save_cache() 
-		send_to_server_background()
+		
+		# EĞER MOBİL VEYA WEB İSE -> RİSK ALMA, HEMEN SUNUCUYA GÖNDER!
+		if OS.has_feature("web") or OS.get_name() == "Android" or OS.get_name() == "iOS":
+			print("⚠️ (WEB/MOBİL) Odak kaybı/Tab değişimi. Veri güvenliği için sunucuya gönderiliyor...")
+			save_cache()
+			send_to_server_background()
+			
+		# PC İSE -> SAKİN OL, SADECE YERELE KAYDET
+		else:
+			print("⏸️ (PC) Pencere odağı kaybedildi (Alt-Tab). Sadece yerel kayıt alındı.")
+			save_cache()
 
 func handle_save_and_exit():
 	if is_quitting: return

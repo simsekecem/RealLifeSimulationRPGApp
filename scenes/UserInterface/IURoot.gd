@@ -19,6 +19,13 @@ func _ready():
 	if has_node("TopRightButtons/SettingsButton"):
 		$TopRightButtons/SettingsButton.pressed.connect(show_settings)
 	
+	if has_node("Joystick"):
+		# Eğer işletim sistemi Android veya iOS ise GÖSTER, değilse GİZLE.
+		if OS.get_name() == "Android" or OS.get_name() == "iOS":
+			$Joystick.visible = true
+		else:
+			$Joystick.visible = false # PC'de gizle
+	
 	# 👇 Veri değişince (İsim, XP veya Karakter değişince) burayı güncelle
 	if Globals.has_signal("data_updated"):
 		Globals.data_updated.connect(update_top_left_ui)
@@ -123,7 +130,11 @@ func change_scene_to(scene_path: String):
 func show_full_ui():
 	$TopLeftButtons.visible = true
 	$TopRightButtons.visible = true
-	if has_node("Joystick"): $Joystick.visible = true
+	if has_node("Joystick"):
+		if OS.get_name() == "Android" or OS.get_name() == "iOS":
+			$Joystick.visible = true
+		else:
+			$Joystick.visible = false
 	hide_all_windows()
 	update_top_left_ui() # UI açılınca bilgileri tazele
 
