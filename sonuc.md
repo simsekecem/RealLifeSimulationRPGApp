@@ -442,3 +442,104 @@ Bu, tüm uygulama için temel ayarları tanımlayan ana Godot proje yapılandır
 **Özet:**
 
 Bu dosya, projenin üst düzey bir planını sunar. 720p temel çözünürlüğe sahip, mobil öncelikli, 2D bir piksel sanatı oyunu kurar. Mimari, durum, UI, ses ve oyun mantığını yönetmek için dört ana singleton'a (`Globals`, `UI`, `MusicController`, `QuestManager`) büyük ölçüde dayanır. Ayrıca Firebase ve GL Uyumluluk render motorunun kullanıldığını doğrular.
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\scenes\prefabs\note_pop_up.gd`
+
+Bu GDScript dosyası, takvimdeki belirli bir tarih için not almayı sağlayan bir açılır pencereyi yönetir.
+
+*   **Arayüz Yönetimi:** Bir `PopupPanel`, bir başlık, not içeriği için bir `TextEdit` ve bir çıkış düğmesi içerir.
+*   **Tarih İşleme:**
+    *   `open_for_date` fonksiyonu, bir tarih nesnesi alarak çalışır. Tarihi veritabanı için "YYYY-AA-GG" formatına çevirir ve açılır pencerenin başlığını kullanıcı dostu "GG.AA.YYYY" formatında ayarlar.
+    *   O tarihe ait mevcut bir notu `Globals.cache`'ten yükler.
+*   **Veri Kalıcılığı:**
+    *   `_save_note_to_cache`: Notu kaydeder. `Globals.cache["calendar_notes"]` listesinde ilgili tarih girişini bulur ve "note" değerini günceller. O tarihe ait bir giriş yoksa, yeni bir tane oluşturur. Boş notları da kaydedebilir. Kaydetme işlemi, çıkış düğmesine basıldığında gerçekleşir. Metin değiştikçe anında kaydetme seçeneği de yorum satırı olarak mevcuttur.
+    *   `_get_note_from_cache`: Belirli bir tarihe ait notu `Globals.cache`'ten alır.
+*   **Görev Entegrasyonu:** Açılır pencere açıldığında, muhtemelen bir eğitim görevini tamamlamak için `QuestManager`'daki `first_calendar` eylemini tetikler.
+*   **Kullanıcı Deneyimi:**
+    *   `exclusive` (özel) olarak ayarlanarak arkasındaki arayüzle etkileşimi engeller.
+    *   Açıldıktan sonra bir kare bekler ve ardından kullanıcının hemen yazmaya başlamasına olanak tanımak için `TextEdit`'e otomatik olarak odaklanır.
+*   **`Globals` Bağımlılığı:** Veri depolama (`Globals.cache`), veri temizleme (`Globals.safe_str`, `Globals.ensure_list`) ve sunucu senkronizasyonu için veriyi "kirli" olarak işaretleme (`Globals.mark_dirty`) gibi işlemler için `Globals` singleton'una büyük ölçüde bağımlıdır.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\scenes\Wardrobe.tscn`
+
+Bu Godot Sahne dosyası (`.tscn`), "Gardırop" ekranının görsel düzenini ve yapısını tanımlar.
+
+*   **Kök Düğüm:** Sahnenin ana düğümü, tüm ekranı kaplayan "Wardrobe" adında bir `Control` düğümüdür. Bu düğüme `Wardrobe.gd` betiği bağlanmıştır ve arayüz `Wardrobe.tres` temasını kullanır.
+*   **Arka Plan:** `NinePatchRect` düğümü, `wardrobe.png` resmini kullanarak sahne için ölçeklenebilir bir arka plan oluşturur.
+*   **Kıyafet Yuvaları:** Ana düzen, iki dikey kutu (`VBoxContainer`) içeren bir yatay kutu (`HBoxContainer`) ile organize edilmiştir. Bu kaplar, farklı kıyafet kategorileri için yuvalar içerir:
+    *   `SlotOuter` (Dış Giyim)
+    *   `SlotDress` (Elbise)
+    *   `SlotUpper` (Üst Giyim)
+    *   `SlotLower` (Alt Giyim)
+    *   `SlotShoes` (Ayakkabı)
+*   **Yuva Yapısı:** Her bir yuva, şeffaf bir arka plana sahip bir `Panel`'dir. Her panelin içinde, yatay olarak üç öğeyi düzenleyen bir `HBoxContainer` bulunur:
+    *   "<" etiketli bir "Geri" `Button`'u.
+    *   Kıyafetin resminin gösterileceği bir `TextureRect`.
+    *   ">" etiketli bir "İleri" `Button`'u.
+Bu yapı, oyuncunun her kategorideki eşyalar arasında gezinmesine olanak tanır.
+*   **Eylem Düğmeleri:**
+    *   `AddClothesButton`: "ADD CLOTHES" (Kıyafet Ekle) etiketli bir düğme.
+    *   `MagicButton`: "TODAY'S OUTFIT" (Günün Kombini) etiketli, muhtemelen otomatik kombinasyon oluşturmayı tetikleyen bir düğme.
+    *   `CloseButton`: Gardırop ekranından çıkmak için kullanılan "<-" etiketli bir düğme.
+*   **Betik ve Tema:** Sahne, `TextureRect`'leri dolduracak ve tüm düğme tıklamalarını yönetecek olan `Wardrobe.gd` betiğiyle sıkı bir şekilde bağlantılıdır. Görsel görünüm, `Wardrobe.tres` tema dosyası tarafından tanımlanır.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\scenes\UserInterface\SettingsWindow.gd`
+
+Bu GDScript dosyası, oyunun ayarlar penceresini yönetir.
+
+*   **Arayüz Yönetimi:** Ayarlar penceresini temsil eden bir `Control` düğümünü kontrol eder. Bir `close_button` ve bir `volume_slider` içerir.
+*   **Ses Kontrolü:**
+    *   `_ready()`: Pencere hazır olduğunda, kayıtlı ses seviyesini `Globals.cache["preferences"]["music_volume"]`'dan yükler. Kayıtlı değer yoksa, varsayılan olarak 50 kullanır. Ardından kaydırıcının konumunu ayarlar ve sesi "Müzik" ses yoluna uygular.
+    *   `_on_volume_slider_value_changed(value)`: Bu işlev, kullanıcı kaydırıcıyı hareket ettirdiğinde çağrılır. Yeni ses seviyesini `_apply_volume` aracılığıyla "Müzik" ses yoluna uygular ve `Globals.cache`'teki `music_volume`'u günceller.
+    *   `_apply_volume(value)`: Doğrusal kaydırıcı değerini (0-100) desibele dönüştüren ve "Müzik" ses yolunun ses seviyesini ayarlayan yardımcı bir işlev.
+*   **Veri Kalıcılığı:**
+    *   Ses ayarı `Globals.cache`'te saklanır.
+    *   `hide_settings_window()`: Pencere kapatıldığında, ayarları yerel `user_cache.json` dosyasına kaydetmek için `Globals.save_cache()`'i çağırır.
+*   **Görev Entegrasyonu:** Ses seviyesi ilk kez değiştirildiğinde, `QuestManager`'daki `first_music` eylemini tetikler.
+*   **Pencere Yönetimi:** `hide_settings_window` işlevi, pencereyi gizlemek için `close_button`'ın `pressed` sinyaline bağlıdır.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\questmanager.gd.uid`
+
+Bu dosya, Godot'un `questmanager.gd` betiğini dahili olarak referans göstermek için kullandığı benzersiz bir kimlik (`uid://blha282not461`) içerir. Bu, dosya taşınsa veya yeniden adlandırılsa bile motorun onu bulabilmesini sağlar. Bu bir kod dosyası değildir ve herhangi bir mantık içermez.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\addons\calendar_library\calendar_locale.gd`
+
+Bu GDScript dosyası, takvim eklentisi için yerelleştirilmiş hafta günü ve ay adlarını depolayan bir `CalendarLocale` kaynağı tanımlar.
+
+*   **Kaynak:** `.tres` dosyası olarak oluşturulup kaydedilebilen bir `Resource`.
+*   **Sınıf Adı:** `CalendarLocale` adında global bir sınıf olarak tanımlanmıştır.
+*   **Tarih Formatı:** Yerel ayar için standart tarih formatını (örneğin, "Yıl-Ay-Gün", "Gün-Ay-Yıl") tanımlamak için dışa aktarılmış bir `date_format` numaralandırması ve tarih formatı için ayırıcıyı tanımlayan dışa aktarılmış bir `divider_symbol` değişkeni içerir.
+*   **Yerelleştirme:** Tüm hafta günleri ve ayların tam adları, kısaltmaları ve kısa adları için dışa aktarılmış değişkenler sağlar:
+    *   `monday`, `tuesday`, ...
+    *   `abbr_monday`, `abbr_tuesday`, ...
+    *   `short_monday`, `short_tuesday`, ...
+    *   `january`, `february`, ...
+    *   `abbr_january`, `abbr_february`, ...
+    *   `short_january`, `short_february`, ...
+*   **Kullanım:** Bu kaynak, takvimi doğru yerelleştirilmiş adlarla görüntülemek için bir `Calendar` nesnesine atanabilir. Varsayılan değerler İngilizce'dir. `demo` klasöründeki `calendar_locale_CN.tres` ve `calendar_locale_DE.tres` dosyaları gibi farklı diller için farklı `.tres` dosyaları oluşturulabilir.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\addons\calendar_library\calendar_locale.gd.uid`
+
+Bu dosya, Godot'un `calendar_locale.gd` betiğini dahili olarak referans göstermek için kullandığı benzersiz bir kimlik (`uid://coa0a2gxpj6n5`) içerir. Bu, dosya taşınsa veya yeniden adlandırılsa bile motorun onu bulabilmesini sağlar. Bu bir kod dosyası değildir ve herhangi bir mantık içermez.
+
+### `C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\addons\calendar_library\calendar.gd`
+
+Bu GDScript dosyası, Godot için kapsamlı bir `Takvim` kütüphanesi tanımlar. Bu, referans sayılarak yönetilen bir `RefCounted` sınıfıdır.
+
+*   **Temel İşlevsellik:** Kütüphane, yıllık, aylık ve haftalık genel bakışlar için takvim verileri oluşturma işlevleri sunar. Godot'un `Time` singleton kurallarına uyar.
+*   **Yerelleştirme:** Hafta içi günleri ve aylar için yerelleştirilmiş adlar sağlamak üzere `CalendarLocale` kaynağını kullanır. Başlatmada varsayılan bir İngilizce yerel ayarı oluşturulur.
+*   **Tarih Biçimlendirme:**
+    *   POSIX benzeri yer tutucular (ör. `%Y`, `%m`, `%d`, `%A`) kullanarak bir tarih dizesini biçimlendirebilen bir `get_date_formatted` işlevi sağlar.
+    *   Ayrıca, atanmış `CalendarLocale`'deki ayarlara göre bir tarihi biçimlendirmek için `get_date_locale_format` işlevine sahiptir.
+*   **Takvim Oluşturma:**
+    *   `get_calendar_year`, `get_calendar_month`, `get_calendar_week`: Bu işlevler, bir yılı, ayı veya haftayı temsil eden `Tarih` nesnelerinden oluşan diziler döndürür. Bitişik günleri dahil etme ve tutarlı bir kullanıcı arayüzü sunumu için sabit sayıda hafta zorlama seçeneklerine sahiptirler.
+*   **Tarih Hesaplama:**
+    *   `is_leap_year`, `get_leap_days`, `get_days_in_month`, `get_days_in_year`, `get_day_of_year`: Tarihle ilgili hesaplamalar için bir dizi işlev.
+    *   `get_weekday`: Belirli bir tarihin haftanın hangi günü olduğunu belirlemek için Zeller Uyum algoritmasını kullanır.
+    *   `get_week_number`: Belirli bir tarihin hafta numarasını, iki farklı sistemi (`WEEK_NUMBER_FOUR_DAY` ve `WEEK_NUMBER_TRADITIONAL`) destekleyerek hesaplar.
+*   **İç Sınıf `Date`:**
+    *   `yıl`, `ay` ve `gün`ü saklamak için iç içe geçmiş bir `Tarih` sınıfı tanımlanmıştır.
+    *   Doğrulama (`is_valid`), karşılaştırma (`is_before`, `is_after`, `is_equal`) ve düzenleme (`add_days`, `subtract_months`, vb.) için yöntemler içerir.
+    *   Ayrıca, temiz bir dize gösterimi (ör. "2023-12-01") sağlamak için bir `_to_string` yöntemine sahiptir.
+    *   Geçerli tarihi bir `Tarih` nesnesi olarak almak için statik bir `today()` işlevi sağlanmıştır.
+
+Bu kütüphane, oyun içindeki tüm takvimle ilgili mantığı işlemek için güçlü ve bağımsız bir araçtır.
