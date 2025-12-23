@@ -45,13 +45,7 @@ func _ready():
 	if input_reading: input_reading.text_changed.connect(_on_book_list_changed)
 	if input_completed: input_completed.text_changed.connect(_on_book_list_changed)
 	if input_wishlist: input_wishlist.text_changed.connect(_on_book_list_changed)
-# 👇 GÖREV TETİKLEYİCİLERİ EKLEME
-	# QuestManager Autoload olarak ekliyse doğrudan çağırıyoruz:
-	if has_node("/root/QuestManager"):
-		# 1. Statik Görev: Restorana ilk giriş
-		QuestManager.trigger_action("first_library")
-		# 2. Günlük Görev: Gemini'den gelen genel restoran aksiyonu
-		QuestManager.trigger_action("library_action")
+
 # ============================================================
 #  KİTAP LİSTESİ YÖNETİMİ (SOL PANEL) 📚
 # ============================================================
@@ -108,7 +102,12 @@ func _on_book_list_changed():
 	
 	Globals.cache["library"] = new_library_list
 	Globals.mark_dirty()
-
+# 👇 EKLE: Kitap listesi her güncellendiğinde (veya ilk kez veri girildiğinde)
+	if has_node("/root/QuestManager"):
+		# Not: Library için Worker'da "study_action" hedefi koymuştuk. 
+		# İstersen kitap eklemeyi de buna bağlayabilirsin.
+		QuestManager.trigger_action("study_action")
+		QuestManager.trigger_action("first_library")
 # 👇 Parametre olarak 'global_seen_titles' ekledik
 func _parse_text_edit_to_list(text_edit: TextEdit, status: String, target_list: Array, seen_map: Dictionary):
 	if not text_edit: return
@@ -203,7 +202,10 @@ func save_study_data(date: String, hour: int, subject: String):
 		Globals.cache["study_log"].append({ "date": date, "start_time": hour, "end_time": hour + 1, "subject": subject })
 	
 	Globals.mark_dirty()
-
+# 👇 EKLE: Bir ders/konu yazıldığı an görev tetiklenir
+	if subject.strip_edges() != "" and has_node("/root/QuestManager"):
+		QuestManager.trigger_action("study_action") # Worker'daki target_action ismi
+		QuestManager.trigger_action("first_library") # Statik görev ismi
 func get_study_data(target_date: String, target_hour: int) -> String:
 	var log_list = Globals.ensure_list(Globals.cache.get("study_log", []))
 	for entry in log_list:
@@ -214,6 +216,13 @@ func get_study_data(target_date: String, target_hour: int) -> String:
 
 func _on_back_button_pressed():
 	Globals.save_cache()
+	# 👇 EKLE: Çıkarken de tetikle (Eğer içeride veri varsa)
+	if has_node("/root/QuestManager"):
+		var lib_size = Globals.cache.get("library", []).size()
+		var study_size = Globals.cache.get("study_log", []).size()
+		if lib_size > 0 or study_size > 0:
+			QuestManager.trigger_action("study_action")
+			QuestManager.trigger_action("first_library")
 	if UI.has_node("UIRoot"): UI.get_node("UIRoot").return_to_town()
 
 

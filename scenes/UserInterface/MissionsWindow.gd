@@ -80,7 +80,7 @@ func load_missions(missions: Array):
 			name_label.add_theme_color_override("font_color", Color.GREEN)
 		else:
 			# Tamamlanmayanlar normal (beyaz) kalsın
-			name_label.add_theme_color_override("font_color", Color.WHITE)
+			name_label.add_theme_color_override("font_color", Color.BLACK)
 		
 		missions_list.add_child(row)
 

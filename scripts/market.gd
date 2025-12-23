@@ -33,19 +33,18 @@ func _ready():
 	if Globals.has_signal("data_updated"):
 		if not Globals.data_updated.is_connected(_on_global_data_updated):
 			Globals.data_updated.connect(_on_global_data_updated)
-# 👇 GÖREV TETİKLEYİCİLERİ EKLEME
-	# QuestManager Autoload olarak ekliyse doğrudan çağırıyoruz:
-	if has_node("/root/QuestManager"):
-		# 1. Statik Görev: Restorana ilk giriş
-		QuestManager.trigger_action("first_market")
-		# 2. Günlük Görev: Gemini'den gelen genel restoran aksiyonu
-		QuestManager.trigger_action("market_action")
+
 func _switch_category(cat_name: String):
 	# Eğer zaten açıksa ve panel görünürse işlem yapma (veya yenile)
 	# Önceki kategoriyi kaydet (Panel açıksa)
 	if panel.visible and current_category_name != "":
 		panel.save_items_to_cache()
-	
+	# 👇 EKLE: Veri kaydedildi, QuestManager'a haber ver
+		Globals.mark_dirty()
+# 👇 EKLE: Kategori değiştirirken veri kaydedildiyse görevi tetikle
+		if has_node("/root/QuestManager"):
+			QuestManager.trigger_action("market_add")
+			QuestManager.trigger_action("first_market")
 	current_category_name = cat_name
 	panel.visible = true
 	
@@ -58,7 +57,12 @@ func _on_back_button_pressed():
 	# Çıkarken kaydet
 	if panel.visible and current_category_name != "":
 		panel.save_items_to_cache()
-	
+	# 👇 EKLE: Çıkarken veriyi kirli işaretle ki görev tamamlansın ve senkronize olsun
+		Globals.mark_dirty()
+# 👇 EKLE: Çıkarken veriyi kirli işaretle ve görevi tetikle
+		if has_node("/root/QuestManager"):
+			QuestManager.trigger_action("market_add")
+			QuestManager.trigger_action("first_market")		
 	if UI.has_node("UIRoot"): UI.get_node("UIRoot").return_to_town()
 
 func _on_global_data_updated():

@@ -67,13 +67,7 @@ func _ready():
 
 	# ❌ OTOMATİK SEÇİM YOK: Kullanıcı tıklayana kadar her şey gizli kalacak.
 
-	# 👇 GÖREV TETİKLEYİCİLERİ EKLEME
-	# QuestManager Autoload olarak ekliyse doğrudan çağırıyoruz:
-	if has_node("/root/QuestManager"):
-		# 1. Statik Görev: Restorana ilk giriş
-		QuestManager.trigger_action("first_restaurant")
-		# 2. Günlük Görev: Gemini'den gelen genel restoran aksiyonu
-		QuestManager.trigger_action("restaurant_action")
+
 	
 # =================================================
 # GÜN SEÇİMİ (BURASI TARİHİ HESAPLAR VE AÇAR)
@@ -186,6 +180,10 @@ func _save_data(field: String, value: String):
 	
 	Globals.cache["restaurant"] = list
 	Globals.mark_dirty()
+# 👇 BURAYA EKLE: Kullanıcı boş olmayan bir değer girdiğinde görevi tetikle
+	if value.strip_edges() != "" and has_node("/root/QuestManager"):
+		QuestManager.trigger_action("eat_action")      # Worker'daki günlük görev hedefi
+		QuestManager.trigger_action("first_restaurant") # Statik giriş görevi
 # =================================================
 # SİNYALLER
 # =================================================
@@ -201,7 +199,14 @@ func _on_notes_changed():
 
 func _on_back_button_pressed():
 	Globals.save_cache()
+# 👇 BURAYA EKLE: Eğer restaurant listesinde veri varsa çıkarken de tetikle
+	if has_node("/root/QuestManager"):
+		var rest_list = Globals.cache.get("restaurant", [])
+		if rest_list.size() > 0:
+			QuestManager.trigger_action("eat_action")
+			QuestManager.trigger_action("first_restaurant")
 	if UI.has_node("UIRoot"): UI.get_node("UIRoot").return_to_town()
+
 # TextureButton'ın 'pressed' sinyaline bağla
 func _on_texture_button_pressed() -> void:
 	# Eğer ChatPopup_R sahneye gömülü ise (Görüntü 8fe72d'deki gibi):
