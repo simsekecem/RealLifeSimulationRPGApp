@@ -27,7 +27,30 @@ export default {
 // ---------- GÜNLÜK GÖREV ÜRET (GEMINI AI - GÜNCELLENDİ) ----------
 if (path === "/api/daily_quests" && method === "POST") {
     try {
-        // 👇 BURASI TAMAMEN YENİLENDİ
+        // ── API KEY ROTASYONU ───────────────────────────────────────
+        const apiKeys = [
+            env.GEMINI_API_KEY,
+            env.GEMINI_KEY_1,
+            env.GEMINI_KEY_2,
+            env.GEMINI_KEY_3,
+            env.GEMINI_KEY_4,
+            env.GEMINI_KEY_5,
+            env.GEMINI_KEY_6
+        ].filter(key => key && key.trim() !== ""); // boş/undefined olanları temizle
+
+        if (apiKeys.length === 0) {
+            throw new Error("Hiç geçerli Gemini API key bulunamadı!");
+        }
+
+        // Her istekte bir sonraki key'i kullan (döngüsel)
+        // Cloudflare Workers KV veya global değişken ile kalıcı yapmak istersen aşağıda alternatif var
+        const keyIndex = Date.now() % apiKeys.length; // basit zaman tabanlı round-robin
+        const selectedKey = apiKeys[keyIndex];
+
+        // İstersen loglamak için (debug amaçlı)
+        // console.log(`Kullanılan key index: ${keyIndex} → ${selectedKey.slice(0,8)}...`);
+
+        // ── PROMPT (değişmedi) ──────────────────────────────────────
         const prompt = `
             You are a quest generator for a Life Simulation Game. 
             Generate exactly 4 daily quests (one for each category: Gym, Library, Market, Restaurant).
@@ -70,10 +93,9 @@ if (path === "/api/daily_quests" && method === "POST") {
                 {"category": "restaurant", "text": "...", "target": "eat_action"}
             ]
         `;
-        // 👆 YENİ PROMPT SONU
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
-        
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${selectedKey}`;
+
         const response = await fetch(geminiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -82,19 +104,21 @@ if (path === "/api/daily_quests" && method === "POST") {
             })
         });
 
+        // ── Gerisi tamamen aynı kalıyor ─────────────────────────────
+        if (!response.ok) {
+            throw new Error(`Gemini API hatası: ${response.status} - ${await response.text().catch(() => "no details")}`);
+        }
+
         const data = await response.json();
         
-        // Gemini bazen hata veya boş dönebilir, kontrol ekleyelim
         let generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-        
-        // Markdown temizliği (```json ve ``` temizler)
         generatedText = generatedText.replace(/```json/g, "").replace(/```/g, "").trim();
-        
+
         let quests = [];
         try {
             quests = JSON.parse(generatedText);
         } catch (e) {
-            // Eğer JSON bozuk gelirse manuel fallback (yedek) görevler
+            console.error("JSON parse hatası, fallback kullanılıyor", e);
             quests = [
                 {"category": "gym", "text": "Run for 15 mins", "target": "gym_action"},
                 {"category": "market", "text": "Add Milk to Groceries list", "target": "market_add"},
@@ -107,8 +131,8 @@ if (path === "/api/daily_quests" && method === "POST") {
             id: `daily_${Date.now()}_${index}`,
             type: "daily",
             category: q.category,
-            description: q.text,       // Godot tarafında description olarak görünecek
-            target_action: q.target,   // Godot tarafında target_action olarak kullanılacak
+            description: q.text,
+            target_action: q.target,
             xp_reward: 50,
             is_completed: false
         }));
@@ -116,8 +140,20 @@ if (path === "/api/daily_quests" && method === "POST") {
         return addCors(new Response(JSON.stringify(finalQuests), {
             headers: { "Content-Type": "application/json" }
         }));
+
     } catch (err) {
-        return addCors(new Response(JSON.stringify({ error: err.message }), { status: 500 }));
+        console.error("Daily quests endpoint hatası:", err);
+        
+        // 429 (rate limit) gelirse daha anlaşılır mesaj da dönebilirsin
+        const status = err.message.includes("429") ? 429 : 500;
+        const message = err.message.includes("429") 
+            ? "Rate limit aşıldı, lütfen biraz bekleyin" 
+            : err.message;
+
+        return addCors(new Response(JSON.stringify({ error: message }), { 
+            status,
+            headers: { "Content-Type": "application/json" }
+        }));
     }
 }
         // ---------- LOGIN ----------
@@ -172,229 +208,309 @@ if (path === "/api/daily_quests" && method === "POST") {
         // ---------- AI CHAT (GYM COACH) ----------
        // ---------- AI CHAT (GYM COACH) ----------
         if (path === "/api/ai_chat" && method === "POST") {
-            try {
-                const body = await request.json();
-                const userMessage = body.message;
-                const userContext = body.context || "Veri yok.";
-                const userName = body.user_name || "Sporcu";
+    try {
+        // ── API KEY ROTASYONU ───────────────────────────────────────────
+        const apiKeys = [
+            env.GEMINI_API_KEY,
+            env.GEMINI_KEY_1,
+            env.GEMINI_KEY_2,
+            env.GEMINI_KEY_3,
+            env.GEMINI_KEY_4,
+            env.GEMINI_KEY_5,
+            env.GEMINI_KEY_6
+        ].filter(key => key && typeof key === "string" && key.trim() !== "");
 
-                // Gemini'ye Gönderilecek İngilizce System Prompt
-                const systemPrompt = `
-                    You are a personal trainer, a professional, friendly, and data-driven personal trainer.
-                    
-                    USER PROFILE:
-                    Name: ${userName}
-                    
-                    TRAINING HISTORY (JSON Context):
-                    ${JSON.stringify(userContext)}
-                    
-                    INSTRUCTIONS:
-                    1. Analyze the user's training history provided in the JSON context to answer their question.
-                    2. BE DATA-DRIVEN: Compare past lifts with current ones. Mention specific numbers (e.g., "You increased your Bench Press weight by 10kg since last week!").
-                    3. If the history shows a gap in training, be encouraging and motivate them to get back on track.
-                    4. If the data is empty or irrelevant to the question, provide expert general fitness advice.
-                    5. TONE: Energetic, supportive, concise (short paragraphs), and use emojis.
-                    
-                    ⚠️ LANGUAGE CONSTRAINT (CRITICAL):
-                    Detect the language of the "${userMessage}". YOU MUST RESPOND IN THE EXACT SAME LANGUAGE as the user's message.
-                    (e.g., If the user asks in Turkish, reply in Turkish. If English, reply in English).
-
-                    USER QUESTION: "${userMessage}"
-                `;
-
-                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
-                
-                const response = await fetch(geminiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt }] }]
-                    })
-                });
-
-                const data = await response.json();
-                
-                // 👇 DEBUG: Varsayılan mesaj yerine hatayı görelim
-                let replyText = "Couldn't understand. Please ask again.";
-
-                // EĞER GEMINI HATA DÖNDÜRDÜYSE ONU YAZDIR
-                if (data.error) {
-                    replyText = "ERROR: " + data.error.message;
-                } 
-                // EĞER BAŞARILIYSA CEVABI AL
-                else if (data.candidates && data.candidates.length > 0) {
-                    replyText = data.candidates[0].content.parts[0].text;
-                }
-
-                return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
-
-            } catch (err) {
-                // Kod patlarsa hatayı görelim
-                return addCors(new Response(JSON.stringify({ reply: "SERVER ERROR: " + err.message }), { status: 200 }));
-            }
+        if (apiKeys.length === 0) {
+            throw new Error("Hiç geçerli Gemini API anahtarı yok");
         }
+
+        // Basit round-robin (her istekte bir sonraki key)
+        const keyIndex = Date.now() % apiKeys.length;
+        const selectedKey = apiKeys[keyIndex];
+        // İstersen console.log(`AI Chat - Key index: ${keyIndex}`); ekleyebilirsin
+
+        // ── Aşağıdaki kısım tamamen orijinal halinle aynı ────────────────
+        const body = await request.json();
+        const userMessage = body.message;
+        const userContext = body.context || "Veri yok.";
+        const userName = body.user_name || "Sporcu";
+
+        const systemPrompt = `
+            You are a personal trainer, a professional, friendly, and data-driven personal trainer.
+            
+            USER PROFILE:
+            Name: ${userName}
+            
+            TRAINING HISTORY (JSON Context):
+            ${JSON.stringify(userContext)}
+            
+            INSTRUCTIONS:
+            1. Analyze the user's training history provided in the JSON context to answer their question.
+            2. BE DATA-DRIVEN: Compare past lifts with current ones. Mention specific numbers (e.g., "You increased your Bench Press weight by 10kg since last week!").
+            3. If the history shows a gap in training, be encouraging and motivate them to get back on track.
+            4. If the data is empty or irrelevant to the question, provide expert general fitness advice.
+            5. TONE: Energetic, supportive, concise (short paragraphs), and use emojis.
+            
+            ⚠️ LANGUAGE CONSTRAINT (CRITICAL):
+            Detect the language of the "${userMessage}". YOU MUST RESPOND IN THE EXACT SAME LANGUAGE as the user's message.
+            (e.g., If the user asks in Turkish, reply in Turkish. If English, reply in English).
+
+            USER QUESTION: "${userMessage}"
+        `;
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${selectedKey}`;
+        
+        const response = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: systemPrompt }] }]
+            })
+        });
+
+        const data = await response.json();
+        
+        let replyText = "Couldn't understand. Please ask again.";
+
+        if (data.error) {
+            replyText = "ERROR: " + data.error.message;
+        } 
+        else if (data.candidates && data.candidates.length > 0) {
+            replyText = data.candidates[0].content.parts[0].text;
+        }
+
+        return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
+
+    } catch (err) {
+        return addCors(new Response(JSON.stringify({ reply: "SERVER ERROR: " + err.message }), { status: 200 }));
+    }
+}
                 // ---------- AI CHAT (DIETITIAN - GYM STYLE) ----------
         if (path === "/api/ai_diet" && method === "POST") {
-            try {
-                const body = await request.json();
-                const userMessage = body.message; // Kullanıcının sorusu
-                const userContext = body.context; // Godot'tan gelen Globals.cache listesi
-                const userName = body.user_name || "Gurme";
+    try {
+        // ── API KEY ROTASYONU ───────────────────────────────────────────
+        const apiKeys = [
+            env.GEMINI_API_KEY,
+            env.GEMINI_KEY_1,
+            env.GEMINI_KEY_2,
+            env.GEMINI_KEY_3,
+            env.GEMINI_KEY_4,
+            env.GEMINI_KEY_5,
+            env.GEMINI_KEY_6
+        ].filter(key => key && typeof key === "string" && key.trim() !== "");
 
-                const systemPrompt = `
-                    You are a professional nutritionist in a life simulation game.
-                    
-                    USER PROFILE:
-                    Name: ${userName}
-                    
-                    MEAL DATA FROM GAME (Context):
-                    ${JSON.stringify(userContext)}
-                    
-                    INSTRUCTIONS:
-                    1. Use the provided "Meal Data" to analyze the user's habits.
-                    2. If the user asks about their diet, reference their specific logs.
-                    3. Be supportive, knowledgeable, and professional. 
-                    4. Use food emojis (🥗, 🥑, 🍎).
-                    
-                    ⚠️ LANGUAGE CONSTRAINT:
-                    Respond in the SAME LANGUAGE as the user's message: "${userMessage}".
-                `;
-
-                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
-                
-                const response = await fetch(geminiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt + `\n\nUSER: ${userMessage}` }] }]
-                    })
-                });
-
-                const data = await response.json();
-                const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Couldn't understand. Please ask again.";
-
-                return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
-
-            } catch (err) {
-                return addCors(new Response(JSON.stringify({ reply: "Error: " + err.message }), { status: 200 }));
-            }
+        if (apiKeys.length === 0) {
+            throw new Error("Hiç geçerli Gemini API anahtarı yok");
         }
+
+        // Basit round-robin (her istekte bir sonraki key)
+        const keyIndex = Date.now() % apiKeys.length;
+        const selectedKey = apiKeys[keyIndex];
+        // İstersen: console.log(`AI Diet - Key index: ${keyIndex}`);
+
+        // ── Aşağıdaki kısım tamamen orijinal halinle aynı ────────────────
+        const body = await request.json();
+        const userMessage = body.message; // Kullanıcının sorusu
+        const userContext = body.context; // Godot'tan gelen Globals.cache listesi
+        const userName = body.user_name || "Gurme";
+
+        const systemPrompt = `
+            You are a professional nutritionist in a life simulation game.
+            
+            USER PROFILE:
+            Name: ${userName}
+            
+            MEAL DATA FROM GAME (Context):
+            ${JSON.stringify(userContext)}
+            
+            INSTRUCTIONS:
+            1. Use the provided "Meal Data" to analyze the user's habits.
+            2. If the user asks about their diet, reference their specific logs.
+            3. Be supportive, knowledgeable, and professional. 
+            4. Use food emojis (🥗, 🥑, 🍎).
+            
+            ⚠️ LANGUAGE CONSTRAINT:
+            Respond in the SAME LANGUAGE as the user's message: "${userMessage}".
+        `;
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${selectedKey}`;
+        
+        const response = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: systemPrompt + `\n\nUSER: ${userMessage}` }] }]
+            })
+        });
+
+        const data = await response.json();
+        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Couldn't understand. Please ask again.";
+
+        return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
+
+    } catch (err) {
+        return addCors(new Response(JSON.stringify({ reply: "Error: " + err.message }), { status: 200 }));
+    }
+}
                 // ---------- AI CHAT (LIBRARIAN & STUDY COACH) ----------
         if (path === "/api/ai_library" && method === "POST") {
-            try {
-                const body = await request.json();
-                const userMessage = body.message;
-                const libraryContext = body.context; // Kitap listesi (Still Reading, Completed vb.)
-                const studySchedule = body.study_schedule; // Yeni: Haftalık ders saatleri verisi
-                const userName = body.user_name || "Kitap Kurdu";
+    try {
+        // ── API KEY ROTASYONU ───────────────────────────────────────────
+        const apiKeys = [
+            env.GEMINI_API_KEY,
+            env.GEMINI_KEY_1,
+            env.GEMINI_KEY_2,
+            env.GEMINI_KEY_3,
+            env.GEMINI_KEY_4,
+            env.GEMINI_KEY_5,
+            env.GEMINI_KEY_6
 
-                const systemPrompt = `
-                    You are a wise Librarian and an expert Study Coach in a life simulation game.
-                    
-                    USER PROFILE:
-                    Name: ${userName}
-                    
-                    USER'S LIBRARY (Books):
-                    ${JSON.stringify(libraryContext)}
-                    
-                    WEEKLY STUDY SCHEDULE (Lessons & Hours):
-                    ${JSON.stringify(studySchedule)}
-                    
-                    INSTRUCTIONS:
-                    1. BOOK ADVISOR: Analyze the books. Encourage finishing 'Reading' books and suggest new ones based on 'Completed' titles.
-                    2. STUDY COACH (CRITICAL): Analyze the study schedule. 
-                    - If they are missing study sessions or have very few hours, motivate them firmly but kindly.
-                    - Mention specific hours (e.g., "I see you have a gap between 10:00-12:00, why not study then?").
-                    - Act as a mentor who wants them to reach their academic goals.
-                    3. TONE: Sophisticated, intellectual, encouraging, and slightly disciplined (like a mentor).
-                    4. EMOJIS: 📖, 📚, ✍️, 🎓, ⏳, 💡.
-                    
-                    ⚠️ LANGUAGE CONSTRAINT:
-                    Respond in the SAME LANGUAGE as the user's message: "${userMessage}".
-                `;
+        ].filter(key => key && typeof key === "string" && key.trim() !== "");
 
-                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
-                
-                const response = await fetch(geminiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt + `\n\nUSER QUESTION: ${userMessage}` }] }]
-                    })
-                });
-
-                const data = await response.json();
-                const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Couldn't understand. Please ask again.";
-
-                return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
-
-            } catch (err) {
-                return addCors(new Response(JSON.stringify({ reply: "Error: " + err.message }), { status: 200 }));
-            }
+        if (apiKeys.length === 0) {
+            throw new Error("Hiç geçerli Gemini API anahtarı yok");
         }
+
+        // Basit round-robin (her istekte bir sonraki key)
+        const keyIndex = Date.now() % apiKeys.length;
+        const selectedKey = apiKeys[keyIndex];
+        // İstersen: console.log(`AI Library - Key index: ${keyIndex}`);
+
+        // ── Aşağıdaki kısım tamamen orijinal halinle aynı ────────────────
+        const body = await request.json();
+        const userMessage = body.message;
+        const libraryContext = body.context; // Kitap listesi (Still Reading, Completed vb.)
+        const studySchedule = body.study_schedule; // Yeni: Haftalık ders saatleri verisi
+        const userName = body.user_name || "Kitap Kurdu";
+
+        const systemPrompt = `
+            You are a wise Librarian and an expert Study Coach in a life simulation game.
+            
+            USER PROFILE:
+            Name: ${userName}
+            
+            USER'S LIBRARY (Books):
+            ${JSON.stringify(libraryContext)}
+            
+            WEEKLY STUDY SCHEDULE (Lessons & Hours):
+            ${JSON.stringify(studySchedule)}
+            
+            INSTRUCTIONS:
+            1. BOOK ADVISOR: Analyze the books. Encourage finishing 'Reading' books and suggest new ones based on 'Completed' titles.
+            2. STUDY COACH (CRITICAL): Analyze the study schedule. 
+            - If they are missing study sessions or have very few hours, motivate them firmly but kindly.
+            - Mention specific hours (e.g., "I see you have a gap between 10:00-12:00, why not study then?").
+            - Act as a mentor who wants them to reach their academic goals.
+            3. TONE: Sophisticated, intellectual, encouraging, and slightly disciplined (like a mentor).
+            4. EMOJIS: 📖, 📚, ✍️, 🎓, ⏳, 💡.
+            
+            ⚠️ LANGUAGE CONSTRAINT:
+            Respond in the SAME LANGUAGE as the user's message: "${userMessage}".
+        `;
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${selectedKey}`;
+        
+        const response = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: systemPrompt + `\n\nUSER QUESTION: ${userMessage}` }] }]
+            })
+        });
+
+        const data = await response.json();
+        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Couldn't understand. Please ask again.";
+
+        return addCors(new Response(JSON.stringify({ reply: replyText }), { status: 200 }));
+
+    } catch (err) {
+        return addCors(new Response(JSON.stringify({ reply: "Error: " + err.message }), { status: 200 }));
+    }
+}
 
         // ---------- AI OUTFIT GENERATOR (GEMINI) ----------
         if (path === "/api/generate_outfit" && method === "POST") {
-            try {
-                const body = await request.json();
-                const wardrobe = body.wardrobe || [];
-                const context = body.context || "daily casual"; // Kullanıcıdan "Düğün", "Spor" vb. de alabiliriz ilerde
+    try {
+        // ── API KEY ROTASYONU ───────────────────────────────────────────
+        const apiKeys = [
+            env.GEMINI_API_KEY,
+            env.GEMINI_KEY_1,
+            env.GEMINI_KEY_2,
+            env.GEMINI_KEY_3,
+            env.GEMINI_KEY_4,
+            env.GEMINI_KEY_5,
+            env.GEMINI_KEY_6
+        ].filter(key => key && typeof key === "string" && key.trim() !== "");
 
-                if (wardrobe.length < 2) {
-                    return addCors(new Response(JSON.stringify({ error: "Not enough items" }), { status: 400 }));
-                }
-
-                // Gemini için sadeleştirilmiş liste (Sadece isim, renk ve ID gönderiyoruz, resim URL'ine gerek yok)
-                const simplifiedList = wardrobe.map(item => ({
-                    id: item.id,
-                    name: item.item_name,
-                    category: item.category,
-                    color: item.color
-                }));
-
-                const systemPrompt = `
-                    You are a world-class fashion stylist.
-                    
-                    TASK: Create a stylish outfit from the provided list of clothes for a "${context}" occasion.
-                    
-                    RULES:
-                    1. Select 1 Top + 1 Bottom (OR 1 Dress) + 1 Shoes + (Optional) Outerwear.
-                    2. Return ONLY valid JSON. No markdown, no extra text.
-                    3. JSON Format:
-                    {
-                        "selected_ids": [12, 45, 99],
-                        "explanation": "I chose the white shirt to contrast with..."
-                    }
-                    4. "explanation" should be short, friendly, and use emojis. Language: English.
-                    
-                    WARDROBE LIST:
-                    ${JSON.stringify(simplifiedList)}
-                `;
-
-                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
-                
-                const response = await fetch(geminiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt }] }]
-                    })
-                });
-
-                const data = await response.json();
-                let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-                
-                // Gemini bazen ```json ... ``` içinde döndürür, temizleyelim
-                rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-                
-                const result = JSON.parse(rawText);
-
-                return addCors(new Response(JSON.stringify(result), { status: 200 }));
-
-            } catch (err) {
-                return addCors(new Response(JSON.stringify({ error: err.message }), { status: 500 }));
-            }
+        if (apiKeys.length === 0) {
+            throw new Error("Hiç geçerli Gemini API anahtarı yok");
         }
+
+        // Basit round-robin (her istekte bir sonraki key)
+        const keyIndex = Date.now() % apiKeys.length;
+        const selectedKey = apiKeys[keyIndex];
+        // İstersen: console.log(`Generate Outfit - Key index: ${keyIndex}`);
+
+        // ── Aşağıdaki kısım tamamen orijinal halinle aynı ────────────────
+        const body = await request.json();
+        const wardrobe = body.wardrobe || [];
+        const context = body.context || "daily casual"; // Kullanıcıdan "Düğün", "Spor" vb. de alabiliriz ilerde
+
+        if (wardrobe.length < 2) {
+            return addCors(new Response(JSON.stringify({ error: "Not enough items" }), { status: 400 }));
+        }
+
+        // Gemini için sadeleştirilmiş liste (Sadece isim, renk ve ID gönderiyoruz, resim URL'ine gerek yok)
+        const simplifiedList = wardrobe.map(item => ({
+            id: item.id,
+            name: item.item_name,
+            category: item.category,
+            color: item.color
+        }));
+
+        const systemPrompt = `
+            You are a world-class fashion stylist.
+            
+            TASK: Create a stylish outfit from the provided list of clothes for a "${context}" occasion.
+            
+            RULES:
+            1. Select 1 Top + 1 Bottom (OR 1 Dress) + 1 Shoes + (Optional) Outerwear.
+            2. Return ONLY valid JSON. No markdown, no extra text.
+            3. JSON Format:
+            {
+                "selected_ids": [12, 45, 99],
+                "explanation": "I chose the white shirt to contrast with..."
+            }
+            4. "explanation" should be short, friendly, and use emojis. Language: English.
+            
+            WARDROBE LIST:
+            ${JSON.stringify(simplifiedList)}
+        `;
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${selectedKey}`;
+        
+        const response = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: systemPrompt }] }]
+            })
+        });
+
+        const data = await response.json();
+        let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+        
+        // Gemini bazen ```json ... ``` içinde döndürür, temizleyelim
+        rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        
+        const result = JSON.parse(rawText);
+
+        return addCors(new Response(JSON.stringify(result), { status: 200 }));
+
+    } catch (err) {
+        return addCors(new Response(JSON.stringify({ error: err.message }), { status: 500 }));
+    }
+}
 
 
 

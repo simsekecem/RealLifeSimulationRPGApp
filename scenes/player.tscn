@@ -25,4 +25,5 @@ shape = SubResource("CapsuleShape2D_g2els")
 
 [node name="Camera2D" type="Camera2D" parent="." groups=["player"]]
 zoom = Vector2(2, 2)
+process_callback = 0
 position_smoothing_enabled = true

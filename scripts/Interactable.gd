@@ -54,8 +54,6 @@ func interact():
 			open_wardrobe() # 👈 Gardırop buraya yönlendirildi
 		"NPC":
 			start_dialog()
-		"Bed":
-			print("🛏️ Uykucu şirin!")
 
 # ============================================================
 # 👗 GARDIROP (OVERLAY) MANTIĞI
