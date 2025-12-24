@@ -8,7 +8,6 @@ bg_color = Color(0.21, 0.13030499, 0.0020999978, 0.59607846)
 
 [node name="ItemCard" type="Panel"]
 custom_minimum_size = Vector2(180, 162)
-size_flags_vertical = 3
 theme = ExtResource("1_lroro")
 theme_override_styles/panel = SubResource("StyleBoxFlat_yucqt")
 script = ExtResource("1_jxadr")

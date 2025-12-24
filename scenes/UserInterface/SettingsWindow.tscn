@@ -76,6 +76,7 @@ theme_override_fonts/font = ExtResource("2_in2ko")
 text = "Music"
 
 [node name="SaveButton" type="TextureButton" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 592.0
 offset_top = 433.0
