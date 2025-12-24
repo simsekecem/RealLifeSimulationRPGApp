@@ -26,20 +26,30 @@ func _gui_input(event):
 		_update_handle(event.position)
 
 func _update_handle(local_pos: Vector2):
-	# DÜZELTME BURADA:
-	# global_position yerine sadece position kullanıyoruz.
-	# Böylece Joystick ekranın neresinde olursa olsun kendi içine göre hesap yapar.
-	
 	var center = bg.position + bg.size / 2
 	var delta = local_pos - center
 
+	# Maksimum mesafeyi aşma
 	if delta.length() > max_distance:
 		delta = delta.normalized() * max_distance
 
-	# handle.global_position yerine handle.position kullanıyoruz
+	# Handle pozisyonu
 	handle.position = center + delta - handle.size / 2
-	
-	direction = delta / max_distance
+
+	# --------- EĞRİLİ HIZ HESABI ---------
+	var strength: float = delta.length() / max_distance
+
+	# Eğri uygula
+	# 1.0 = lineer
+	# 0.6 = önerilen
+	strength = pow(strength, 0.6)
+
+	# Yön + güç
+	if delta.length() > 0.0:
+		direction = delta.normalized() * strength
+	else:
+		direction = Vector2.ZERO
+
 
 func _reset_handle():
 	# Burada da position kullanıyoruz
