@@ -19,15 +19,50 @@ func _ready():
 	if camera:
 		camera.make_current()
 	
+	# 👇 YENİ: Kamera sınırlarını otomatik ayarla
+	# (call_deferred kullanıyoruz ki sahne tamamen yüklensin)
+	call_deferred("setup_camera_limits")
+	
 	# 2. Karakter Görünümünü Yükle
 	load_character_visuals()
 
 	# 👇 Sinyal Bağlantısı
-	# data_updated sinyali her tetiklendiğinde load_character_visuals çalışır
 	if Globals.has_signal("data_updated"):
 		if not Globals.data_updated.is_connected(load_character_visuals):
 			Globals.data_updated.connect(load_character_visuals)
 			print("✅ Player, global veri güncellemelerini dinlemeye başladı.")
+
+# ============================================================
+# 👇 YENİ: KAMERA SINIRLAMA FONKSİYONU 📷
+# ============================================================
+func setup_camera_limits():
+	if camera == null: return
+
+	# Player'ın eklendiği sahnedeki (Parent) zemin node'unu bulmaya çalışıyoruz.
+	# Genelde adı "TileMap" veya "Ground" olur.
+	var tilemap = get_parent().get_node_or_null("TileMap")
+	
+	if tilemap == null:
+		tilemap = get_parent().get_node_or_null("Ground")
+		
+	if tilemap:
+		# 1. Haritanın dolu olan kısmını (dikdörtgen) al
+		var map_rect = tilemap.get_used_rect()
+		
+		# 2. Tile boyutunu (kare boyutu) al (örn: 16px veya 32px)
+		var tile_size = tilemap.tile_set.tile_size
+		
+		# 3. Sol ve Üst sınır (Başlangıç noktası)
+		camera.limit_left = map_rect.position.x * tile_size.x
+		camera.limit_top = map_rect.position.y * tile_size.y
+		
+		# 4. Sağ ve Alt sınır (Başlangıç + Genişlik)
+		camera.limit_right = (map_rect.position.x + map_rect.size.x) * tile_size.x
+		camera.limit_bottom = (map_rect.position.y + map_rect.size.y) * tile_size.y
+		
+		print("📷 Kamera sınırları haritaya göre ayarlandı: ", map_rect)
+	else:
+		print("⚠️ Uyarı: Kamera sınırı için sahnede 'TileMap' veya 'Ground' bulunamadı.")
 
 # --- KARAKTER GÖRÜNÜMÜNÜ YÜKLE ---
 func load_character_visuals():
@@ -35,8 +70,6 @@ func load_character_visuals():
 	var user_data = Globals.cache.get("user", {})
 	var char_id = int(user_data.get("character_id", 1))
 	
-	# 👇 KRİTİK KONTROL: Eğer karakter zaten bu ID ile yüklüyse işlemi durdur
-	# Bu sayede kütüphanede yazı yazarken loglar dolmaz ve karakter titremez
 	if char_id == current_visual_id:
 		return
 	
@@ -50,7 +83,6 @@ func load_character_visuals():
 			anim.sprite_frames = new_frames
 			play_animation("idle")
 			
-			# 👇 YENİ: Başarıyla yüklenen ID'yi kaydet
 			current_visual_id = char_id
 			print("🎭 [PLAYER] Görünüm güncellendi: ID ", char_id)
 		else:
