@@ -81789,10 +81789,6 @@ visible = false
 tile_map_data = PackedByteArray("AAASAA4AAQAIAAoAAFA=")
 tile_set = SubResource("TileSet_pwx13")
 
-[node name="Player" parent="." instance=ExtResource("10_5q1rr")]
-position = Vector2(655, 346)
-collision_mask = 8
-
 [node name="NPC_Interactable" parent="." instance=ExtResource("11_u4arb")]
 position = Vector2(1015, 418)
 
@@ -81802,7 +81798,6 @@ position = Vector2(989, 216)
 [node name="npc_interactable1" parent="." instance=ExtResource("13_icc4n")]
 position = Vector2(590, 465)
 interact_type = "Market"
-dialog_text = "Buy more veggies"
 
 [node name="Cow" parent="." instance=ExtResource("14_b0eaf")]
 position = Vector2(1179, 702)
@@ -81811,13 +81806,16 @@ position = Vector2(1179, 702)
 position = Vector2(721, 676)
 
 [node name="random_npc" parent="." instance=ExtResource("15_uutfq")]
+y_sort_enabled = true
 position = Vector2(312, 446)
+collision_layer = 8
 
 [node name="npc_interactable2" parent="." instance=ExtResource("16_b00ts")]
 position = Vector2(921, 165)
-dialog_text = "Lets keep on rolling baby
-"
 
 [node name="npc_interactable3" parent="." instance=ExtResource("17_i0mj0")]
 position = Vector2(383, 213)
-dialog_text = "Let her cook!"
+
+[node name="Player" parent="." instance=ExtResource("10_5q1rr")]
+position = Vector2(655, 346)
+collision_mask = 8
