@@ -84,17 +84,8 @@ theme_override_fonts/font = ExtResource("5_f158r")
 theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBoxFlat_rvna5")
 theme_override_styles/focus = SubResource("StyleBoxFlat_ghdar")
-
-[node name="Label" type="Label" parent="NinePatchRect/TextEdit"]
-layout_mode = 0
-offset_left = 13.0
-offset_top = 4.0
-offset_right = 265.0
-offset_bottom = 54.0
-theme_override_colors/font_color = Color(0.6313726, 0.7372549, 0.59607846, 1)
-text = "
-REMINDER NOTES"
-horizontal_alignment = 1
+placeholder_text = " Reminder Notes"
+wrap_mode = 1
 
 [node name="DaysContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
