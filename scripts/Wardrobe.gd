@@ -384,7 +384,7 @@ func _on_classification_complete(_r, code, _h, body, original_img: Image, image_
 	
 	# 3. İsim Birleştirme (Blue + Running Shoe = Blue Running Shoe)
 	var final_name = raw_name
-	if color != "Grey" and color != "" and not raw_name.to_lower().contains(color.to_lower()):
+	if color != "" and not raw_name.to_lower().contains(color.to_lower()):
 		final_name = color + " " + raw_name
 	
 	var item_data = {
@@ -479,32 +479,63 @@ func show_success_popup(item_name: String):
 # ==========================================================
 # 👇 RENK ALGILAMA (TEKRAR EKLENDİ)
 # ==========================================================
+# ==========================================================
+# 👇 RENK ALGILAMA (GÜNCELLENDİ: Sadece Merkeze Odaklı)
+# ==========================================================
 func detect_dominant_color(img: Image) -> String:
-	img.convert(Image.FORMAT_RGB8)
-	var data = img.get_data()
-	var r_total = 0; var g_total = 0; var b_total = 0; var pixel_count = 0
-	var w = img.get_width(); var h = img.get_height()
-	var start_x = int(w * 0.2); var end_x = int(w * 0.8)
-	var start_y = int(h * 0.2); var end_y = int(h * 0.8)
+	# İşlem yapmadan önce orijinali bozmamak için kopyasını alalım (Opsiyonel ama güvenli)
+	var img_clone = img.duplicate()
+	img_clone.convert(Image.FORMAT_RGB8)
+	
+	var data = img_clone.get_data()
+	var r_total = 0
+	var g_total = 0
+	var b_total = 0
+	var pixel_count = 0
+	
+	var w = img_clone.get_width()
+	var h = img_clone.get_height()
+	
+	# 🔥 DEĞİŞİKLİK BURADA:
+	# Eskiden: 0.2 (20%) ile 0.8 (80%) arasıydı.
+	# Yeni: 0.4 (40%) ile 0.6 (60%) arası. Sadece göbeğe bakar.
+	var start_x = int(w * 0.40) 
+	var end_x = int(w * 0.60)
+	var start_y = int(h * 0.35) # Dikeyde kıyafet uzun olabilir, biraz daha geniş bıraktık
+	var end_y = int(h * 0.65)
 
+	# Adım sayısını (step) pixel yoğunluğuna göre dinamik de yapabilirsin ama 4 iyidir.
 	for y in range(start_y, end_y, 4):
 		for x in range(start_x, end_x, 4):
 			var idx = (y * w + x) * 3
-			r_total += data[idx]; g_total += data[idx + 1]; b_total += data[idx + 2]
+			
+			# Basit bir parlaklık kontrolü ekleyebiliriz (Çok karanlık/aydınlık pikselleri yoksaymak için)
+			# Ama şimdilik senin orijinal mantığını koruyoruz:
+			r_total += data[idx]
+			g_total += data[idx + 1]
+			b_total += data[idx + 2]
 			pixel_count += 1
 
 	if pixel_count == 0: return "Grey"
+	
 	var r_avg = r_total / pixel_count / 255.0
 	var g_avg = g_total / pixel_count / 255.0
 	var b_avg = b_total / pixel_count / 255.0
 
-	if r_avg > 0.7 and g_avg > 0.7 and b_avg > 0.7: return "White"
-	if r_avg < 0.3 and g_avg < 0.3 and b_avg < 0.3: return "Black"
-	if r_avg > g_avg + 0.2 and r_avg > b_avg + 0.2: return "Red"
-	if g_avg > r_avg + 0.2 and g_avg > b_avg + 0.2: return "Green"
-	if b_avg > r_avg + 0.2 and b_avg > g_avg + 0.2: return "Blue"
-	if r_avg > 0.6 and g_avg > 0.4 and b_avg < 0.4: return "Orange"
-	if r_avg > 0.5 and g_avg > 0.4 and b_avg > 0.5: return "Pink"
-	if r_avg > 0.5 and g_avg > 0.4 and b_avg < 0.3: return "Brown"
-	if r_avg > 0.6 and g_avg > 0.5 and b_avg > 0.4: return "Beige"
+	# Debug için konsola yazdırıp renkleri kontrol edebilirsin
+	# print("R: ", r_avg, " G: ", g_avg, " B: ", b_avg)
+
+	if r_avg > 0.75 and g_avg > 0.75 and b_avg > 0.75: return "White" # Eşik biraz artırıldı
+	if r_avg < 0.25 and g_avg < 0.25 and b_avg < 0.25: return "Black" # Eşik biraz azaltıldı
+	
+	# Renk karşılaştırmaları (Mevcut mantık)
+	if r_avg > g_avg + 0.15 and r_avg > b_avg + 0.15: return "Red" # Toleranslar biraz sıkılaştırıldı
+	if g_avg > r_avg + 0.15 and g_avg > b_avg + 0.15: return "Green"
+	if b_avg > r_avg + 0.15 and b_avg > g_avg + 0.15: return "Blue"
+	
+	if r_avg > 0.6 and g_avg > 0.35 and b_avg < 0.3: return "Orange"
+	if r_avg > 0.5 and g_avg > 0.3 and b_avg > 0.4: return "Pink" # Pink ayarı hassastır
+	if r_avg > 0.45 and g_avg > 0.35 and b_avg < 0.3: return "Brown"
+	if r_avg > 0.6 and g_avg > 0.55 and b_avg > 0.45: return "Beige"
+	
 	return "Grey"
