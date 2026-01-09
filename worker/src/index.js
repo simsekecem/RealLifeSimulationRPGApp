@@ -872,7 +872,9 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 const userLevel = userBox.level || 1;
                 const userExp = userBox.experience || 0;
                 const charId = userBox.character_id || 1;
-                const fcmToken = userBox.fcm_token || null;
+                const fcmToken = userBox.hasOwnProperty("fcm_token")
+                    ? userBox.fcm_token
+                    : undefined;
 
                 // 👇 YENİ: İsim boşsa DB'ye "Çaylak" olarak yazılmasını garantile
                 const finalUserName = userName === "" ? "Rookie" : userName;
@@ -881,8 +883,8 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     `INSERT INTO users (user_id, name, birthdate, level, experience, character_id, fcm_token) VALUES (?, ?, ?, ?, ?, ?, ?)`,
                     [userId, finalUserName, userBirth, userLevel, userExp, charId, fcmToken],
                     // UPDATE: fcm_token sütununu güncelliyoruz
-                    `UPDATE users SET name=?, birthdate=?, level=?, experience=?, character_id=?, fcm_token=? WHERE user_id=?`,
-                    [finalUserName, userBirth, userLevel, userExp, charId, fcmToken, userId]
+                    `UPDATE users SET name=?, birthdate=?, level=?, experience=?, character_id=?, fcm_token = COALESCE(NULLIF(?, ''), fcm_token) WHERE user_id=?`,
+                    [finalUserName, userBirth, userLevel, userExp, charId, fcmToken ?? null, userId]
                 );
 
                 // 2. PREFERENCES (KALDIRILDI)

@@ -104,25 +104,28 @@ func _on_core_initialized(success: bool):
 		print("❌ Firebase Core başlatılamadı.")
 
 # 👇 KRİTİK BÖLÜM: Token Gelince Ne Yapıyoruz?
+# 👇 SADECE MOBİLDE ÇALIŞACAK ŞEKİLDE AYARLANDI
 func _on_fcm_token_received(token: String):
 	if token.is_empty():
 		return
 
-	print("🔥 FCM TOKEN ALINDI VE CACHE'E YAZILDI: ", token)
-	
-	# 1. Token'ı yerel hafızaya (Cache) yaz
-	if not cache["user"].has("fcm_token"):
-		cache["user"]["fcm_token"] = ""
-	
-	cache["user"]["fcm_token"] = token
-	save_cache()
-	
-	# 2. Eğer kullanıcı ZATEN içerideyse (Auth Token varsa),
-	#    Hiç beklemeden bu yeni token'ı sunucuya "Save All" paketiyle gönder.
-	if auth_token != "":
-		print("🔄 Token sunucuya senkronize ediliyor...")
-		send_to_server_background()
-
+	# Sadece Android veya iOS ise işlem yap
+	if OS.get_name() == "Android" or OS.get_name() == "iOS":
+		print("🔥 (MOBİL) Yeni Token Alındı: ", token)
+		
+		# Yerel hafızaya yaz
+		if not cache["user"].has("fcm_token"):
+			cache["user"]["fcm_token"] = ""
+		
+		cache["user"]["fcm_token"] = token
+		save_cache()
+		
+		# Eğer giriş yapmışsak sunucuya hemen gönder
+		if auth_token != "":
+			send_to_server_background()
+	else:
+		# PC veya Web ise bu gelen token'ı yoksay (genelde null veya boş gelir)
+		pass
 # ============================================================
 #   YEREL KAYIT (LOCAL SAVE)
 # ============================================================
@@ -150,11 +153,23 @@ func safe_int(value) -> int: return int(float(str(value)))
 func safe_str(value) -> String: return str(value).strip_edges()
 
 func _get_sync_payload() -> Dictionary:
-	# Cache'i kopyala. Token zaten cache["user"] içinde olduğu için
-	# otomatik olarak pakete dahil edilecek!
 	var payload = cache.duplicate(true)
+
 	if payload.has("preferences"):
-		payload.erase("preferences") 
+		payload.erase("preferences")
+
+	var is_mobile = (OS.get_name() == "Android" or OS.get_name() == "iOS")
+
+	# 🔥 PC / WEB -> fcm_token ASLA GÖNDERME
+	if not is_mobile:
+		if payload.has("user"):
+			payload["user"].erase("fcm_token")
+	else:
+		# Mobilde de boşsa gönderme
+		var token = payload["user"].get("fcm_token", "")
+		if token == "":
+			payload["user"].erase("fcm_token")
+
 	return payload
 
 # ============================================================
@@ -280,9 +295,17 @@ func _on_load_complete(_res, code, _headers, body):
 
 func apply_server_data(data):
 	var current_local_token = cache["user"].get("fcm_token", "")
-	if data.has("user"): cache["user"] = data["user"]
-	if cache["user"].get("fcm_token", "") == "" and current_local_token != "":
-		cache["user"]["fcm_token"] = current_local_token
+	var is_mobile = (OS.get_name() == "Android" or OS.get_name() == "iOS")
+
+	if data.has("user"):
+		var server_user = data["user"]
+
+		# Server verisini uygula
+		cache["user"] = server_user
+
+		# 🔥 SADECE MOBİLDE token'ı koru
+		if is_mobile and current_local_token != "":
+			cache["user"]["fcm_token"] = current_local_token
 	
 	cache["study_log"] = ensure_list(data.get("study_log"))
 	cache["gym_log"] = ensure_list(data.get("gym_log"))
@@ -303,9 +326,15 @@ func apply_server_data(data):
 # --- Veri Birleştirme ---
 func merge_server_with_local(server_data):
 	var current_local_token = cache["user"].get("fcm_token", "")
-	if server_data.has("user"): cache["user"] = server_data["user"]
-	if cache["user"].get("fcm_token", "") == "" and current_local_token != "":
-		cache["user"]["fcm_token"] = current_local_token
+	var is_mobile = (OS.get_name() == "Android" or OS.get_name() == "iOS")
+
+	if server_data.has("user"):
+		var server_user = server_data["user"]
+
+		cache["user"] = server_user
+
+		if is_mobile and current_local_token != "":
+			cache["user"]["fcm_token"] = current_local_token
 	
 	merge_list("study_log", ensure_list(server_data.get("study_log")))
 	merge_list("gym_log", ensure_list(server_data.get("gym_log")))
