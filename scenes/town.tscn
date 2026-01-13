@@ -82643,20 +82643,27 @@ tile_map_data = PackedByteArray("AAASAA4AAQAIAAoAAFA=")
 tile_set = SubResource("TileSet_pwx13")
 
 [node name="NPC_Interactable" parent="." instance=ExtResource("11_u4arb")]
+y_sort_enabled = true
 position = Vector2(1015, 418)
+collision_layer = 8
 
 [node name="Duck" parent="." instance=ExtResource("12_u4arb")]
 position = Vector2(989, 216)
 
 [node name="npc_interactable1" parent="." instance=ExtResource("13_icc4n")]
+y_sort_enabled = true
 position = Vector2(590, 465)
-interact_type = "Market"
+collision_layer = 8
 
 [node name="Cow" parent="." instance=ExtResource("14_b0eaf")]
+y_sort_enabled = true
 position = Vector2(1179, 702)
+collision_layer = 8
 
 [node name="Cow2" parent="." instance=ExtResource("14_b0eaf")]
+y_sort_enabled = true
 position = Vector2(721, 676)
+collision_layer = 8
 
 [node name="random_npc" parent="." instance=ExtResource("15_uutfq")]
 y_sort_enabled = true
@@ -82664,10 +82671,14 @@ position = Vector2(312, 446)
 collision_layer = 8
 
 [node name="npc_interactable2" parent="." instance=ExtResource("16_b00ts")]
+y_sort_enabled = true
 position = Vector2(921, 165)
+collision_layer = 8
 
 [node name="npc_interactable3" parent="." instance=ExtResource("17_i0mj0")]
+y_sort_enabled = true
 position = Vector2(383, 213)
+collision_layer = 8
 
 [node name="Player" parent="." instance=ExtResource("10_5q1rr")]
 position = Vector2(655, 346)

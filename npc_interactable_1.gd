@@ -1,7 +1,6 @@
-extends Area2D
+extends CharacterBody2D 
 
 # --- EDİTÖRDEN AYARLANACAK DEĞİŞKENLER ---
-# Market için interact_type'ı "market" olarak sabitliyoruz
 @export var interact_type: String = "market" 
 @export var wait_time: float = 1.0
 
@@ -10,6 +9,7 @@ extends Area2D
 @onready var dialog_bubble = $DialogBubble
 @onready var quest_label = $DialogBubble/Panel/QuestLabel
 @onready var timer = $Timer
+@onready var interaction_area = $Area2D # Tetikleme için alttaki Area2D'yi kullanacağız
 
 var has_triggered: bool = false 
 var player_ref: Node2D = null 
@@ -18,13 +18,15 @@ func _ready():
 	timer.wait_time = wait_time
 	timer.one_shot = true
 	
-	timer.timeout.connect(_on_timer_timeout)
-	body_entered.connect(_on_body_entered)
-	body_exited.connect(_on_body_exited)
+	# ÖNEMLİ: Sinyalleri ana düğümden değil, çocuk olan Area2D'den bağlıyoruz
+	if interaction_area:
+		interaction_area.body_entered.connect(_on_body_entered)
+		interaction_area.body_exited.connect(_on_body_exited)
 	
+	timer.timeout.connect(_on_timer_timeout)
 	dialog_bubble.visible = false
 
-# --- ALANA GİRİNCE ---
+# --- ALANA GİRİNCE (Area2D üzerinden tetiklenir) ---
 func _on_body_entered(body):
 	if body.is_in_group("player"):
 		player_ref = body 
@@ -53,7 +55,6 @@ func update_dialog_from_manager():
 		var found_quest_text = ""
 		
 		for q in all_quests:
-			# Burada sadece 'market' kategorisindeki 'daily' görevleri arar
 			if q.get("category") == "market" and q.get("type") == "daily":
 				found_quest_text = q.get("description", "")
 				break

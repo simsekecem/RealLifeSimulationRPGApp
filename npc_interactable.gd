@@ -1,7 +1,6 @@
-extends Area2D
+extends CharacterBody2D 
 
 # --- EDİTÖRDEN AYARLANACAK DEĞİŞKENLER ---
-# Kategoriler: gym, market, restaurant, library (Worker ile aynı olmalı)
 @export_enum("gym", "market", "restaurant", "library") var interact_type: String = "library" 
 @export var wait_time: float = 1.0
 
@@ -10,6 +9,7 @@ extends Area2D
 @onready var dialog_bubble = $DialogBubble
 @onready var quest_label = $DialogBubble/Panel/QuestLabel
 @onready var timer = $Timer
+@onready var interaction_area = $Area2D # Sinyalleri bu alandan alacağız
 
 var has_triggered: bool = false 
 var player_ref: Node2D = null 
@@ -18,14 +18,15 @@ func _ready():
 	timer.wait_time = wait_time
 	timer.one_shot = true
 	
-	# Sinyal bağlantıları
-	timer.timeout.connect(_on_timer_timeout)
-	body_entered.connect(_on_body_entered)
-	body_exited.connect(_on_body_exited)
+	# Sinyalleri ana düğümden değil, çocuk olan Area2D'den bağlıyoruz
+	if interaction_area:
+		interaction_area.body_entered.connect(_on_body_entered)
+		interaction_area.body_exited.connect(_on_body_exited)
 	
+	timer.timeout.connect(_on_timer_timeout)
 	dialog_bubble.visible = false
 
-# --- ALANA GİRİNCE ---
+# --- ALANA GİRİNCE (Area2D Tetiklenince) ---
 func _on_body_entered(body):
 	if body.is_in_group("player"):
 		player_ref = body 
@@ -44,36 +45,31 @@ func _on_body_exited(body):
 func _on_timer_timeout():
 	if player_ref != null:
 		has_triggered = true
-		update_dialog_from_manager() # Görevi hafızadan çek
+		update_dialog_from_manager()
 		show_dialogue()
 
-# --- GÖREVİ HAFIZADAN ÇEKME FONKSİYONU ---
+# --- GÖREVİ HAFIZADAN ÇEKME ---
 func update_dialog_from_manager():
-	# QuestManager tarafından doldurulan Globals.cache kontrolü
 	if Globals.cache.has("quests"):
 		var all_quests = Globals.cache["quests"]
 		var found_quest_text = ""
 		
 		for q in all_quests:
-			# Kategori eşleşmesi ve 'daily' tipi kontrolü
 			if q.get("category") == interact_type and q.get("type") == "daily":
 				found_quest_text = q.get("description", "")
 				break
 		
-		# Görev bulunduysa metni bas, bulunamadıysa istediğin mesajı yaz
 		if found_quest_text != "":
 			quest_label.text = found_quest_text
 		else:
 			quest_label.text = "Sorry, no daily quest. Rest well!"
 	else:
-		# Cache henüz yüklenmemişse (örn. internet yavaşsa)
 		quest_label.text = "Sorry, no daily quest. Rest well!"
 
 func show_dialogue():
 	dialog_bubble.visible = true
 
 func _process(_delta):
-	# Oyuncu alandaysa NPC ona döner
 	if player_ref != null and not has_triggered:
 		flip_towards_player()
 

@@ -1,7 +1,6 @@
-extends Area2D
+extends CharacterBody2D 
 
 # --- EDİTÖRDEN AYARLANACAK DEĞİŞKENLER ---
-# Restoran NPC'si olduğu için tipi "restaurant" olarak ayarlıyoruz.
 @export var interact_type: String = "restaurant" 
 @export var wait_time: float = 1.0
 
@@ -10,6 +9,7 @@ extends Area2D
 @onready var dialog_bubble = $DialogBubble
 @onready var quest_label = $DialogBubble/Panel/QuestLabel
 @onready var timer = $Timer
+@onready var interaction_area = $Area2D # Tetikleme için çocuk düğüm olan Area2D
 
 var has_triggered: bool = false 
 var player_ref: Node2D = null 
@@ -18,11 +18,12 @@ func _ready():
 	timer.wait_time = wait_time
 	timer.one_shot = true
 	
-	# Sinyal bağlantıları
-	timer.timeout.connect(_on_timer_timeout)
-	body_entered.connect(_on_body_entered)
-	body_exited.connect(_on_body_exited)
+	# Sinyal bağlantılarını alt düğüm olan Area2D üzerinden yapıyoruz
+	if interaction_area:
+		interaction_area.body_entered.connect(_on_body_entered)
+		interaction_area.body_exited.connect(_on_body_exited)
 	
+	timer.timeout.connect(_on_timer_timeout)
 	dialog_bubble.visible = false
 
 # --- ALANA GİRİNCE ---
@@ -44,36 +45,31 @@ func _on_body_exited(body):
 func _on_timer_timeout():
 	if player_ref != null:
 		has_triggered = true
-		update_dialog_from_manager() # Görevi hafızadan çek
+		update_dialog_from_manager() 
 		show_dialogue()
 
-# --- GÖREVİ HAFIZADAN ÇEKME FONKSİYONU ---
+# --- GÖREVİ HAFIZADAN ÇEKME (Restaurant Kategorisi) ---
 func update_dialog_from_manager():
-	# QuestManager'ın doldurduğu Globals.cache kontrolü
 	if Globals.cache.has("quests"):
 		var all_quests = Globals.cache["quests"]
 		var found_quest_text = ""
 		
 		for q in all_quests:
-			# Kategori "restaurant" mı ve tip "daily" mi?
 			if q.get("category") == "restaurant" and q.get("type") == "daily":
 				found_quest_text = q.get("description", "")
 				break
 		
-		# Eğer o günkü yemek görevi bulunduysa yaz, yoksa senin istediğin mesajı ver
 		if found_quest_text != "":
 			quest_label.text = found_quest_text
 		else:
-			quest_label.text = "Sorry, no daily quest. Rest well!"
+			quest_label.text = "We're out of specials. Try again later!"
 	else:
-		# Veriler henüz yüklenmemişse
-		quest_label.text = "Sorry, no daily quest. Rest well!"
+		quest_label.text = "Menu is loading..."
 
 func show_dialogue():
 	dialog_bubble.visible = true
 
 func _process(_delta):
-	# Oyuncu yakındaysa ona bakmaya devam et
 	if player_ref != null and not has_triggered:
 		flip_towards_player()
 
