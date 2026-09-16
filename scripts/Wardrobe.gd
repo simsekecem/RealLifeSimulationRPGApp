@@ -1,7 +1,7 @@
 extends Control
 
 # PROJECT SETTINGS
-const PROJECT_ID = "YOUR_SUPABASE_PROJECT_ID"
+const PROJECT_ID = "rzsndtstonztfuayodmg"
 const SUPABASE_URL = "https://" + PROJECT_ID + ".supabase.co/storage/v1/object/wardrobe/"
 const PUBLIC_URL_BASE = "https://" + PROJECT_ID + ".supabase.co/storage/v1/object/public/wardrobe/"
 
@@ -524,4 +524,3 @@ func detect_dominant_color(img: Image) -> String:
 	if r_avg > 0.6 and g_avg > 0.55 and b_avg > 0.45: return "Beige"
 	
 	return "Grey"
-

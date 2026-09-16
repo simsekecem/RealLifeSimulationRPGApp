@@ -16,8 +16,8 @@ var last_scene_path := ""
 var texture_cache: Dictionary = {}
 var is_initial_sync_done: bool = false
 
-var supabase_anon_key: String = "YOUR_SUPABASE_ANON_KEY" 
-var supabase_project_id: String = "YOUR_SUPABASE_PROJECT_ID"
+var supabase_anon_key: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6c25kdHN0b256dGZ1YXlvZG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyOTg4OTQsImV4cCI6MjA3NTg3NDg5NH0.UPDS44mZl-YP0UNGqnpPzIedyphNptgnXehax5tUi50" 
+var supabase_project_id: String = "rzsndtstonztfuayodmg"
 
 # User cache structure
 var cache := {
@@ -598,4 +598,3 @@ func add_xp(amount: int):
 	
 	save_cache()
 	data_updated.emit()
-

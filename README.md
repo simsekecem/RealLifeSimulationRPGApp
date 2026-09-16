@@ -1,7 +1,7 @@
 <table align="center" style="border-collapse: collapse; border: none; background: transparent;">
   <tr style="border: none; background: transparent;">
     <td style="border: none; background: transparent; vertical-align: middle; text-align: right; padding-right: 15px;">
-      <h1 style="margin: 0; font-size: 2.2em; border: none;">✨ My Pixel Life (Real Life Simulation RPG) ✨</h1>
+      <h1 style="margin: 0; font-size: 2.2em; border: none;">✨ My Pixel Routine ✨</h1>
     </td>
     <td style="border: none; background: transparent; vertical-align: middle; text-align: left;">
       <img src="https://github.com/user-attachments/assets/faaae912-6ca3-4cdb-b187-cf1286a7e4f0" width="100" alt="Rook Mascot" style="image-rendering: pixelated; display: block;" />
@@ -42,13 +42,13 @@ Experience the game directly in your web browser on **itch.io** or download the 
   <a href="https://reallifesim.itch.io/mypixelroutine" target="_blank">
     <img src="https://img.shields.io/badge/Play%20on-itch.io-FA5C5C?style=for-the-badge&logo=itchdotio&logoColor=white" alt="Play on itch.io" />
   </a>
-  <a href="https://github.com/simsekecem/RealLifeSimulationRPGApp/releases/latest">
+  <a href="https://github.com/simsekecem/MyPixelRoutine/releases/latest">
     <img src="https://img.shields.io/badge/Download-Android%20APK-brightgreen?style=for-the-badge&logo=android" alt="Download APK" />
   </a>
 </p>
 
-- **Web (Browser):** Play instantly on [itch.io (Real Life Simulation)](https://reallifesim.itch.io/mypixelroutine) without installing anything!
-- **Android (Mobile):** Download the latest standalone `.apk` from the [Releases](https://github.com/simsekecem/RealLifeSimulationRPGApp/releases/latest) section.
+- **Web (Browser):** Play instantly on [itch.io (My Pixel Routine)](https://reallifesim.itch.io/mypixelroutine) without installing anything!
+- **Android (Mobile):** Download the latest standalone `.apk` from the [Releases](https://github.com/simsekecem/MyPixelRoutine/releases/latest) section.
 
 > **Android Installation Note:** Since this is an indie build, your Android device may prompt *"Install unknown app"*. Enable the permission to proceed with installation.
 
