@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://dw7ipw30a2pk5"]
+[gd_scene load_steps=8 format=3 uid="uid://dw7ipw30a2pk5"]
 
 [ext_resource type="Texture2D" uid="uid://csepbew64lyh1" path="res://assets/ui/GUI/Settings.png" id="1_g7hd6"]
 [ext_resource type="Script" uid="uid://bx30f3x38od16" path="res://scenes/UserInterface/SettingsWindow.gd" id="1_q40td"]
 [ext_resource type="FontFile" uid="uid://cnu3sa8v30pc0" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_in2ko"]
+[ext_resource type="FontFile" uid="uid://b63qvrxir6pmy" path="res://assets/fonts/CherrySwash-Regular.ttf" id="4_73xgc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_in2ko"]
 atlas = ExtResource("1_g7hd6")
@@ -58,9 +59,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -37.5
-offset_top = -145.5
+offset_top = -180.5
 offset_right = 139.5
-offset_bottom = -72.5
+offset_bottom = -107.5
 grow_horizontal = 2
 grow_vertical = 2
 value = 50.0
@@ -68,9 +69,9 @@ value = 50.0
 [node name="MusicLabel" type="Label" parent="."]
 layout_mode = 0
 offset_left = 508.0
-offset_top = 242.0
+offset_top = 207.0
 offset_right = 593.0
-offset_bottom = 265.0
+offset_bottom = 230.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_in2ko")
 text = "Music"
@@ -101,5 +102,24 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_in2ko")
 text = "SAVE"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 492.0
+offset_top = 252.0
+offset_right = 790.0
+offset_bottom = 649.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("4_73xgc")
+theme_override_font_sizes/font_size = 13
+text = "CREDITS
+Backgrounds & UI: Free Sky with Clouds & Basic Pixel Art UI by Free Game Assets
+Environment & World: Overworld Tileset (Grass Biome) by Beast Pixels
+Town Buildings: Pixel Houses RPG Pack 16x16 by kepx
+Player Home: Main Character’s Home by Free Game Assets
+Furniture Sets: Coastal & Fancy Mansion Sets by 0_mem0ry
+Character Sprites: RPG Character Pack by farm-animal
+Music (BGM): City Date by Jan Hehr"
+autowrap_mode = 3
 
 [connection signal="value_changed" from="VolumeSlider" to="." method="_on_volume_slider_value_changed"]
