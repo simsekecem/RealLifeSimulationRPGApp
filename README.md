@@ -1,6 +1,7 @@
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/faaae912-6ca3-4cdb-b187-cf1286a7e4f0" width="80" alt="Rook Mascot" style="image-rendering: pixelated;" />
-# ✨ My Pixel Life (Real Life Simulation RPG) ✨ 
+<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+  <img src="https://github.com/user-attachments/assets/faaae912-6ca3-4cdb-b187-cf1286a7e4f0" width="85" alt="Rook Mascot" style="image-rendering: pixelated;" />
+  <h1 style="margin: 0; display: inline-block;">✨ My Pixel Life (Real Life Simulation RPG) ✨</h1>
+</div>
 
 
 A gamified life management RPG built with **Godot 4**, featuring an intelligent backend powered by **Google Gemini AI**, **Cloudflare Workers AI**, **Cloudflare D1**, and **Supabase**.
