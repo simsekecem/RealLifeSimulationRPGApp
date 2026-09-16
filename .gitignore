@@ -9,13 +9,15 @@ assets/
 *.idsig
 *.aab
 web/
+/web/
 
 debug.keystore
 *.keystore
 *.jks
 google-services.json
 GoogleService-Info.plist
-android/build/
+android/
+/android/
 *.aar
 
 worker/wrangler.toml
