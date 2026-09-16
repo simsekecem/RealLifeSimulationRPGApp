@@ -1,5 +1,3 @@
-
-
 <table align="center" style="border-collapse: collapse; border: none; background: transparent;">
   <tr style="border: none; background: transparent;">
     <td style="border: none; background: transparent; vertical-align: middle; text-align: right; padding-right: 15px;">
@@ -41,7 +39,7 @@ Transform your daily habits, study routines, workouts, meal plans, and wardrobe 
 Experience the game directly in your web browser on **itch.io** or download the Android APK:
 
 <p align="left">
-  <a href="https://reallifesim.itch.io/reallifesimulationapp" target="_blank">
+  <a href="https://reallifesim.itch.io/mypixelroutine" target="_blank">
     <img src="https://img.shields.io/badge/Play%20on-itch.io-FA5C5C?style=for-the-badge&logo=itchdotio&logoColor=white" alt="Play on itch.io" />
   </a>
   <a href="https://github.com/simsekecem/RealLifeSimulationRPGApp/releases/latest">
@@ -49,7 +47,7 @@ Experience the game directly in your web browser on **itch.io** or download the 
   </a>
 </p>
 
-- **Web (Browser):** Play instantly on [itch.io (Real Life Simulation)](https://reallifesim.itch.io/reallifesimulationapp) without installing anything!
+- **Web (Browser):** Play instantly on [itch.io (Real Life Simulation)](https://reallifesim.itch.io/mypixelroutine) without installing anything!
 - **Android (Mobile):** Download the latest standalone `.apk` from the [Releases](https://github.com/simsekecem/RealLifeSimulationRPGApp/releases/latest) section.
 
 > **Android Installation Note:** Since this is an indie build, your Android device may prompt *"Install unknown app"*. Enable the permission to proceed with installation.
@@ -119,6 +117,16 @@ This game was made possible with the help of the following amazing free assets. 
 
 ---
 
+## Authors & Contributors
+
+This project was co-developed as a collaborative effort by:
+
+- **Nida Elvin Mertoğlu**
+  - *Roles:* Co-developed game mechanics, frontend architecture, UI design, database schemas, backend integration, and AI features.
+- **Ecem Şimşek**
+  - *Roles:* Co-developed game mechanics, frontend architecture, UI design, database schemas, backend integration, and AI features.
+
+---
 ## License
 
 This project is licensed under the **MIT License**.
