@@ -1,47 +1,47 @@
 extends Control
 
-# 🔵 PROJECT SETTINGS
-const PROJECT_ID = "rzsndtstonztfuayodmg"
+# PROJECT SETTINGS
+const PROJECT_ID = "YOUR_SUPABASE_PROJECT_ID"
 const SUPABASE_URL = "https://" + PROJECT_ID + ".supabase.co/storage/v1/object/wardrobe/"
 const PUBLIC_URL_BASE = "https://" + PROJECT_ID + ".supabase.co/storage/v1/object/public/wardrobe/"
 
-# 👇 Endpointler
+# Endpoints
 const WORKER_URL = "https://life-sim-worker.life-simulation.workers.dev/api/classify_clothing_vit"
 const WORKER_URL_DELETE = "https://life-sim-worker.life-simulation.workers.dev/api/delete_item"
 const WORKER_URL_OUTFIT = "https://life-sim-worker.life-simulation.workers.dev/api/generate_outfit"
 
-# 🔵 POPUP SCENES
+# POPUP SCENES
 var popup_font = preload("res://assets/fonts/PressStart2P-Regular.ttf")
 var popup_scene := preload("res://scenes/WardrobeItemListPopup.tscn")
 var outfit_popup_scene := preload("res://scenes/OutfitResultPopup.tscn")
 var popup: Node
 
-# Mevcut indeksler
+# Current category indices
 var current_indices = { "outer": 0, "dress": 0, "upper": 0, "lower": 0, "shoes": 0 }
 
 # Placeholder
 var placeholder_texture: Texture2D = null
 
-# --- 🔥 ARKA PLAN YÜKLEME SIRASI (QUEUE) ---
+# --- BACKGROUND DOWNLOAD QUEUE ---
 var download_queue: Array = [] 
 var is_downloading: bool = false 
 
-# Request Referansları
+# Request references
 var current_classify_request: HTTPRequest = null
 var current_upload_request: HTTPRequest = null
 
 # ------------------------------------------------------------
-# READY & BAŞLANGIÇ
+# READY & INITIALIZATION
 # ------------------------------------------------------------
 func _ready():
-	print("🚀 [WARDROBE] Başlatıldı...")
+	print("[WARDROBE] Initialized...")
 
-	# Placeholder oluştur
+	# Create placeholder
 	var ph_img = Image.create(200, 200, false, Image.FORMAT_RGBA8)
 	ph_img.fill(Color(0, 0, 0, 0))
 	placeholder_texture = ImageTexture.create_from_image(ph_img)
 
-	# Popup Kurulumları
+	# Popup Setups
 	popup = popup_scene.instantiate()
 	add_child(popup)
 	popup.hide()
@@ -50,19 +50,17 @@ func _ready():
 	if popup.has_signal("item_deleted"): popup.item_deleted.connect(_on_popup_item_deleted)
 	if popup.has_signal("item_edited"): popup.item_edited.connect(_on_popup_item_edited)
 
-	# Buton Bağlantıları
+	# Button connections
 	if has_node("CloseButton"): $CloseButton.pressed.connect(_on_close_button_pressed)
 	if has_node("AddClothesButton"): $AddClothesButton.pressed.connect(_on_add_clothes_button_pressed)
 	if has_node("MagicButton"): $MagicButton.pressed.connect(_on_magic_button_pressed)
 
 	connect_category_buttons()
 
-	# 🔥 1. SAHNE DEĞİŞİMİNİ DİNLE (Town -> House geçişi için)
+	# 1. Listen for scene transitions (Town -> House)
 	get_tree().node_added.connect(_on_scene_changed)
 
-	# 🔥 2. BAŞLANGIÇ KONTROLÜ
-	# Eğer bu script Ev'in bir parçasıysa, _ready çalıştığında zaten evdeyiz demektir.
-	# Yine de sahne adını kontrol edip başlatıyoruz.
+	# 2. Initial scene check
 	check_start_loading()
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -70,58 +68,57 @@ func _ready():
 	Globals.data_updated.connect(refresh_wardrobe_ui)
 
 # ------------------------------------------------------------
-# 🔥 SAHNE KONTROLÜ (OTOMATİK İNDİRME TETİKLEYİCİSİ)
+# SCENE CHECK (AUTOMATIC DOWNLOAD TRIGGER)
 # ------------------------------------------------------------
 func check_start_loading():
 	var current_scene = get_tree().current_scene
-	# Eğer şu anki sahne HOUSE ise indirmeyi başlat
+	# Start background download if current scene is house
 	if current_scene and current_scene.scene_file_path.contains("house.tscn"):
-		print("🏠 Evdeyiz! Arka plan indirmesi başlatılıyor...")
+		print("Currently in House. Starting background download...")
 		_start_background_loading_v2()
 
 func _on_scene_changed(node: Node):
-	# Sadece ROOT'a eklenen ana sahneleri kontrol et (Performans için)
+	# Only inspect root child nodes for performance
 	if node.get_parent() == get_tree().root:
-		# Eğer yüklenen sahne 'house.tscn' ise
 		if "house.tscn" in node.scene_file_path:
-			print("🏠 Town'dan Eve Girildi! İndirme başlatılıyor...")
+			print("Entered House from Town. Starting background download...")
 			_start_background_loading_v2()
 
 # ------------------------------------------------------------
-# 🔥 ARKA PLAN YÜKLEME SİSTEMİ (V2)
+# BACKGROUND DOWNLOAD SYSTEM (V2)
 # ------------------------------------------------------------
 func _start_background_loading_v2():
 	var wardrobe = Globals.cache.get("wardrobe", [])
 	
-	# Zaten indiriliyor mu?
+	# Skip if already downloading
 	if is_downloading and not download_queue.is_empty():
 		return
 
-	# Cache'de olmayanları sıraya diz
+	# Queue items not yet cached
 	for item in wardrobe:
 		var url = item.get("image_url", "")
-		# URL var mı? VE Hafızada (Texture Cache) YOK mu?
+		# Check if URL exists and is not yet in texture cache
 		if url != "" and not Globals.texture_cache.has(url):
-			# Sırada da yoksa ekle
+			# Add to queue if not already queued
 			if not download_queue.has(url):
 				download_queue.append(url)
 	
-	print("📥 İndirilecek resim sayısı: ", download_queue.size())
+	print("📥 Number of images to download: ", download_queue.size())
 	
-	# Sıra boş değilse ve şu an indirmiyorsak -> Başla
+	# If queue is not empty and not downloading -> Start
 	if not download_queue.is_empty() and not is_downloading:
 		_process_next_download_v2()
 
 func _process_next_download_v2():
 	if download_queue.is_empty():
 		is_downloading = false
-		print("✅ Tüm indirmeler tamamlandı.")
+		print("✅ All downloads completed.")
 		return
 		
 	is_downloading = true
 	var url = download_queue.pop_front()
 	
-	# Belki sırada beklerken başka bir yerden yüklenmiştir, kontrol et
+	# Check if cached elsewhere while waiting in queue
 	if Globals.texture_cache.has(url):
 		_process_next_download_v2()
 		return
@@ -146,16 +143,16 @@ func _on_single_image_downloaded(url, code, body, http_node):
 		
 		if err == OK:
 			var tex = ImageTexture.create_from_image(img)
-			# 🔥 GLOBALS CACHE'E KAYDET
+			# Save to Globals texture cache
 			Globals.texture_cache[url] = tex 
-			# UI açıksa hemen orayı da güncelle (canlı görünür)
+			# Update UI immediately if open
 			refresh_wardrobe_ui()
 	
-	# Sunucuyu boğmamak için çok kısa (0.05s) bekle sonra diğerine geç
+	# Throttle downloads slightly (0.05s) to avoid choking the network
 	get_tree().create_timer(0.05).timeout.connect(_process_next_download_v2)
 
 # ------------------------------------------------------------
-# GÖRÜNTÜLEME VE NAVİGASYON
+# DISPLAY AND NAVIGATION
 # ------------------------------------------------------------
 func update_category_display(category: String):
 	var items = get_items_in_category(category)
@@ -178,12 +175,12 @@ func update_category_display(category: String):
 	var current_item = items[index]
 	var image_url = current_item["image_url"]
 
-	# Cache kontrolü: Varsa hemen koy, yoksa placeholder koy ve indiriliyor mu bak
+	# Cache check: Display if cached, otherwise show placeholder and trigger download
 	if Globals.texture_cache.has(image_url):
 		texture_rect.texture = Globals.texture_cache[image_url]
 	else:
 		texture_rect.texture = placeholder_texture
-		# Eğer bu resim sırada yoksa, acil olarak en başa ekle
+		# Prioritize downloading this image if not already queued
 		if not download_queue.has(image_url):
 			download_queue.push_front(image_url) 
 			if not is_downloading: _process_next_download_v2()
@@ -346,19 +343,19 @@ func _on_close_button_pressed():
 	queue_free()
 
 # ------------------------------------------------------------
-# ANDROID & RESİM YÜKLEME
+# ANDROID & IMAGE UPLOAD
 # ------------------------------------------------------------
 func _on_add_clothes_button_pressed():
 	if OS.get_name() == "Android":
 		var perms = OS.get_granted_permissions()
 		if not perms.has("android.permission.READ_MEDIA_IMAGES") and not perms.has("android.permission.READ_EXTERNAL_STORAGE"):
 			OS.request_permissions(); return
-	DisplayServer.file_dialog_show("Kıyafet Seç", "", "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE, ["*.jpg", "*.jpeg", "*.png"], _on_file_selected)
+	DisplayServer.file_dialog_show("Select Clothing", "", "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE, ["*.jpg", "*.jpeg", "*.png"], _on_file_selected)
 
 func _on_file_selected(status: bool, paths: PackedStringArray, _idx: int):
 	if not status or paths.is_empty(): return
 	var img := Image.new()
-	if img.load(paths[0]) != OK: OS.alert("Resim yüklenemedi."); return
+	if img.load(paths[0]) != OK: OS.alert("Failed to load image."); return
 	if img.get_width() > 600:
 		var scale = 600.0 / img.get_width()
 		img.resize(int(600), int(img.get_height() * scale), Image.INTERPOLATE_LANCZOS)
@@ -369,27 +366,27 @@ func _on_file_selected(status: bool, paths: PackedStringArray, _idx: int):
 	current_classify_request.request_completed.connect(_on_classification_complete.bind(img, buffer))
 	current_classify_request.request(WORKER_URL, ["Content-Type: application/json"], HTTPClient.METHOD_POST, JSON.stringify({ "image": base64_str }))
 
-# 👇 CLASSIFICATION (RENK VE İSİM DÜZELTME AKTİF ✅)
+# CLASSIFICATION (COLOR AND NAME PROCESSING)
 func _on_classification_complete(_r, code, _h, body, original_img: Image, image_buffer: PackedByteArray):
 	if current_classify_request: current_classify_request.queue_free()
 	if code != 200: OS.alert("AI Error."); return
 	var json = JSON.parse_string(body.get_string_from_utf8())
 	if not json.get("is_valid", false): OS.alert("Not a clothing item."); return
 	
-	# 1. Ham İsim
+	# 1. Raw name
 	var raw_name = json.get("item_name", "Item")
 	
-	# 2. Yerel Fonksiyonla Renk Bulma (FONKSİYON GERİ GELDİ)
+	# 2. Local dominant color detection
 	var color = detect_dominant_color(original_img)
 	
-	# 3. İsim Birleştirme (Blue + Running Shoe = Blue Running Shoe)
+	# 3. Combine color and name (e.g. Blue + Running Shoe = Blue Running Shoe)
 	var final_name = raw_name
 	if color != "" and not raw_name.to_lower().contains(color.to_lower()):
 		final_name = color + " " + raw_name
 	
 	var item_data = {
 		"category": json.get("category", "upper"),
-		"item_name": final_name, # ✅ Düzeltilmiş isim
+		"item_name": final_name,
 		"color": color,
 		"confidence": json.get("confidence", 0.0),
 		"is_favorite": false
@@ -420,10 +417,10 @@ func _on_upload_completed(_r, code, _h, body, item_data):
 	Globals.save_cache()
 	refresh_wardrobe_ui()
 	
-	# ✅ BİLDİRİM GÖSTER (YEŞİL TEMA)
+	# Show success popup
 	show_success_popup(item_data.get("item_name", "New Item"))
 	
-	# ✅ GÖREV TETİKLE
+	# Trigger quest action
 	var qm = get_node_or_null("/root/QuestManager")
 	if qm and qm.has_method("trigger_action"):
 		qm.trigger_action("first_wardrobe")
@@ -477,13 +474,10 @@ func show_success_popup(item_name: String):
 	tween.tween_callback(layer.queue_free)
 
 # ==========================================================
-# 👇 RENK ALGILAMA (TEKRAR EKLENDİ)
-# ==========================================================
-# ==========================================================
-# 👇 RENK ALGILAMA (GÜNCELLENDİ: Sadece Merkeze Odaklı)
+# DOMINANT COLOR DETECTION (CENTER FOCUSED)
 # ==========================================================
 func detect_dominant_color(img: Image) -> String:
-	# İşlem yapmadan önce orijinali bozmamak için kopyasını alalım (Opsiyonel ama güvenli)
+	# Duplicate image to preserve original data
 	var img_clone = img.duplicate()
 	img_clone.convert(Image.FORMAT_RGB8)
 	
@@ -496,21 +490,15 @@ func detect_dominant_color(img: Image) -> String:
 	var w = img_clone.get_width()
 	var h = img_clone.get_height()
 	
-	# 🔥 DEĞİŞİKLİK BURADA:
-	# Eskiden: 0.2 (20%) ile 0.8 (80%) arasıydı.
-	# Yeni: 0.4 (40%) ile 0.6 (60%) arası. Sadece göbeğe bakar.
+	# Sample center 40%-60% horizontally and 35%-65% vertically
 	var start_x = int(w * 0.40) 
 	var end_x = int(w * 0.60)
-	var start_y = int(h * 0.35) # Dikeyde kıyafet uzun olabilir, biraz daha geniş bıraktık
+	var start_y = int(h * 0.35)
 	var end_y = int(h * 0.65)
 
-	# Adım sayısını (step) pixel yoğunluğuna göre dinamik de yapabilirsin ama 4 iyidir.
 	for y in range(start_y, end_y, 4):
 		for x in range(start_x, end_x, 4):
 			var idx = (y * w + x) * 3
-			
-			# Basit bir parlaklık kontrolü ekleyebiliriz (Çok karanlık/aydınlık pikselleri yoksaymak için)
-			# Ama şimdilik senin orijinal mantığını koruyoruz:
 			r_total += data[idx]
 			g_total += data[idx + 1]
 			b_total += data[idx + 2]
@@ -522,20 +510,18 @@ func detect_dominant_color(img: Image) -> String:
 	var g_avg = g_total / pixel_count / 255.0
 	var b_avg = b_total / pixel_count / 255.0
 
-	# Debug için konsola yazdırıp renkleri kontrol edebilirsin
-	# print("R: ", r_avg, " G: ", g_avg, " B: ", b_avg)
-
-	if r_avg > 0.75 and g_avg > 0.75 and b_avg > 0.75: return "White" # Eşik biraz artırıldı
-	if r_avg < 0.25 and g_avg < 0.25 and b_avg < 0.25: return "Black" # Eşik biraz azaltıldı
+	if r_avg > 0.75 and g_avg > 0.75 and b_avg > 0.75: return "White"
+	if r_avg < 0.25 and g_avg < 0.25 and b_avg < 0.25: return "Black"
 	
-	# Renk karşılaştırmaları (Mevcut mantık)
-	if r_avg > g_avg + 0.15 and r_avg > b_avg + 0.15: return "Red" # Toleranslar biraz sıkılaştırıldı
+	# Color thresholds
+	if r_avg > g_avg + 0.15 and r_avg > b_avg + 0.15: return "Red"
 	if g_avg > r_avg + 0.15 and g_avg > b_avg + 0.15: return "Green"
 	if b_avg > r_avg + 0.15 and b_avg > g_avg + 0.15: return "Blue"
 	
 	if r_avg > 0.6 and g_avg > 0.35 and b_avg < 0.3: return "Orange"
-	if r_avg > 0.5 and g_avg > 0.3 and b_avg > 0.4: return "Pink" # Pink ayarı hassastır
+	if r_avg > 0.5 and g_avg > 0.3 and b_avg > 0.4: return "Pink"
 	if r_avg > 0.45 and g_avg > 0.35 and b_avg < 0.3: return "Brown"
 	if r_avg > 0.6 and g_avg > 0.55 and b_avg > 0.45: return "Beige"
 	
 	return "Grey"
+

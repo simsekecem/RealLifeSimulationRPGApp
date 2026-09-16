@@ -1,8 +1,8 @@
 extends Control
 
 
-const SUPABASE_URL = "https://rzsndtstonztfuayodmg.supabase.co"
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6c25kdHN0b256dGZ1YXlvZG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyOTg4OTQsImV4cCI6MjA3NTg3NDg5NH0.UPDS44mZl-YP0UNGqnpPzIedyphNptgnXehax5tUi50"
+const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co"
+const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY"
 
 @onready var email_field = $EmailField
 @onready var password_field = $PasswordField
@@ -15,7 +15,7 @@ var pending_action := ""  # "login" or "signup"
 	#$SignupButton.pressed.connect(_on_signup)
 	#http.request_completed.connect(_on_request_completed)
 
-# 🔹 LOGIN
+# LOGIN
 func _on_login() -> void:
 	pending_action = "login"
 	var url = SUPABASE_URL + "/auth/v1/token?grant_type=password"
@@ -47,9 +47,9 @@ func _on_signup() -> void:
 func _on_request_completed(result: int, code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
 	var data = JSON.parse_string(body.get_string_from_utf8())
 
-	# Eğer kullanıcı onay bekliyorsa:
+	# Check if user needs email confirmation:
 	if data.has("user") and data["user"] == null and not data.has("session"):
-		print("📧 E-posta adresinizi kontrol edin. Onay maili gönderildi.")
+		print("Please check your email. Confirmation link has been sent.")
 		return
 
 	var token: String = ""
@@ -60,7 +60,7 @@ func _on_request_completed(result: int, code: int, headers: PackedStringArray, b
 	if data.has("user") and data["user"] != null and data["user"].has("id"):
 		user_id = data["user"]["id"]
 
-	# Bazı cevaplarda session içinde olur
+	# Session-wrapped response handling
 	if data.has("session"):
 		var session = data["session"]
 		if session.has("access_token"):
@@ -69,7 +69,7 @@ func _on_request_completed(result: int, code: int, headers: PackedStringArray, b
 			user_id = session["user"]["id"]
 
 	if token == "" or user_id == "":
-		print("⚠️ Kullanıcı veya token bilgisi eksik:", data)
+		print("User or token information missing:", data)
 		return
 
 	Globals.auth_token = token
@@ -79,9 +79,7 @@ func _on_request_completed(result: int, code: int, headers: PackedStringArray, b
 	print("User ID:", user_id)
 	print("Token:", token)
 
-	
-
 
 func _on_acc_button_pressed() -> void:
-	#print("Create Account clicked!") # test için
+	# Create Account button clicked
 	get_tree().change_scene_to_file("res://authscreen_signup.tscn")

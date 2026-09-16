@@ -7,52 +7,50 @@ extends Control
 func _ready():
 	close_button.pressed.connect(hide_missions_window)
 	
-	# Sinyali bağla (Görev tamamlandığında veya yenilendiğinde tetiklenir)
+	# Connect signal (triggered when quests complete or update)
 	if Globals.has_signal("data_updated"):
 		Globals.data_updated.connect(refresh_mission_list)
 	
-	# 👇 KRİTİK: QuestManager'ın statik görevleri Globals'a yazması için 
-	# çok kısa bir süre (0.1sn) bekliyoruz.
+	# Allow QuestManager a short moment to populate static quests
 	await get_tree().create_timer(0.1).timeout
 	refresh_mission_list()
 
 func refresh_mission_list():
 	var all_quests = Globals.cache.get("quests", [])
 	
-	# --- SIRALAMA MANTIĞI ---
+	# --- SORTING LOGIC ---
 	var daily_quests = []
 	var other_quests = []
 	
-	# Görevleri türüne göre iki ayrı listeye ayırıyoruz
+	# Split quests by type
 	for q in all_quests:
 		if q.get("type") == "daily":
 			daily_quests.append(q)
 		else:
 			other_quests.append(q)
 	
-	# Önce Daily olanları, sonra diğerlerini birleştirip gönderiyoruz
+	# Daily quests first, followed by story quests
 	var sorted_quests = daily_quests + other_quests
 	
-	print("🔍 Görev Listeleniyor: ", sorted_quests.size(), " adet. (Daily öncelikli)")
+	print("🔍 Listing quests: ", sorted_quests.size(), " total (Daily prioritized)")
 	load_missions(sorted_quests)
 
 func load_missions(missions: Array):
-	# Eski listeyi temizle
+	# Clear old list
 	for child in missions_list.get_children():
 		child.queue_free()
 
 	for quest in missions:
 		var row = mission_row_scene.instantiate()
 		
-		# --- DÜĞÜM YOLLARI ---
+		# --- NODE PATHS ---
 		var name_label = row.get_node("MissionList/MissionName")
 		var detail_label = row.get_node("MissionList/MissionDetail")
 		var xp_label = row.get_node("MissionList/HBoxContainer/XP")
 		
-		# "Completed" düğümü (CheckBox olduğunu varsayıyoruz)
 		var tick_icon = row.get_node_or_null("Completed") 
 		
-		# Verileri ata
+		# Populate data
 		name_label.text = quest.get("description", "Mission")
 		xp_label.text = str(quest.get("xp_reward", 0)) + " XP"
 		
@@ -61,25 +59,17 @@ func load_missions(missions: Array):
 		
 		var is_done = quest.get("is_completed", false)
 
-		# --- TİK İKONU AYARLARI ---
+		# --- CHECKBOX ICON SETTINGS ---
 		if tick_icon:
-			# 1. Her zaman görünür olsun
 			tick_icon.visible = true
-			
-			# 2. Eğer görev bittiyse tikli olsun, bitmediyse boş olsun
-			# (Eğer tick_icon bir CheckBox ise 'button_pressed' özelliğini kullanırız)
 			if "button_pressed" in tick_icon:
 				tick_icon.button_pressed = is_done
-				
-				# Kullanıcı elle tıklayıp değiştirmesin diye sadece görüntü yapalım:
 				tick_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		
-		# --- RENK AYARI ---
+		# --- COLOR STYLING ---
 		if is_done:
-			# Tamamlananların yazısı yeşil olsun
 			name_label.add_theme_color_override("font_color", Color.GREEN)
 		else:
-			# Tamamlanmayanlar normal (beyaz) kalsın
 			name_label.add_theme_color_override("font_color", Color.BLACK)
 		
 		missions_list.add_child(row)

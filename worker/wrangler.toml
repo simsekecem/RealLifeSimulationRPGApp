@@ -24,11 +24,11 @@ invocation_logs = true
 
 [triggers]
 crons = [
-  "10 2 * * *",   # TR 08:00 (Güne başla)
-  "0 9 * * *",   # TR 12:00 (Öğle arası kontrolü)
-  "0 13 * * *",  # TR 16:00 (İkindi darlaması)
-  "0 20 * * *",  # TR 20:00 (Akşam raporu)
-  "10 21 * * *"   # TR 00:00 (Günü bitirirken son çağrı)
+  "10 2 * * *",   # 08:00 UTC+3 (Morning routine)
+  "0 9 * * *",   # 12:00 UTC+3 (Lunch check-in)
+  "0 13 * * *",  # 16:00 UTC+3 (Afternoon reminder)
+  "0 20 * * *",  # 20:00 UTC+3 (Evening summary)
+  "10 21 * * *"   # 00:00 UTC+3 (End of day review)
 ]
 
 [ai]

@@ -5,7 +5,7 @@ export default {
         const path = url.pathname;
         const method = request.method;
 
-        // Mobil APK + itch.io + browser hepsinde çalışsın diye wildcard yerine dinamik origin
+        // Dynamic origin instead of wildcard to support APK, itch.io, and browser environments
         const origin = request.headers.get("Origin") || "*";
 
         const addCors = (response) => {
@@ -24,10 +24,10 @@ export default {
         // =====================================================
         // PUBLIC ENDPOINTS
         // =====================================================
-// ---------- GÜNLÜK GÖREV ÜRET (GEMINI AI - GÜNCELLENDİ) ----------
+// ---------- DAILY QUEST GENERATOR (GEMINI AI) ----------
 if (path === "/api/daily_quests" && method === "POST") {
     try {
-        // ── API KEY ROTASYONU ───────────────────────────────────────
+        // ── API KEY ROTATION ─────────────────────────────────────────
         const apiKeys = [
             env.GEMINI_API_KEY,
             env.GEMINI_KEY_1,
@@ -36,21 +36,17 @@ if (path === "/api/daily_quests" && method === "POST") {
             env.GEMINI_KEY_4,
             env.GEMINI_KEY_5,
             env.GEMINI_KEY_6
-        ].filter(key => key && key.trim() !== ""); // boş/undefined olanları temizle
+        ].filter(key => key && key.trim() !== ""); // filter out empty/undefined keys
 
         if (apiKeys.length === 0) {
-            throw new Error("Hiç geçerli Gemini API key bulunamadı!");
+            throw new Error("No valid Gemini API key found!");
         }
 
-        // Her istekte bir sonraki key'i kullan (döngüsel)
-        // Cloudflare Workers KV veya global değişken ile kalıcı yapmak istersen aşağıda alternatif var
-        const keyIndex = Date.now() % apiKeys.length; // basit zaman tabanlı round-robin
+        // Round-robin key selection per request
+        const keyIndex = Date.now() % apiKeys.length;
         const selectedKey = apiKeys[keyIndex];
 
-        // İstersen loglamak için (debug amaçlı)
-        // console.log(`Kullanılan key index: ${keyIndex} → ${selectedKey.slice(0,8)}...`);
-
-        // ── PROMPT (değişmedi) ──────────────────────────────────────
+        // ── PROMPT ───────────────────────────────────────────────────
         const prompt = `
             You are a quest generator for a Life Simulation Game. 
             Generate exactly 4 daily quests (one for each category: Gym, Library, Market, Restaurant).
@@ -104,9 +100,8 @@ if (path === "/api/daily_quests" && method === "POST") {
             })
         });
 
-        // ── Gerisi tamamen aynı kalıyor ─────────────────────────────
         if (!response.ok) {
-            throw new Error(`Gemini API hatası: ${response.status} - ${await response.text().catch(() => "no details")}`);
+            throw new Error(`Gemini API error: ${response.status} - ${await response.text().catch(() => "no details")}`);
         }
 
         const data = await response.json();
@@ -118,7 +113,7 @@ if (path === "/api/daily_quests" && method === "POST") {
         try {
             quests = JSON.parse(generatedText);
         } catch (e) {
-            console.error("JSON parse hatası, fallback kullanılıyor", e);
+            console.error("JSON parse error, using fallback", e);
             quests = [
                 {"category": "gym", "text": "Run for 15 mins", "target": "gym_action"},
                 {"category": "market", "text": "Add Milk to Groceries list", "target": "market_add"},
@@ -142,12 +137,11 @@ if (path === "/api/daily_quests" && method === "POST") {
         }));
 
     } catch (err) {
-        console.error("Daily quests endpoint hatası:", err);
+        console.error("Daily quests endpoint error:", err);
         
-        // 429 (rate limit) gelirse daha anlaşılır mesaj da dönebilirsin
         const status = err.message.includes("429") ? 429 : 500;
         const message = err.message.includes("429") 
-            ? "Rate limit aşıldı, lütfen biraz bekleyin" 
+            ? "Rate limit exceeded, please try again later" 
             : err.message;
 
         return addCors(new Response(JSON.stringify({ error: message }), { 
@@ -156,12 +150,12 @@ if (path === "/api/daily_quests" && method === "POST") {
         }));
     }
 }
-    // ---------- SIGNUP (KAYIT OL - DÜZELTİLMİŞ) ----------
+    // ---------- SIGNUP ----------
 if (path === "/api/signup" && method === "POST") {
     try {
         const body = await request.json();
         
-        // 1. Supabase Auth Signup API çağrısı (Kullanıcı oluştur)
+        // 1. Supabase Auth Signup API call (create user)
         const res = await fetch(`${env.SUPABASE_URL}/auth/v1/signup`, {
             method: "POST",
             headers: {
@@ -176,7 +170,7 @@ if (path === "/api/signup" && method === "POST") {
 
         const data = await res.json();
 
-        // Hata durumları
+        // Error handling
         if (!res.ok) {
             let errorCode = "signup_failed";
             if (data.msg && data.msg.includes("valid email")) errorCode = "email_address_invalid";
@@ -188,30 +182,28 @@ if (path === "/api/signup" && method === "POST") {
             }), { status: res.status }));
         }
 
-        // 🟢 EKSİK OLAN PARÇA BURASIYDI! 🟢
-        // Auth başarılı olduysa, hemen veritabanına "Rookie" profili açalım.
-        // Supabase bazen data.id, bazen data.user.id döndürür, ikisini de kontrol edelim.
+        // Initialize D1 database user profile upon successful auth signup
         const newUserId = data.id || (data.user ? data.user.id : null);
 
         if (newUserId) {
             try {
-                // D1 Veritabanına varsayılan satırı ekle
+                // Insert default user row into D1
                 await env.DB.prepare(
                     `INSERT INTO users (user_id, name, birthdate, level, experience, character_id) 
                      VALUES (?, ?, ?, ?, ?, ?)`
                 ).bind(
                     newUserId,      // User ID
-                    "Rookie",       // Varsayılan İsim
-                    "2000-01-01",   // Varsayılan Tarih
+                    "Rookie",       // Default Name
+                    "2000-01-01",   // Default Birthdate
                     1,              // Level 1
                     0,              // XP 0
                     1               // Character 1
                 ).run();
                 
-                console.log(`✅ Yeni kullanıcı için DB profili oluşturuldu: ${newUserId}`);
+                console.log(`✅ DB profile created for user: ${newUserId}`);
             } catch (dbErr) {
-                // Eğer burası hata verirse (örneğin kullanıcı zaten varsa), sessizce logla ama süreci bozma.
-                console.error("DB Profil oluşturma hatası (Signup):", dbErr);
+                // Log silently if profile already exists
+                console.error("DB profile creation error (Signup):", dbErr);
             }
         }
 
@@ -271,10 +263,9 @@ if (path === "/api/signup" && method === "POST") {
         }
 
         // ---------- AI CHAT (GYM COACH) ----------
-       // ---------- AI CHAT (GYM COACH) ----------
         if (path === "/api/ai_chat" && method === "POST") {
     try {
-        // ── API KEY ROTASYONU ───────────────────────────────────────────
+        // ── API KEY ROTATION ───────────────────────────────────────────
         const apiKeys = [
             env.GEMINI_API_KEY,
             env.GEMINI_KEY_1,
@@ -286,19 +277,17 @@ if (path === "/api/signup" && method === "POST") {
         ].filter(key => key && typeof key === "string" && key.trim() !== "");
 
         if (apiKeys.length === 0) {
-            throw new Error("Hiç geçerli Gemini API anahtarı yok");
+            throw new Error("No valid Gemini API key found");
         }
 
-        // Basit round-robin (her istekte bir sonraki key)
+        // Simple round-robin key rotation
         const keyIndex = Date.now() % apiKeys.length;
         const selectedKey = apiKeys[keyIndex];
-        // İstersen console.log(`AI Chat - Key index: ${keyIndex}`); ekleyebilirsin
 
-        // ── Aşağıdaki kısım tamamen orijinal halinle aynı ────────────────
         const body = await request.json();
         const userMessage = body.message;
-        const userContext = body.context || "Veri yok.";
-        const userName = body.user_name || "Sporcu";
+        const userContext = body.context || "No data.";
+        const userName = body.user_name || "Athlete";
 
         const systemPrompt = `
             You are a personal trainer, a professional, friendly, and data-driven personal trainer.
@@ -350,10 +339,10 @@ if (path === "/api/signup" && method === "POST") {
         return addCors(new Response(JSON.stringify({ reply: "SERVER ERROR: " + err.message }), { status: 200 }));
     }
 }
-                // ---------- AI CHAT (DIETITIAN - GYM STYLE) ----------
+        // ---------- AI CHAT (DIETITIAN) ----------
         if (path === "/api/ai_diet" && method === "POST") {
     try {
-        // ── API KEY ROTASYONU ───────────────────────────────────────────
+        // ── API KEY ROTATION ───────────────────────────────────────────
         const apiKeys = [
             env.GEMINI_API_KEY,
             env.GEMINI_KEY_1,
@@ -365,19 +354,17 @@ if (path === "/api/signup" && method === "POST") {
         ].filter(key => key && typeof key === "string" && key.trim() !== "");
 
         if (apiKeys.length === 0) {
-            throw new Error("Hiç geçerli Gemini API anahtarı yok");
+            throw new Error("No valid Gemini API key found");
         }
 
-        // Basit round-robin (her istekte bir sonraki key)
+        // Simple round-robin key rotation
         const keyIndex = Date.now() % apiKeys.length;
         const selectedKey = apiKeys[keyIndex];
-        // İstersen: console.log(`AI Diet - Key index: ${keyIndex}`);
 
-        // ── Aşağıdaki kısım tamamen orijinal halinle aynı ────────────────
         const body = await request.json();
-        const userMessage = body.message; // Kullanıcının sorusu
-        const userContext = body.context; // Godot'tan gelen Globals.cache listesi
-        const userName = body.user_name || "Gurme";
+        const userMessage = body.message; // User prompt
+        const userContext = body.context; // Meal cache list from client
+        const userName = body.user_name || "Gourmet";
 
         const systemPrompt = `
             You are a professional nutritionist in a life simulation game.
@@ -417,10 +404,10 @@ if (path === "/api/signup" && method === "POST") {
         return addCors(new Response(JSON.stringify({ reply: "Error: " + err.message }), { status: 200 }));
     }
 }
-                // ---------- AI CHAT (LIBRARIAN & STUDY COACH) ----------
+        // ---------- AI CHAT (LIBRARIAN & STUDY COACH) ----------
         if (path === "/api/ai_library" && method === "POST") {
     try {
-        // ── API KEY ROTASYONU ───────────────────────────────────────────
+        // ── API KEY ROTATION ───────────────────────────────────────────
         const apiKeys = [
             env.GEMINI_API_KEY,
             env.GEMINI_KEY_1,
@@ -433,20 +420,18 @@ if (path === "/api/signup" && method === "POST") {
         ].filter(key => key && typeof key === "string" && key.trim() !== "");
 
         if (apiKeys.length === 0) {
-            throw new Error("Hiç geçerli Gemini API anahtarı yok");
+            throw new Error("No valid Gemini API key found");
         }
 
-        // Basit round-robin (her istekte bir sonraki key)
+        // Simple round-robin key rotation
         const keyIndex = Date.now() % apiKeys.length;
         const selectedKey = apiKeys[keyIndex];
-        // İstersen: console.log(`AI Library - Key index: ${keyIndex}`);
 
-        // ── Aşağıdaki kısım tamamen orijinal halinle aynı ────────────────
         const body = await request.json();
         const userMessage = body.message;
-        const libraryContext = body.context; // Kitap listesi (Still Reading, Completed vb.)
-        const studySchedule = body.study_schedule; // Yeni: Haftalık ders saatleri verisi
-        const userName = body.user_name || "Kitap Kurdu";
+        const libraryContext = body.context; // Book list (Reading, Completed, etc.)
+        const studySchedule = body.study_schedule; // Weekly study hours schedule
+        const userName = body.user_name || "Bookworm";
 
         const systemPrompt = `
             You are a wise Librarian and an expert Study Coach in a life simulation game.
@@ -496,7 +481,7 @@ if (path === "/api/signup" && method === "POST") {
         // ---------- AI OUTFIT GENERATOR (GEMINI) ----------
         if (path === "/api/generate_outfit" && method === "POST") {
     try {
-        // ── API KEY ROTASYONU ───────────────────────────────────────────
+        // ── API KEY ROTATION ───────────────────────────────────────────
         const apiKeys = [
             env.GEMINI_API_KEY,
             env.GEMINI_KEY_1,
@@ -508,24 +493,22 @@ if (path === "/api/signup" && method === "POST") {
         ].filter(key => key && typeof key === "string" && key.trim() !== "");
 
         if (apiKeys.length === 0) {
-            throw new Error("Hiç geçerli Gemini API anahtarı yok");
+            throw new Error("No valid Gemini API key found");
         }
 
-        // Basit round-robin (her istekte bir sonraki key)
+        // Simple round-robin key rotation
         const keyIndex = Date.now() % apiKeys.length;
         const selectedKey = apiKeys[keyIndex];
-        // İstersen: console.log(`Generate Outfit - Key index: ${keyIndex}`);
 
-        // ── Aşağıdaki kısım tamamen orijinal halinle aynı ────────────────
         const body = await request.json();
         const wardrobe = body.wardrobe || [];
-        const context = body.context || "daily casual"; // Kullanıcıdan "Düğün", "Spor" vb. de alabiliriz ilerde
+        const context = body.context || "daily casual";
 
         if (wardrobe.length < 2) {
             return addCors(new Response(JSON.stringify({ error: "Not enough items" }), { status: 400 }));
         }
 
-        // Gemini için sadeleştirilmiş liste (Sadece isim, renk ve ID gönderiyoruz, resim URL'ine gerek yok)
+        // Simplified list for Gemini (name, category, color, and ID)
         const simplifiedList = wardrobe.map(item => ({
             id: item.id,
             name: item.item_name,
@@ -565,7 +548,7 @@ if (path === "/api/signup" && method === "POST") {
         const data = await response.json();
         let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
         
-        // Gemini bazen ```json ... ``` içinde döndürür, temizleyelim
+        // Clean markdown json fences if present
         rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
         
         const result = JSON.parse(rawText);
@@ -642,35 +625,35 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 		// 🚫 NON-CLOTHING BLACKLIST
 		// --------------------------------------------------
 		const nonClothingKeywords = [
-			// İnsan / canlı
+			// Humans / animals
 			"person", "man", "woman", "child", "baby",
 			"dog", "cat", "animal",
 
-			// Yiyecek
+			// Food
 			"food", "pizza", "burger", "sandwich",
 			"fruit", "apple", "banana",
 			"drink", "coffee", "tea", "beer",
 
-			// Ev / eşya
+			// Household / furniture
 			"chair", "sofa", "table", "desk",
 			"bed", "pillow", "blanket", "lamp",
 			"mirror", "clock", "vase", "curtain",
 
-			// Araç
+			// Vehicles
 			"car", "bus", "truck", "motorcycle",
 			"bicycle", "train", "airplane",
 
-			// Elektronik
+			// Electronics
 			"phone", "smartphone", "laptop",
 			"computer", "keyboard", "mouse",
 			"monitor", "tv", "camera",
 
-			// Mekan / doğa
+			// Places / nature
 			"building", "house", "room",
 			"tree", "forest", "mountain",
 			"beach", "river", "sea", "sky",
 
-			// Aksesuar (bilinçli çıkarıldı)
+			// Accessories (intentionally excluded)
 			"bag", "backpack", "handbag",
 			"watch", "glasses", "sunglasses"
 		];
@@ -694,7 +677,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 		// --------------------------------------------------
 		let category = "upper";
 
-		// 🧥 OUTER (suit çakışmaları fix)
+		// 🧥 OUTER (fix suit collisions)
 		if (
 			label.includes("jacket") &&
 			!label.includes("dinner jacket") &&
@@ -840,17 +823,16 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 
                 if (!imageUrl) return addCors(new Response(JSON.stringify({ error: "No image URL" }), { status: 400 }));
 
-                // 1. D1'den Sil (GÜVENLİK GÜNCELLEMESİ: Sadece user_id eşleşirse sil!)
+                // 1. Delete from D1 (Security check: only delete matching user_id)
                 const result = await env.DB.prepare("DELETE FROM wardrobe WHERE user_id=? AND image_url=?")
                     .bind(userId, imageUrl).run();
 
-                // Eğer veritabanından bir şey silinmediyse, demek ki o resim bu kullanıcının değil!
+                // If no record was deleted, image does not belong to this user
                 if (result.meta.changes === 0) {
-                     // Supabase'e gitmeye gerek yok, çünkü yetkisi yok.
                      return addCors(new Response(JSON.stringify({ success: true, note: "Item not found or not yours" }), { status: 200 }));
                 }
 
-                // 2. Supabase'den Sil
+                // 2. Delete from Supabase Storage
                 const fileName = imageUrl.split("/wardrobe/").pop(); 
                 if (fileName) {
                     await fetch(`${env.SUPABASE_URL}/storage/v1/object/wardrobe/${fileName}`, {
@@ -903,7 +885,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 quests: await env.DB.prepare(`SELECT id, type, description, target_action, xp_reward, is_completed FROM quests WHERE user_id=?`).bind(userId).all()
             };
 
-            // Boolean dönüşümü (Godot için 1 -> true)
+            // Boolean conversion for client (1 -> true)
             if (result.quests && result.quests.results) {
                 result.quests = result.quests.results.map(q => ({ ...q, is_completed: q.is_completed === 1 }));
             }
@@ -928,9 +910,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 
                 const safeList = (data) => Array.isArray(data) ? data : [];
 
-                // 1. USER
-                // 1. USER (Level, XP ve Karakter ID Eklendi)
-                // 1. USER (İsim Varsayılanı DB Tarafından Kontrol Ediliyor)
+                // 1. USER (Name, Level, XP, Character ID, FCM Token)
                 const userBox = body.user || {}; 
                 const rawName = userBox.name || "";
                 const userName = (!rawName || rawName.trim() === "") ? "Rookie" : rawName;
@@ -942,34 +922,23 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     ? userBox.fcm_token
                     : undefined;
 
-                // 👇 YENİ: İsim boşsa DB'ye "Çaylak" olarak yazılmasını garantile
-                const finalUserName = userName === "" ? "Rookie" : userName;
-
                 await insertOrUpdate(
                     `INSERT INTO users (user_id, name, birthdate, level, experience, character_id, fcm_token) VALUES (?, ?, ?, ?, ?, ?, ?)`,
                     [userId, userName, userBirth, userLevel, userExp, charId, fcmToken],
-                    // UPDATE: fcm_token sütununu güncelliyoruz
                     `UPDATE users SET name=?, birthdate=?, level=?, experience=?, character_id=?, fcm_token = COALESCE(NULLIF(?, ''), fcm_token) WHERE user_id=?`,
                     [userName, userBirth, userLevel, userExp, charId, fcmToken ?? null, userId]
                 );
 
-                // 2. PREFERENCES (KALDIRILDI)
-                // Artık sunucuya kaydedilmiyor.
-
-                // 3. LIBRARY
-                // 3. LIBRARY (ID TABANLI GÜVENLİ SENKRONİZASYON)
-                // 3. LIBRARY (ID TABANLI GÜVENLİ SENKRONİZASYON)
+                // 2. LIBRARY (ID-based safe synchronization)
                 if (body.library !== undefined) {
                     const library = safeList(body.library);
 
-                    // A) SİLİNENLERİ TEMİZLE
-                    // Gelen listedeki ID'leri topla (sadece eski kayıtlar)
+                    // A) Remove deleted records
                     const validIds = library
                         .filter(b => b.id !== undefined && b.id !== null && b.id !== 0)
                         .map(b => b.id);
 
                     if (validIds.length > 0) {
-                        // Client listesinde olmayan ID'leri veritabanından sil
                         const placeholders = validIds.map(() => '?').join(',');
                         await env.DB.prepare(`
                             DELETE FROM library_books 
@@ -977,23 +946,20 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                             AND id NOT IN (${placeholders})
                         `).bind(userId, ...validIds).run();
                     } else {
-                        // Güvenlik: Liste boşsa hepsini sil
                         await env.DB.prepare(`DELETE FROM library_books WHERE user_id=?`).bind(userId).run();
                     }
 
-                    // B) EKLE veya GÜNCELLE
+                    // B) Add or update items
                     for (const b of library) {
                         if (!b.title || b.title.trim() === "") continue;
 
                         if (b.id) {
-                            // ID VARSA -> GÜNCELLE
                             await env.DB.prepare(`
                                 UPDATE library_books 
                                 SET title = ?, status = ? 
                                 WHERE id = ? AND user_id = ?
                             `).bind(b.title, b.status, b.id, userId).run();
                         } else {
-                            // ID YOKSA -> YENİ EKLE
                             await env.DB.prepare(`
                                 INSERT INTO library_books (user_id, title, status) 
                                 VALUES (?, ?, ?)
@@ -1013,34 +979,21 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     );
                 }
 
-                // 5. GYM LOG
-                // 5. GYM LOG (GÜNCELLENDİ: CRASH-PROOF & ID DESTEKLİ)
-                // =====================================================
-                // 5. GYM LOG (TAM EŞLEŞME KONTROLLÜ & COMPLETED HARİÇ)
-                        // =====================================================
+                // 3. GYM LOG
                 const gym_log = safeList(body.gym_log);
 
                 for (const g of gym_log) {
-                    
-                    // ---------------------------------------------------------
-                    // 1. ADIM: SİLME KONTROLÜ
-                    // ---------------------------------------------------------
-                    // Eğer ID varsa ama isim silindiyse veya boşsa, veritabanından yok et.
+                    // 1. DELETE: If ID exists but exercise_name is empty, delete from DB
                     if (g.id && (!g.exercise_name || g.exercise_name.trim() === "")) {
                         await env.DB.prepare(`DELETE FROM gym_log WHERE id=? AND user_id=?`)
                             .bind(g.id, userId).run();
                         continue;
                     }
 
-                    // İsimsiz yeni kayıtların eklenmesini engelle
+                    // Skip empty new records
                     if (!g.exercise_name || g.exercise_name.trim() === "") continue;
 
-                    // ---------------------------------------------------------
-                    // 2. ADIM: UPSERT (EKLE VEYA GÜNCELLE)
-                    // ---------------------------------------------------------
-                    // NOT: Bu sorgunun çalışması için D1 konsolunda şu indeksi oluşturmuş olmalısın:
-                    // CREATE UNIQUE INDEX idx_gym_workout_details ON gym_log(user_id, date, exercise_name, sets, reps, weight, duration, rest, region);
-                    
+                    // 2. UPSERT (INSERT OR UPDATE)
                     try {
                         await env.DB.prepare(`
                         INSERT INTO gym_log (
@@ -1065,35 +1018,23 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 
                     } catch (e) {
                         console.error("Gym Log Sync Error:", e.message);
-                        // Tekil bir hata tüm döngüyü bozmasın diye burada loglayıp devam ediyoruz.
                     }
                 }
 
-                // 6. MARKET ITEMS
+                // 4. MARKET ITEMS
                 const market_items = safeList(body.market_items);
                 for (const m of market_items) {
-                    
-                    // ---------------------------------------------------------
-                    // 1. ADIM: İSİM KONTROLÜ (BOŞSA YOK ET!)
-                    // ---------------------------------------------------------
-                    // Eğer isim yoksa veya boşluksa...
+                    // 1. Check item name (delete if empty and has existing ID)
                     if (!m.item_name || m.item_name.trim() === "") {
-                        // ...ve bu eski bir kayıtsa (ID'si varsa)
                         if (m.id) {
-                            // Veritabanından silip atıyoruz.
                             await env.DB.prepare(`DELETE FROM market_items WHERE id=? AND user_id=?`)
                                 .bind(m.id, userId).run();
                         }
-                        // İster yeni olsun ister eski, işlem burada biter.
-                        // Aşağıdaki koda inip "boş isimle kaydetmeye" çalışmasına izin vermiyoruz!
                         continue; 
                     }
 
-                    // ---------------------------------------------------------
-                    // 2. ADIM: DOLU İSİMLERİ KAYDET
-                    // ---------------------------------------------------------
-                    
-                    // A) GÜNCELLEME (ID VARSA)
+                    // 2. Save valid items
+                    // A) UPDATE (if ID exists)
                     if (m.id) {
                         try {
                             await env.DB.prepare(`
@@ -1102,13 +1043,10 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                                 WHERE id=? AND user_id=?
                             `).bind(m.category, m.item_name, m.planned, m.bought, m.date, m.id, userId).run();
                         } catch (e) {
-                            // Eğer isim değiştirdin ve o isimde başka ürün varsa (Çakışma),
-                            // Eskisini sil ki çakışma olmasın.
                             await env.DB.prepare(`DELETE FROM market_items WHERE id=?`).bind(m.id).run();
                         }
                     } 
-                    
-                    // B) EKLEME (ID YOKSA)
+                    // B) INSERT (if no ID)
                     else {
                         try {
                             await env.DB.prepare(`
@@ -1116,7 +1054,6 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                                 VALUES (?, ?, ?, ?, ?, ?)
                             `).bind(userId, m.category, m.item_name, m.planned, m.bought, m.date).run();
                         } catch (e) {
-                            // Zaten varsa özelliklerini güncelle
                             await env.DB.prepare(`
                                 UPDATE market_items 
                                 SET planned=?, bought=?, date=? 
@@ -1126,10 +1063,9 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     }
                 }
 
-                // 7. RESTAURANT LOG
+                // 5. RESTAURANT LOG
                 const restaurant = safeList(body.restaurant);
                 for (const r of restaurant) {
-                    // Eğer r.notes veya r.breakfast gelmezse (null/undefined ise) || "" sayesinde hata almaz, boş kaydeder.
                     const params = [
                         userId, 
                         r.date, 
@@ -1158,25 +1094,23 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     );
                 }
 
-                // 8. CALENDAR NOTES
-                // 8. CALENDAR NOTES (GÜNCELLENDİ: Boş Notları Korur & Çift Kaydı Önler)
+                // 6. CALENDAR NOTES
                 const calendar_notes = safeList(body.calendar_notes);
                 for (const c of calendar_notes) {
-                    // Not içeriği undefined ise boş string yap ama null yapma
                     const noteContent = (c.note === undefined || c.note === null) ? "" : c.note;
 
-                    // 1. Önce var olan tarihi güncellemeyi dene
+                    // 1. Try updating existing date note
                     const updateRes = await env.DB.prepare(`UPDATE calendar_notes SET note=? WHERE user_id=? AND date=?`)
                         .bind(noteContent, userId, c.date).run();
                     
-                    // 2. Eğer güncellenecek satır yoksa (yani o tarih ilk kez geliyorsa) yeni ekle
+                    // 2. Insert new record if date does not exist yet
                     if (updateRes.meta.changes === 0) {
                          await env.DB.prepare(`INSERT INTO calendar_notes (user_id, date, note) VALUES (?, ?, ?)`)
                             .bind(userId, c.date, noteContent).run();
                     }
                 }
 
-                // Worker içindeki save_all kısmında quests döngüsünü bul ve burayı şu şekilde değiştir:
+                // 7. QUESTS
                 const quests = safeList(body.quests);
                 for (const q of quests) {
                     if (!q.id) continue;
@@ -1188,11 +1122,11 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                             ON CONFLICT(user_id, id) 
                             DO UPDATE SET 
                                 is_completed = excluded.is_completed,
-                                type = excluded.type -- Tipi de güncelle ki 'daily' ise 'daily' kalsın
+                                type = excluded.type
                         `).bind(
                             userId,
                             q.id,
-                            q.type, // Varsayılan "static" atamasını kaldırdık, neyse o gitsin
+                            q.type,
                             q.description || "",
                             q.target_action || "",
                             q.xp_reward || 0,
@@ -1203,6 +1137,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     }
                 }
 
+                // 8. WARDROBE
                 const wardrobe = safeList(body.wardrobe);
                 for (const w of wardrobe) {
                     if (w.id && (!w.image_url || w.image_url === "")) {
@@ -1212,7 +1147,6 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     if (!w.image_url || w.image_url === "") continue;
 
                     try {
-                        // CONFIDENCE EKLENDİ 🚀
                         await env.DB.prepare(`
                             INSERT INTO wardrobe (user_id, category, item_name, color, image_url, is_favorite, confidence) 
                             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -1225,7 +1159,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                             w.color || "Unknown", 
                             w.image_url, 
                             w.is_favorite ? 1 : 0,
-                            w.confidence || 0 // Confidence değeri burada bağlanıyor
+                            w.confidence || 0
                         ).run();
                     } catch (e) {
                         console.error("Wardrobe Save Error:", e.message);
@@ -1238,25 +1172,22 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 return addCors(new Response(JSON.stringify({ error: err.message, stack: err.stack }), { status: 500 }));
             }
         }
-        // ---------- HUGGING FACE (KORUMALI VERSİYON) ----------
+        // ---------- HUGGING FACE (PROTECTED ENDPOINT) ----------
     
 
             // Not found
             return addCors(new Response(JSON.stringify({ error: "Not Found" }), { status: 404 }));
         },
 
-// Worker kodunun en altındaki scheduled fonksiyonunu bununla değiştir:
-
     async scheduled(event, env, ctx) {
         const today = new Date().toISOString().split('T')[0];
         console.log(`🕒 Global Notification Sync Started: ${today}`);
 
         // =================================================================
-        // 👇 1. SUPABASE PING (Anti-Pause) - EKLENEN KISIM
+        // 1. SUPABASE PING (Anti-Pause / Keepalive)
         // =================================================================
         try {
-            // Supabase Auth servisine basit bir sağlık kontrolü atıyoruz.
-            // Bu istek veritabanını "aktif" gösterir ve uyku moduna girmesini engeller.
+            // Health check to Supabase Auth to keep database active and prevent sleep mode
             const sbPing = await fetch(`${env.SUPABASE_URL}/auth/v1/health`, {
                 method: "GET",
                 headers: {
@@ -1265,19 +1196,18 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
             });
             console.log(`💓 Supabase Ping Status: ${sbPing.status}`);
         } catch (e) {
-            // Ping atamazsa bile akış bozulmasın, sadece logla.
             console.error("Supabase Ping Error:", e.message);
         }
 
         // =================================================================
-        // 👇 2. FIREBASE BİLDİRİM SİSTEMİ (Mevcut Kodun)
+        // 2. FIREBASE PUSH NOTIFICATIONS
         // =================================================================
         try {
-            // A. Auth Hazırlığı
+            // A. Authentication
             const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
             const accessToken = await getGoogleAccessToken(serviceAccount);
 
-            // B. FCM Token'ı olan kullanıcıları çek
+            // B. Fetch users with FCM tokens
             const { results: users } = await env.DB.prepare(
                 "SELECT user_id, fcm_token, name FROM users WHERE fcm_token IS NOT NULL AND fcm_token != ''"
             ).all();
@@ -1285,7 +1215,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
             for (const user of users) {
                 let summaryParts = [];
 
-                // --- VERİ KONTROLLERİ (BOŞ SATIR FİLTRELİ) ---
+                // --- DATA CHECKS (FILTER EMPTY ENTRIES) ---
                 
                 // Gym
                 const gym = await env.DB.prepare(`
@@ -1346,21 +1276,21 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 
                 if (meal) summaryParts.push(`🍽️ Meal plan is ready.`);
 
-                // --- BİLDİRİM METNİ ---
+                // --- NOTIFICATION TEXT ---
                 let title = "";
                 let body = "";
 
                 if (summaryParts.length > 0) {
-                    // DURUM 1: Yapılacak işler var
+                    // Case 1: Pending tasks
                     title = `Don't stop now, ${user.name || 'Champ'}! 🚀`;
                     body = "Unfinished goals for today:\n" + summaryParts.join("\n") + "\n\nLog in now to complete them!";
                 } else {
-                    // DURUM 2: Her şey bitti veya plan yok
+                    // Case 2: All done or no plans
                     title = `Your life is waiting! ✨`;
                     body = `Hey ${user.name || 'Rookie'}, your character needs you. Log in now to plan your next move!`;
                 }
 
-                // C. Gönderim
+                // C. Dispatch
                 const fcmUrl = `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`;
                 
                 const payload = {
@@ -1393,7 +1323,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 };
 
 async function getGoogleAccessToken(serviceAccount) {
-  // 1. JWT Header ve Payload hazırla
+  // 1. Prepare JWT Header and Payload
   const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + 3600;
@@ -1408,7 +1338,7 @@ async function getGoogleAccessToken(serviceAccount) {
 
   const unsignedToken = `${header}.${payload}`;
 
-  // 2. Özel anahtarı (Private Key) temizle ve import et
+  // 2. Clean and import private key
   const pemHeader = "-----BEGIN PRIVATE KEY-----";
   const pemFooter = "-----END PRIVATE KEY-----";
   const pemContents = serviceAccount.private_key
@@ -1427,7 +1357,7 @@ async function getGoogleAccessToken(serviceAccount) {
     ["sign"]
   );
 
-  // 3. Token'ı imzala
+  // 3. Sign token
   const signature = await crypto.subtle.sign(
     "RSASSA-PKCS1-v1_5",
     cryptoKey,
@@ -1436,7 +1366,7 @@ async function getGoogleAccessToken(serviceAccount) {
 
   const signedToken = `${unsignedToken}.${btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")}`;
 
-  // 4. Google'dan gerçek Access Token'ı iste
+  // 4. Request Access Token from Google OAuth2
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },

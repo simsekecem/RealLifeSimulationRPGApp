@@ -2,45 +2,45 @@ extends Control
 
 @onready var windows = $Windows
 
-# Sol Üst Köşe Referansları
+# Top-Left References
 @onready var top_left_frame = $TopLeftButtons/Frame
 @onready var avatar_icon = $TopLeftButtons/Frame/AvatarIcon
 @onready var xp_bar = $TopLeftButtons/Frame/XPBar
 @onready var username_text = $TopLeftButtons/Frame/UsernameText
 
 func _ready():
-	# Avatar Butonu Tıklaması
+	# Avatar button click
 	if avatar_icon:
 		avatar_icon.pressed.connect(show_avatar)
 	
-	# Sağ Üst Butonlar
+	# Top-Right Buttons
 	if has_node("TopRightButtons/MissionsButton"):
 		$TopRightButtons/MissionsButton.pressed.connect(show_missions)
 	if has_node("TopRightButtons/SettingsButton"):
 		$TopRightButtons/SettingsButton.pressed.connect(show_settings)
 	
 	if has_node("Joystick"):
-		# Eğer işletim sistemi Android veya iOS ise GÖSTER, değilse GİZLE.
+		# Show joystick on mobile (Android/iOS), hide on desktop
 		if OS.get_name() == "Android" or OS.get_name() == "iOS":
 			$Joystick.visible = true
 		else:
-			$Joystick.visible = false # PC'de gizle
+			$Joystick.visible = false
 	
-	# 👇 Veri değişince (İsim, XP veya Karakter değişince) burayı güncelle
+	# Update UI when cache data updates
 	if Globals.has_signal("data_updated"):
 		Globals.data_updated.connect(update_top_left_ui)
 	
-	# Başlangıçta verileri yükle
+	# Initial UI load
 	update_top_left_ui()
-	print("✅ UI bağlantıları başarıyla kuruldu.")
+	print("✅ UI connections established.")
 
 # =================================================
-# 👇 GÜNCELLENDİ: SOL ÜST KÖŞE YÖNETİMİ
+# TOP-LEFT UI MANAGEMENT
 # =================================================
 func update_top_left_ui():
 	var user_data = Globals.cache.get("user", {})
 	
-	# 1. İsim
+	# 1. Username
 	if username_text:
 		username_text.text = str(user_data.get("name", "Player"))
 	
@@ -49,9 +49,6 @@ func update_top_left_ui():
 		var current_xp = int(user_data.get("experience", 0))
 		var current_lvl = int(user_data.get("level", 1))
 		
-		# ❌ ESKİSİ: xp_bar.max_value = current_lvl * 100 
-		# (Logic 300 isterken bu 100 gösterdiği için bar erken doluyordu)
-		
 		if Globals.has_method("get_required_xp"):
 			xp_bar.max_value = Globals.get_required_xp(current_lvl)
 		else:
@@ -59,34 +56,29 @@ func update_top_left_ui():
 		xp_bar.value = current_xp
 		xp_bar.tooltip_text = "Level: %d | XP: %d / %d" % [current_lvl, current_xp, xp_bar.max_value]
 
-	# 3. 👇 YENİ: AVATAR İKONUNU GÜNCELLE
+	# 3. Avatar Icon
 	if avatar_icon:
 		var char_id = int(user_data.get("character_id", 1))
 		
-		# İkon dosya yolu (Eğer ikonların yoksa burayı normal resim yolu yapabilirsin)
-		# Örnek İkon Yolu: res://assets/characters/icons/char_icon_1.png
 		var path = "res://assets/characters/icons/char_icon_%d.png" % char_id
 		
-		# Eğer ikon dosyası yoksa, belki normal karakter dosyası vardır?
 		if not ResourceLoader.exists(path):
 			path = "res://assets/characters/char_%d.png" % char_id
 
 		if ResourceLoader.exists(path):
 			var tex = load(path)
 			
-			# AvatarIcon bir Button mu yoksa TextureRect mi? Ona göre atama yapalım.
 			if avatar_icon is TextureButton:
 				avatar_icon.texture_normal = tex
-				# İkonun boyutunu korumak için (gerekirse)
 				avatar_icon.ignore_texture_size = true
 				avatar_icon.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 			elif avatar_icon is TextureRect:
 				avatar_icon.texture = tex
 		else:
-			print("⚠️ Avatar ikonu bulunamadı: ", path)
+			print("⚠️ Avatar icon not found: ", path)
 
 # =================================================
-# PENCERE YÖNETİMİ (Burası aynı kalıyor)
+# WINDOW MANAGEMENT
 # =================================================
 
 func hide_all_windows():
@@ -136,7 +128,7 @@ func show_full_ui():
 		else:
 			$Joystick.visible = false
 	hide_all_windows()
-	update_top_left_ui() # UI açılınca bilgileri tazele
+	update_top_left_ui()
 
 func return_to_town():
 	var current_scene = get_tree().current_scene

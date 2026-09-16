@@ -11,27 +11,27 @@ func _ready():
 	pass 
 
 # ------------------------------------------------------------
-# LOAD (YÜKLEME)
+# LOAD
 # ------------------------------------------------------------
 func load_category(cat_name: String):
 	active_category = cat_name
 	
-	# 1. UI TEMİZLİĞİ: queue_free gecikmeli siler, remove_child anında temizler.
+	# 1. UI CLEANUP: remove_child clears immediately, queue_free frees memory
 	for child in vbox.get_children():
 		vbox.remove_child(child)
 		child.queue_free()
 	
 	var all_items = Globals.cache.get("market_items", [])
 	
-	# 2. VERİ DÜZELTME (Sessizce yap, sinyal döngüsüne girmesin)
+	# 2. DATA NORMALIZATION (Avoid recursive signals)
 	if typeof(all_items) == TYPE_DICTIONARY:
 		all_items = all_items.values() if not all_items.has("results") else all_items["results"]
 		Globals.cache["market_items"] = all_items
-		Globals.save_cache() # Sessiz kayıt
+		Globals.save_cache() # Silent save
 	
 	if typeof(all_items) != TYPE_ARRAY: all_items = []
 	
-	# 3. PARMAK İZİ KONTROLÜ (Çift görünmeyi engelleyen kısım) ✨
+	# 3. FINGERPRINT DEDUPLICATION (prevents duplicate entries)
 	var seen_fingerprints = []
 	
 	for item in all_items:
@@ -41,21 +41,21 @@ func load_category(cat_name: String):
 		var i_cat = str(item.get("category", ""))
 		var i_date = str(item.get("date", ""))
 		
-		# İsim boşsa atla (Save fonksiyonun silme işlemini yapacak zaten)
+		# Skip if name is empty
 		if i_name == "": continue
 
-		# Sadece seçili kategorideysen işlem yap
+		# Only process items matching the active category
 		if i_cat == cat_name:
-			# Parmak İzi: Aynı isim, aynı kategori ve aynı tarihli ürünü bir kez göster
+			# Fingerprint: same name, category, and date
 			var fingerprint = i_name.to_lower() + "|" + i_cat + "|" + i_date
 			
 			if fingerprint in seen_fingerprints:
-				continue # Bu zaten eklendi, atla!
+				continue # Already added, skip
 			
 			seen_fingerprints.append(fingerprint)
 			add_item(false, item)
 	
-	# 4. En sona boş bir satır ekle (Yeni giriş için)
+	# 4. Add empty row at end for new entries
 	add_item(false)
 
 # ------------------------------------------------------------
@@ -83,7 +83,7 @@ func _call_scroll_bottom(): await get_tree().process_frame; scroll.scroll_vertic
 func _focus_lineedit(le): await get_tree().process_frame; if is_instance_valid(le): le.grab_focus()
 
 # ------------------------------------------------------------
-# SAVE (KAYDETME) - LOGLU VERSİYON 📝
+# SAVE ITEMS TO CACHE
 # ------------------------------------------------------------
 func save_items_to_cache():
 	if active_category == "": return
@@ -92,14 +92,14 @@ func save_items_to_cache():
 	var all_items = Globals.cache.get("market_items", [])
 	if typeof(all_items) != TYPE_ARRAY: all_items = []
 	
-	# 1. DİĞER KATEGORİLERİ KORU
+	# 1. PRESERVE OTHER CATEGORIES
 	for item in all_items:
 		if typeof(item) != TYPE_DICTIONARY: continue
 		if item.get("category") != active_category:
 			new_list.append(item)
 	
-	# 2. EKRANDAKİLERİ İŞLE
-	# Kaydederken de çiftleşmeyi önlemek için local kontrol
+	# 2. PROCESS ON-SCREEN ROWS
+	# Deduplicate names during save
 	var saved_names = []
 	
 	for child in vbox.get_children():
@@ -107,25 +107,21 @@ func save_items_to_cache():
 			var data = child.get_data()
 			var name = str(data.get("item_name", "")).strip_edges()
 			
-			# Çift girişi engelle (Boş değilse)
+			# Prevent duplicate entries (if not empty)
 			if name != "":
 				if name.to_lower() in saved_names: continue
 				saved_names.append(name.to_lower())
 
-			# Mantıksal Filtreleme
+			# Logical filtering
 			if name == "" and not data.has("id"):
-				continue # Yeni boş satır, kaydetme
+				continue # Empty new row, do not save
 			
 			data["category"] = active_category
 			new_list.append(data)
 	
-	# 3. KAYDET
+	# 3. SAVE
 	Globals.cache["market_items"] = new_list
 	Globals.mark_dirty()
 	Globals.save_cache()
-	# 3. KAYDET
-	Globals.cache["market_items"] = new_list
-	Globals.mark_dirty()
-	Globals.save_cache()
-	print("🏁 SAVE BİTTİ. Yeni Liste Boyutu: ", new_list.size())
+	print("🏁 SAVE FINISHED. New list size: ", new_list.size())
 	print("------------------------------------------\n")

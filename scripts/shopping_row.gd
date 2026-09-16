@@ -26,8 +26,8 @@ func _update_visuals(checked: bool):
 # --- SAVE & LOAD ---
 
 func set_data(data: Dictionary):
-	# DEBUG: Veri yüklenirken ne geliyor görelim
-	# print("🔍 ROW SET_DATA ÇAĞRILDI: ", data) 
+	# DEBUG: Inspect incoming data
+	# print("🔍 ROW SET_DATA CALLED: ", data) 
 	
 	if data.has("item_name"):
 		name_field.text = str(data["item_name"])
@@ -35,13 +35,13 @@ func set_data(data: Dictionary):
 	if data.has("category"):
 		current_category = data["category"]
 		
-	# ID KONTROLÜ
+	# ID CHECK
 	if data.has("id"):
 		item_id = data["id"]
-		# print("✅ ROW: ID Hafızaya alındı -> ", item_id)
+		# print("✅ ROW: ID cached in memory -> ", item_id)
 	else:
 		item_id = null
-		# print("⚠️ ROW: Bu veride ID yok (Yeni satır olabilir)")
+		# print("⚠️ ROW: No ID in record (might be a new row)")
 	
 	var is_bought = int(data.get("bought", 0)) == 1
 	checkbox.button_pressed = is_bought
@@ -62,8 +62,8 @@ func get_data() -> Dictionary:
 	
 	if item_id != null:
 		data["id"] = item_id
-		print("📤 ROW GET_DATA: ID ile dönüyor (%s) -> %s" % [item_id, clean_name])
+		print("📤 ROW GET_DATA: Returning with ID (%s) -> %s" % [item_id, clean_name])
 	else:
-		print("📤 ROW GET_DATA: ID SİZ dönüyor -> %s" % [clean_name])
+		print("📤 ROW GET_DATA: Returning WITHOUT ID -> %s" % [clean_name])
 		
 	return data

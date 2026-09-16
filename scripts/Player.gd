@@ -1,82 +1,80 @@
 extends CharacterBody2D
 
-@export var speed: float = 150.0  # Karakterin hızı
-@export var accel: float = 20.0    # Hızlanma
-@export var friction: float = 20.0 # Durma
+@export var speed: float = 150.0  # Character movement speed
+@export var accel: float = 20.0    # Acceleration
+@export var friction: float = 20.0 # Deceleration
 
 @onready var anim = $AnimatedSprite2D 
 
-# --- KAMERA ---
+# --- CAMERA ---
 @onready var camera = $Camera2D 
 
 var last_direction = Vector2.DOWN 
 
-# 👇 YENİ: Yüklenmiş olan karakter ID'sini takip etmek için
+# Track loaded character visual ID
 var current_visual_id: int = -1 
 
 func _ready():
-	# 1. Kamera Ayarı
+	# 1. Camera setup
 	if camera:
 		camera.make_current()
 	
-	# 👇 YENİ: Kamera sınırlarını otomatik ayarla
-	# (call_deferred kullanıyoruz ki sahne tamamen yüklensin)
+	# Automatically configure camera limits to fit map boundaries
 	call_deferred("setup_camera_limits")
 	
-	# 2. Karakter Görünümünü Yükle
+	# 2. Load character visual
 	load_character_visuals()
 
-	# 👇 Sinyal Bağlantısı
+	# Signal connection
 	if Globals.has_signal("data_updated"):
 		if not Globals.data_updated.is_connected(load_character_visuals):
 			Globals.data_updated.connect(load_character_visuals)
-			print("✅ Player, global veri güncellemelerini dinlemeye başladı.")
+			print("✅ Player listening for global data updates.")
 
 # ============================================================
-# 👇 YENİ: KAMERA SINIRLAMA FONKSİYONU 📷
+# CAMERA BOUNDS
 # ============================================================
 func setup_camera_limits():
 	if camera == null: return
 
-	# Player'ın eklendiği sahnedeki (Parent) zemin node'unu bulmaya çalışıyoruz.
-	# Genelde adı "TileMap" veya "Ground" olur.
+	# Look for parent scene's TileMap or Ground node
 	var tilemap = get_parent().get_node_or_null("TileMap")
 	
 	if tilemap == null:
 		tilemap = get_parent().get_node_or_null("Ground")
 		
 	if tilemap:
-		# 1. Haritanın dolu olan kısmını (dikdörtgen) al
+		# 1. Get populated rectangular map area
 		var map_rect = tilemap.get_used_rect()
 		
-		# 2. Tile boyutunu (kare boyutu) al (örn: 16px veya 32px)
+		# 2. Get tile size
 		var tile_size = tilemap.tile_set.tile_size
 		
-		# 3. Sol ve Üst sınır (Başlangıç noktası)
+		# 3. Left and top bounds
 		camera.limit_left = map_rect.position.x * tile_size.x
 		camera.limit_top = map_rect.position.y * tile_size.y
 		
-		# 4. Sağ ve Alt sınır (Başlangıç + Genişlik)
+		# 4. Right and bottom bounds
 		camera.limit_right = (map_rect.position.x + map_rect.size.x) * tile_size.x
 		camera.limit_bottom = (map_rect.position.y + map_rect.size.y) * tile_size.y
 		
-		print("📷 Kamera sınırları haritaya göre ayarlandı: ", map_rect)
+		print("📷 Camera limits set to map bounds: ", map_rect)
 	else:
-		print("⚠️ Uyarı: Kamera sınırı için sahnede 'TileMap' veya 'Ground' bulunamadı.")
+		print("⚠️ Warning: Neither 'TileMap' nor 'Ground' found for camera limits.")
 
-# --- KARAKTER GÖRÜNÜMÜNÜ YÜKLE ---
+# --- LOAD CHARACTER VISUALS ---
 func load_character_visuals():
-	# 1. Global veriden seçili karakter ID'sini al
+	# 1. Get selected character ID from global cache
 	var user_data = Globals.cache.get("user", {})
 	var char_id = int(user_data.get("character_id", 1))
 	
 	if char_id == current_visual_id:
 		return
 	
-	# 2. Dosya yolunu oluştur
+	# 2. Construct resource path
 	var path = "res://assets/characters/resources/char_%d.tres" % char_id
 	
-	# 3. Dosya varsa yükle ve karaktere giydir
+	# 3. If file exists, load and apply SpriteFrames
 	if ResourceLoader.exists(path):
 		var new_frames = load(path)
 		if new_frames is SpriteFrames:
@@ -84,26 +82,26 @@ func load_character_visuals():
 			play_animation("idle")
 			
 			current_visual_id = char_id
-			print("🎭 [PLAYER] Görünüm güncellendi: ID ", char_id)
+			print("🎭 [PLAYER] Appearance updated: ID ", char_id)
 		else:
-			print("⚠️ Hata: Yüklenen dosya SpriteFrames formatında değil!")
+			print("⚠️ Error: Loaded resource is not SpriteFrames!")
 	else:
-		print("⚠️ Hata: Karakter dosyası bulunamadı -> ", path)
+		print("⚠️ Error: Character file not found -> ", path)
 
 func _physics_process(delta):
 	var direction = Vector2.ZERO
 
-	# 1. JOYSTICK KONTROLÜ
+	# 1. Joystick input
 	if UI.has_node("UIRoot/Joystick"):
 		var joystick = UI.get_node("UIRoot/Joystick")
 		if "direction" in joystick and joystick.direction.length() > 0:
 			direction = (joystick.direction * 1.5).limit_length(1.0)
 
-	# 2. KLAVYE KONTROLÜ
+	# 2. Keyboard input
 	if direction == Vector2.ZERO:
 		direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 
-	# 3. HAREKET VE ANİMASYON
+	# 3. Movement and animation
 	if direction != Vector2.ZERO:
 		velocity = velocity.lerp(direction * speed, accel * delta)
 		last_direction = direction

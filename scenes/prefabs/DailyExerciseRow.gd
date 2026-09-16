@@ -18,7 +18,7 @@ var regions_list = [
 	"Abs","Cardio","Full Body","Stretching"
 ]
 
-# 👇 YENİ: ID değişkeni
+# Record ID
 var record_id = null
 
 func _ready():
@@ -35,7 +35,7 @@ func fill_regions():
 
 # ---------------- LOAD ----------------
 func set_data(data: Dictionary):
-	# 👇 YENİ: ID'yi hafızaya al
+	# Store record ID
 	if data.has("id"):
 		record_id = data["id"]
 	
@@ -72,7 +72,7 @@ func get_data() -> Dictionary:
 		"region": region_val
 	}
 	
-	# 👇 YENİ: ID varsa pakete koy
+	# Include record ID if present
 	if record_id != null:
 		data["id"] = record_id
 		

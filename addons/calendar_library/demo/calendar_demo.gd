@@ -15,7 +15,7 @@ var week_number_system: Calendar.WeekNumberSystem
 var show_week_number: bool = true
 
 # -------------------------------------------------------
-# 🔵 POPUP PREFAB BURADA YÜKLENİYOR
+# Load popup prefab
 var note_popup_scene := preload("res://scenes/prefabs/note_pop_up.tscn")
 var note_popup: Node
 # -------------------------------------------------------
@@ -24,7 +24,7 @@ func _ready() -> void:
 	UI.get_node("UIRoot").show_only_top_right_buttons()
 	if has_node("Back_Button"):
 		$Back_Button.pressed.connect(_on_back_button_pressed)
-	elif has_node("%Back_Button"): # Eğer Unique Name (%) kullandıysan
+	elif has_node("%Back_Button"): # If using unique name (%)
 		%Back_Button.pressed.connect(_on_back_button_pressed)
 	cal.set_first_weekday(Time.WEEKDAY_MONDAY)
 	cal.week_number_system = Calendar.WeekNumberSystem.WEEK_NUMBER_FOUR_DAY
@@ -34,10 +34,10 @@ func _ready() -> void:
 	months_formatted = cal.get_months_formatted(Calendar.MonthFormat.MONTH_FORMAT_FULL)
 	
 	# -------------------------------------------------------
-	# 🔵 POPUP OLUŞTUR → SAHNEYE EKLE
+	# Instantiate popup -> Add to scene
 	note_popup = note_popup_scene.instantiate()
 	add_child(note_popup)
-	# popup başlangıçta kapalı olsun
+	# Hide popup initially
 	note_popup.hide()
 	# -------------------------------------------------------
 	
@@ -93,7 +93,7 @@ func populate_year_calendar():
 
 
 ############################################################
-#########   DATE SELECTION + POPUP AÇMA
+#########   DATE SELECTION + OPEN POPUP
 ############################################################
 
 func _on_date_pressed(date: Calendar.Date, date_label: Label):
@@ -102,7 +102,7 @@ func _on_date_pressed(date: Calendar.Date, date_label: Label):
 	selected_date = date
 
 	# -------------------------------------------------------
-	# 🔵 POPUP’I AÇ — date parametresi ile
+	# Open popup with date parameter
 	note_popup.call("open_for_date", date)
 	# -------------------------------------------------------
 
@@ -246,15 +246,15 @@ class CalendarLabel:
 		label_settings.font_size = font_size
 
 func _on_back_button_pressed():
-	# 1. Verileri kaydet
+	# 1. Save cached data
 	Globals.save_cache()
 	
-	# 2. Oyunu tekrar hareket ettir (Unpause)
+	# 2. Resume game execution
 	get_tree().paused = false
 	
-	# 3. Eğer UIRoot'a bağlıysan, eski UI düzenini geri getir (Opsiyonel ama şık durur)
+	# 3. Restore UI state via UIRoot
 	if UI.has_node("UIRoot"):
-		UI.get_node("UIRoot").show_full_ui() # Veya show_only_top_right_buttons()
+		UI.get_node("UIRoot").show_full_ui()
 	
-	# 4. Takvim penceresini yok et (Kapat)
+	# 4. Close calendar screen
 	queue_free()

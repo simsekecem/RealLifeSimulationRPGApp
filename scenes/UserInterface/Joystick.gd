@@ -9,14 +9,14 @@ var dragging := false
 var direction := Vector2.ZERO
 
 func _ready():
-	# Başlangıçta merkeze al
+	# Center handle on start
 	_reset_handle()
 
 func _gui_input(event):
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			dragging = true
-			# event.position zaten LOCAL (bu node'a göre) olduğu için sorun yok
+			# event.position is local to this node
 			_update_handle(event.position)
 		else:
 			dragging = false
@@ -29,22 +29,22 @@ func _update_handle(local_pos: Vector2):
 	var center = bg.position + bg.size / 2
 	var delta = local_pos - center
 
-	# Maksimum mesafeyi aşma
+	# Clamp to max distance
 	if delta.length() > max_distance:
 		delta = delta.normalized() * max_distance
 
-	# Handle pozisyonu
+	# Update handle position
 	handle.position = center + delta - handle.size / 2
 
-	# --------- EĞRİLİ HIZ HESABI ---------
+	# --------- CURVED SPEED CALCULATION ---------
 	var strength: float = delta.length() / max_distance
 
-	# Eğri uygula
-	# 1.0 = lineer
-	# 0.6 = önerilen
+	# Apply curve
+	# 1.0 = linear
+	# 0.6 = recommended
 	strength = pow(strength, 0.6)
 
-	# Yön + güç
+	# Direction + strength
 	if delta.length() > 0.0:
 		direction = delta.normalized() * strength
 	else:
@@ -52,6 +52,6 @@ func _update_handle(local_pos: Vector2):
 
 
 func _reset_handle():
-	# Burada da position kullanıyoruz
+	# Reset handle to center
 	handle.position = bg.position + bg.size / 2 - handle.size / 2
 	direction = Vector2.ZERO

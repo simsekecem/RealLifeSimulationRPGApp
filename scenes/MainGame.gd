@@ -1,77 +1,77 @@
 extends Node2D
 
-# Sahne ağacındaki Container node'larına erişim
+# Access to Container nodes in the scene tree
 @onready var town_container = $TownContainer
 @onready var home_container = $HomeContainer
 @onready var others_container = $OthersContainer
 
-# Town sahnesinin yolu
+# Path to the Town scene
 var town_scene_path = "res://scenes/town.tscn"
 
 func _ready():
-	print("MainGame Başlatıldı. TownContainer dolduruluyor...")
-	# 🎵 ARKA PLAN MÜZİĞİ BAŞLAT
+	print("MainGame initialized. Populating TownContainer...")
+	# 🎵 START BACKGROUND MUSIC
 	MusicController.bgm_play()
 	# ---------------------------------------------------------
-	# 1. TOWN SAHNESİNİ YÜKLEME
+	# 1. LOAD TOWN SCENE
 	# ---------------------------------------------------------
 	if town_scene_path != "":
 		var town_scene = load(town_scene_path)
 		var town_instance = town_scene.instantiate()
 		town_container.add_child(town_instance)
-		print("✅ Town sahneye eklendi.")
+		print("✅ Town added to scene.")
 	else:
-		print("❌ HATA: Town sahne yolu boş!")
+		print("❌ ERROR: Town scene path is empty!")
 
 	# ---------------------------------------------------------
-	# 2. GLOBAL UI ERİŞİMİ
+	# 2. GLOBAL UI ACCESS
 	# ---------------------------------------------------------
 	if UI.has_node("UIRoot"):
 		var ui_root = UI.get_node("UIRoot")
 		
-		# Joystick ve butonları göster
+		# Show joystick and buttons
 		if ui_root.has_method("show_full_ui"):
 			ui_root.show_full_ui()
 			ui_root.set_process_input(true) 
-			print("✅ UI aktif edildi.")
+			print("✅ UI activated.")
 	else:
-		print("⚠️ UYARI: Global UI içinde 'UIRoot' bulunamadı!")
+		print("⚠️ WARNING: 'UIRoot' not found in Global UI!")
 
 ## ---------------------------------------------------------
-# FONKSİYON: EVE/MEKANA GİRİŞ (GÜNCELLENDİ)
+# FUNCTION: ENTER HOUSE / INDOOR VENUE (UPDATED)
 # ---------------------------------------------------------
 func enter_house(house_path: String):
-	print("🚪 Mekana giriliyor: ", house_path)
+	print("🚪 Entering indoor venue: ", house_path)
 	
-	# --- YENİ EKLENEN KISIM: GİRMEDEN ÖNCE İT ---
-	# Town donmadan önce karakteri kapıdan uzaklaştırıyoruz.
-	# Böylece geri döndüğümüzde (unpause olunca) kapıya basmıyor olacak.
+	# --- OFFSET BEFORE ENTERING ---
+	# Move the character away from the door before freezing Town.
+	# This prevents re-triggering the door upon returning (unpausing).
 	if town_container.get_child_count() > 0:
 		var town_instance = town_container.get_child(0)
 		if town_instance.has_node("Player"):
 			var player = town_instance.get_node("Player")
-			player.position.y += 10 # 50 piksel aşağı kaydır
+			player.position.y += 10 # Shift down
 			
-			# Yüzünü de aşağı çevirelim ki kapıdan çıkmış gibi dursun
+			# Face down so character looks like they exited through the door
 			if player.has_method("play_animation"):
 				player.last_direction = Vector2.DOWN
 				player.play_animation("idle")
 	# --------------------------------------------
 
-	# 1. Town'u gizle ve dondur
+	# 1. Hide and freeze Town
 	town_container.visible = false
 	town_container.process_mode = Node.PROCESS_MODE_DISABLED
 	
-	# 2. Yeni sahneyi yükle
+	# 2. Instantiate the new scene
 	var new_scene = load(house_path).instantiate()
 	
-	# 3. Sahnenin türüne göre doğru kutuya koy
+	# 3. Place into appropriate container based on scene type
 	if new_scene is Control:
 		others_container.add_child(new_scene)
 	elif new_scene is Node2D:
 		home_container.add_child(new_scene)
 		
-		# Evin içindeki karakterin kamerasını aktif et
+		# Activate the indoor player's camera
 		if new_scene.has_node("Player"):
 			var home_player = new_scene.get_node("Player")
 			if home_player.has_node("Camera2D"):
@@ -79,51 +79,49 @@ func enter_house(house_path: String):
 
 
 # ---------------------------------------------------------
-# FONKSİYON: EVDEN ÇIKIŞ (TOWN'A DÖNÜŞ)
+# FUNCTION: EXIT HOUSE (RETURN TO TOWN)
 # ---------------------------------------------------------
 func exit_house():
-	print("🌲 Town'a geri dönülüyor...")
+	print("🌲 Returning to Town...")
 	
-	# 1. KAPILARI KİLİTLE (Spawn Loop Koruması)
+	# 1. LOCK DOORS (Spawn loop protection)
 	Globals.door_locked = true
 
-	# 2. Evleri ve Menüleri temizle
+	# 2. Clear indoor locations and menus
 	for child in home_container.get_children():
 		child.queue_free()
 	
 	for child in others_container.get_children():
 		child.queue_free()
 		
-	# 3. Town'u tekrar görünür yap ve çalıştır
+	# 3. Unhide and resume Town
 	town_container.visible = true
 	town_container.process_mode = Node.PROCESS_MODE_INHERIT
 	
-	# 4. KAMERAYI DÜZELT (İtme kodu kalktı!)
+	# 4. ADJUST CAMERA
 	if town_container.get_child_count() > 0:
 		var town_instance = town_container.get_child(0)
 		if town_instance.has_node("Player"):
 			var player = town_instance.get_node("Player")
 			
-			# ARTIK İTMİYORUZ! (Bu satırı sildik: player.position.y += 100)
-			
-			# Sadece kamerayı Town karakterine veriyoruz
+			# Switch camera back to the Town player
 			if player.has_node("Camera2D"):
 				player.get_node("Camera2D").make_current()
 				
-			# (Opsiyonel) Yüzünü aşağı çevirip durdurabilirsin
+			# Face down and switch to idle animation
 			if player.has_method("play_animation"):
 				player.last_direction = Vector2.DOWN
 				player.play_animation("idle")
 
-	# 5. UI'ı göster
+	# 5. Show UI
 	if UI.has_node("UIRoot"):
 		UI.get_node("UIRoot").show_full_ui()
 		
-	# 6. KİLİDİ AÇMA SAYACI
-	print("⏳ Kapılar 1 saniye kilitlendi.")
+	# 6. UNLOCK TIMER
+	print("⏳ Doors locked for 1 second.")
 	await get_tree().create_timer(1.0).timeout
 	Globals.door_locked = false
-	print("🔓 Kapılar tekrar aktif.")
+	print("🔓 Doors re-enabled.")
 	
 	
 	

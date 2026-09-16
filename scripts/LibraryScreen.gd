@@ -3,16 +3,15 @@ extends Control
 @export var hour_row_scene: PackedScene = preload("res://scenes/prefabs/StudyHoursRow.tscn")
 
 # ============================================================
-#  NODE REFERANSLARI
+#  NODE REFERENCES
 # ============================================================
 
-# --- SOL PANEL (KİTAP LİSTESİ) ---
-# Kitapların olduğu panelin adını ve altındaki TextEdit'lerin adını kontrol et!
+# --- LEFT PANEL (BOOK LIST) ---
 @onready var input_reading = $Panel/BooksPanel/CurrentlyReading
 @onready var input_completed = $Panel/BooksPanel/Finished
 @onready var input_wishlist = $Panel/BooksPanel/Wishlist
 
-# --- SAĞ PANEL (ÇALIŞMA SAATLERİ) ---
+# --- RIGHT PANEL (STUDY HOURS) ---
 @onready var day_buttons = [
 	$DaysPanel/MondayButton, $DaysPanel/TuesdayButton, $DaysPanel/WednesdayButton,
 	$DaysPanel/ThursdayButton, $DaysPanel/FridayButton, $DaysPanel/SaturdayButton, $DaysPanel/SundayButton
@@ -24,30 +23,30 @@ var current_selected_button: Button = null
 var current_week_monday_unix: int = 0
 
 # ============================================================
-#  BAŞLANGIÇ
+#  INITIALIZATION
 # ============================================================
 func _ready():
-	# UI Ayarları
+	# UI Settings
 	back_button.pressed.connect(_on_back_button_pressed)
 	if UI.has_node("UIRoot"): UI.get_node("UIRoot").show_only_top_right_buttons()
 	
-	# --- SAĞ PANEL (SAATLER) ---
+	# --- RIGHT PANEL (HOURS) ---
 	calculate_current_week()
 	for i in range(day_buttons.size()):
 		var button = day_buttons[i]
 		button.toggled.connect(_on_day_button_toggled.bind(button, i))
 
-	# --- SOL PANEL (KİTAPLAR) ---
-	# 1. Önce kayıtlı veriyi getir ve kutulara doldur
+	# --- LEFT PANEL (BOOKS) ---
+	# 1. Load saved data and populate input boxes
 	load_books_to_ui()
 	
-	# 2. Kutularda bir şey değişirse (harf yazma/silme) hemen kaydet
+	# 2. Save immediately if text changes
 	if input_reading: input_reading.text_changed.connect(_on_book_list_changed)
 	if input_completed: input_completed.text_changed.connect(_on_book_list_changed)
 	if input_wishlist: input_wishlist.text_changed.connect(_on_book_list_changed)
 
 # ============================================================
-#  KİTAP LİSTESİ YÖNETİMİ (SOL PANEL) 📚
+#  BOOK LIST MANAGEMENT (LEFT PANEL)
 # ============================================================
 
 func load_books_to_ui():
@@ -57,17 +56,17 @@ func load_books_to_ui():
 	var list_completed = []
 	var list_wishlist = []
 	
-	# 👇 Çift görünmeyi engellemek için "zaten görülenler" takibi
+	# Track seen books to prevent duplicate display
 	var seen_books = [] 
 
 	for book in all_books:
 		var title = Globals.safe_str(book.get("title", ""))
 		var status = Globals.safe_str(book.get("status", "reading"))
 		
-		# Parmak izi oluştur (Başlık + Durum)
+		# Generate fingerprint (Title + Status)
 		var fingerprint = title + "|" + status
 		
-		# Eğer bu kitap aynı kategoride zaten listeye eklendiyse, atla
+		# Skip if book in this category has already been processed
 		if title != "" and fingerprint in seen_books:
 			continue
 		
@@ -78,43 +77,39 @@ func load_books_to_ui():
 		elif status == "completed": list_completed.append(title)
 		elif status == "wishlist": list_wishlist.append(title)
 	
-	# UI'a basarken temiz ve eşsiz listeyi basıyoruz
+	# Populate UI with clean deduplicated lists
 	if input_reading: input_reading.text = "\n".join(list_reading)
 	if input_completed: input_completed.text = "\n".join(list_completed)
 	if input_wishlist: input_wishlist.text = "\n".join(list_wishlist)
 
 # ============================================================
-#  KİTAP LİSTESİ YÖNETİMİ (ÇAKIŞMA KORUMALI)
+#  BOOK LIST MANAGEMENT (COLLISION-PROTECTED)
 # ============================================================
 
 func _on_book_list_changed():
 	var new_library_list = []
 	
-	# 👇 TÜM KUTULAR İÇİN ORTAK "GÖRÜLENLER" LİSTESİ
-	# Bu liste sayesinde bir kitap bir kutuya girdiyse, diğerine giremez.
+	# Shared lookup of titles across all categories to prevent duplicate assignment
 	var global_seen_titles = {} 
 	
-	# Listeleri sırayla işle. (Sıra önemli: Reading -> Completed -> Wishlist)
-	# Eğer aynı kitap hepsine yazıldıysa, sadece ilk sırada (Reading) kabul edilir.
+	# Process categories in priority order: Reading -> Completed -> Wishlist
 	_parse_text_edit_to_list(input_reading, "reading", new_library_list, global_seen_titles)
 	_parse_text_edit_to_list(input_completed, "completed", new_library_list, global_seen_titles)
 	_parse_text_edit_to_list(input_wishlist, "wishlist", new_library_list, global_seen_titles)
 	
 	Globals.cache["library"] = new_library_list
 	Globals.mark_dirty()
-# 👇 EKLE: Kitap listesi her güncellendiğinde (veya ilk kez veri girildiğinde)
+	# Trigger quest action when book list is updated
 	if has_node("/root/QuestManager"):
-		# Not: Library için Worker'da "study_action" hedefi koymuştuk. 
-		# İstersen kitap eklemeyi de buna bağlayabilirsin.
 		QuestManager.trigger_action("study_action")
 		QuestManager.trigger_action("first_library")
-# 👇 Parametre olarak 'global_seen_titles' ekledik
+
 func _parse_text_edit_to_list(text_edit: TextEdit, status: String, target_list: Array, seen_map: Dictionary):
 	if not text_edit: return
 	
 	var lines = text_edit.text.split("\n")
 
-	# ID Haritasını çıkar (Eski ID'leri korumak için)
+	# Map existing IDs to preserve them
 	var existing_ids = {}
 	var old_library = Globals.cache.get("library", [])
 	for item in old_library:
@@ -125,11 +120,10 @@ func _parse_text_edit_to_list(text_edit: TextEdit, status: String, target_list: 
 		var clean_line = line.strip_edges()
 		
 		if clean_line != "":
-			# 🔥 KRİTİK KONTROL: Bu kitap ismi daha önce (başka kutuda bile olsa) görüldü mü?
+			# Skip if title already added in another category
 			if seen_map.has(clean_line):
-				continue # Görüldüyse bu kutuya ekleme, pas geç!
+				continue
 			
-			# Görülmediyse haritaya ekle
 			seen_map[clean_line] = true
 			
 			var book_data = { 
@@ -137,13 +131,13 @@ func _parse_text_edit_to_list(text_edit: TextEdit, status: String, target_list: 
 				"status": status 
 			}
 			
-			# Eski ID'yi koru
+			# Preserve existing ID if present
 			if existing_ids.has(clean_line):
 				book_data["id"] = existing_ids[clean_line]
 			
 			target_list.append(book_data)
 # ============================================================
-#  ÇALIŞMA SAATLERİ (SAĞ PANEL - MEVCUT KOD) 🕒
+#  STUDY HOURS (RIGHT PANEL)
 # ============================================================
 
 func calculate_current_week():
@@ -202,10 +196,11 @@ func save_study_data(date: String, hour: int, subject: String):
 		Globals.cache["study_log"].append({ "date": date, "start_time": hour, "end_time": hour + 1, "subject": subject })
 	
 	Globals.mark_dirty()
-# 👇 EKLE: Bir ders/konu yazıldığı an görev tetiklenir
+	# Trigger quest action whenever a study subject is written
 	if subject.strip_edges() != "" and has_node("/root/QuestManager"):
-		QuestManager.trigger_action("study_action") # Worker'daki target_action ismi
-		QuestManager.trigger_action("first_library") # Statik görev ismi
+		QuestManager.trigger_action("study_action")
+		QuestManager.trigger_action("first_library")
+
 func get_study_data(target_date: String, target_hour: int) -> String:
 	var log_list = Globals.ensure_list(Globals.cache.get("study_log", []))
 	for entry in log_list:
@@ -216,7 +211,7 @@ func get_study_data(target_date: String, target_hour: int) -> String:
 
 func _on_back_button_pressed():
 	Globals.save_cache()
-	# 👇 EKLE: Çıkarken de tetikle (Eğer içeride veri varsa)
+	# Trigger quest action on exit if data exists
 	if has_node("/root/QuestManager"):
 		var lib_size = Globals.cache.get("library", []).size()
 		var study_size = Globals.cache.get("study_log", []).size()

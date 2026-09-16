@@ -1,9 +1,9 @@
 extends Node
 
-# ✅ FONT (Piksel Font)
+# Pixel Font
 var popup_font = preload("res://assets/fonts/PressStart2P-Regular.ttf")
 
-# Statik görev tanımları
+# Static quest definitions
 var static_quest_definitions = [
 	{"id": "static_rest", "desc": "Restaurant first entry", "target": "first_restaurant", "xp": 20},
 	{"id": "static_mark", "desc": "Market first entry", "target": "first_market", "xp": 20},
@@ -16,12 +16,12 @@ var static_quest_definitions = [
 	{"id": "static_mus",  "desc": "Adjust music settings", "target": "first_music", "xp": 20},
 ]
 
-# Bildirim Sırası (Queue) Değişkenleri
+# Notification Queue Variables
 var notification_queue: Array = []
 var is_notification_active: bool = false
 
 func _ready():
-	print("🚀 QuestManager: Hazır, görevler kontrol ediliyor...")
+	print("QuestManager: Initializing quests...")
 	call_deferred("check_and_init_quests")
 
 func check_and_init_quests():
@@ -48,7 +48,7 @@ func check_and_init_quests():
 			updated = true
 			
 	if updated:
-		print("✅ QuestManager: Yeni statik görevler eklendi.")
+		print("QuestManager: New static quests initialized.")
 		Globals.save_cache() 
 		if Globals.has_signal("data_updated"):
 			Globals.data_updated.emit()
@@ -58,10 +58,10 @@ func check_and_init_quests():
 func check_daily_quests():
 	var today_str = Time.get_date_string_from_system()
 	if Globals.cache.get("last_quest_gen_date", "") != today_str:
-		print("📡 QuestManager: Bugünün günlük görevleri yok, Worker'a gidiliyor...")
+		print("QuestManager: Generating daily quests from Worker...")
 		fetch_daily_quests_from_worker(today_str)
 	else:
-		print("ℹ️ QuestManager: Bugünün günlük görevleri zaten yüklü.")
+		print("QuestManager: Today's daily quests are already loaded.")
 
 func fetch_daily_quests_from_worker(today_str):
 	var http = HTTPRequest.new()
@@ -71,7 +71,7 @@ func fetch_daily_quests_from_worker(today_str):
 	var url = "https://life-sim-worker.life-simulation.workers.dev/api/daily_quests"
 	var err = http.request(url, [], HTTPClient.METHOD_POST, "{}")
 	if err != OK:
-		print("❌ QuestManager: HTTP isteği başlatılamadı!")
+		print("QuestManager: Failed to dispatch HTTP request.")
 		
 func _on_daily_received(_result, response_code, _headers, body, today_str, http_node):
 	if response_code == 200:
@@ -96,14 +96,14 @@ func _on_daily_received(_result, response_code, _headers, body, today_str, http_
 			
 			if Globals.has_signal("data_updated"):
 				Globals.data_updated.emit()
-			print("✅ QuestManager: Liste senkronize edildi.")
+			print("QuestManager: Quest list synchronized.")
 	else:
-		print("❌ QuestManager: Worker hatası! Kod: ", response_code)
+		print("QuestManager: Worker response error, code: ", response_code)
 	
 	if http_node: http_node.queue_free()
 
 # ==========================================================
-# 👇 TRIGGER ACTION (Sıraya Ekleme)
+# TRIGGER ACTION (QUEUE MANAGEMENT)
 # ==========================================================
 func trigger_action(action_name: String):
 	var updated = false
@@ -114,7 +114,7 @@ func trigger_action(action_name: String):
 			q["is_completed"] = true
 			Globals.add_xp(q["xp_reward"])
 			updated = true
-			print("🎯 Görev Tamamlandı (Saved): ", q["description"])
+			print("Mission Completed: ", q["description"])
 			
 			add_notification_to_queue(q["description"], q["xp_reward"])
 			
@@ -124,7 +124,7 @@ func trigger_action(action_name: String):
 			Globals.data_updated.emit()
 
 # ==========================================================
-# 👇 KUYRUK YÖNETİMİ
+# QUEUE MANAGEMENT
 # ==========================================================
 func add_notification_to_queue(desc: String, xp: int):
 	notification_queue.append({"desc": desc, "xp": xp})
@@ -142,7 +142,7 @@ func process_notification_queue():
 	)
 
 # ==========================================================
-# 👇 GÖREV TAMAMLANDI PENCERESİ (Standart Siyah/Altın)
+# MISSION COMPLETED POPUP
 # ==========================================================
 func show_mission_popup(desc: String, xp: int):
 	var layer = CanvasLayer.new()
@@ -206,7 +206,7 @@ func show_mission_popup(desc: String, xp: int):
 	)
 
 # ==========================================================
-# 👇 KARAKTER AÇILDI PENCERESİ (KAHVERENGİ TEMA 🟫)
+# CHARACTER UNLOCK POPUP
 # ==========================================================
 func show_unlock_popup(char_id: int):
 	var layer = CanvasLayer.new()
@@ -218,11 +218,11 @@ func show_unlock_popup(char_id: int):
 	panel.scale = Vector2(0, 0)
 	panel.pivot_offset = Vector2(150, 100) 
 	
-	# ✅ TEMA DEĞİŞTİ: Kahverengi & Amber
+	# Theme: Amber & Leather Brown
 	var style = StyleBoxFlat.new()
-	# Arka Plan: Koyu Ahşap / Deri Kahvesi
+	# Background: Dark wood / leather brown
 	style.bg_color = Color(0.24, 0.17, 0.12, 0.95) 
-	# Çerçeve: Açık Amber / Altın Kahve
+	# Border: Amber / Gold
 	style.border_color = Color(0.8, 0.6, 0.3) 
 	
 	style.border_width_left = 4; style.border_width_top = 4
@@ -240,11 +240,10 @@ func show_unlock_popup(char_id: int):
 	vbox.add_theme_constant_override("separation", 15)
 	panel.add_child(vbox)
 	
-	# -- BAŞLIK (Renk: Çerçeve ile uyumlu Amber) --
+	# Title
 	var lbl_title = Label.new()
 	lbl_title.text = "NEW CHARACTER\nUNLOCKED!"
 	lbl_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	# Yazı rengi Magenta yerine Amber/Gold yaptık
 	lbl_title.add_theme_color_override("font_color", Color(0.8, 0.6, 0.3)) 
 	lbl_title.uppercase = true
 	lbl_title.add_theme_font_override("font", popup_font)
@@ -264,11 +263,11 @@ func show_unlock_popup(char_id: int):
 	
 	vbox.add_child(tex_rect)
 	
-	# -- AÇIKLAMA (Beyaz yerine Krem rengi yapabiliriz, daha sıcak durur) --
+	# -- DESCRIPTION (Cream color for warmer look) --
 	var lbl_desc = Label.new()
 	lbl_desc.text = "You can now switch\nto this character\nfrom Avatar menu."
 	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	# Krem Rengi
+	# Cream color
 	lbl_desc.add_theme_color_override("font_color", Color(0.95, 0.9, 0.8)) 
 	lbl_desc.add_theme_font_override("font", popup_font)
 	lbl_desc.add_theme_font_size_override("font_size", 12)

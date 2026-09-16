@@ -11,18 +11,17 @@ const CHAT_MESSAGE_SCENE = preload("res://scenes/chat_message_l.tscn") # L versi
 var is_waiting_for_response = false
 
 func _ready():
-	# HTTP sinyalini bağla
-	# HTTP sinyalini bağla (Önce kontrol et)
+	# Connect HTTP signal
 	if http:
 		if not http.request_completed.is_connected(_on_ai_request_completed):
 			http.request_completed.connect(_on_ai_request_completed)
 	
-	# Input enter tuşu sinyali
+	# Connect input submit signal
 	if input_field:
 		if not input_field.text_submitted.is_connected(_on_input_field_text_submitted):
 			input_field.text_submitted.connect(_on_input_field_text_submitted)
 	
-	# Buton sinyali
+	# Connect send button signal
 	if send_button:
 		if not send_button.pressed.is_connected(_on_send_button_pressed):
 			send_button.pressed.connect(_on_send_button_pressed)
@@ -43,12 +42,12 @@ func _on_send_button_pressed():
 	_send_to_ai_librarian(user_text)
 
 func _send_to_ai_librarian(user_msg: String):
-	# Kütüphane verilerini al (LibraryBooks tablosu)
+	# Fetch library data
 	var library_data = Globals.cache.get("library", [])
 	
-	var user_name = "Kitap Kurdu"
+	var user_name = "Bookworm"
 	if Globals.cache.has("user") and Globals.cache["user"] != null:
-		user_name = Globals.cache["user"].get("name", "Kitap Kurdu")
+		user_name = Globals.cache["user"].get("name", "Bookworm")
 	
 	var body = {
 		"message": user_msg,
@@ -57,7 +56,6 @@ func _send_to_ai_librarian(user_msg: String):
 	}
 	
 	var headers = ["Content-Type: application/json"]
-	# Endpoint'i kütüphane için değiştirdik
 	var api_url = "https://life-sim-worker.life-simulation.workers.dev/api/ai_library" 
 	
 	http.request(api_url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))

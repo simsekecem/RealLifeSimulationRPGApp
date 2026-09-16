@@ -6,30 +6,29 @@ const CHAT_MESSAGE_SCENE = preload("res://scenes/prefabs/chat_message.tscn")
 @onready var chat_scroll = $MainWindow/MarginContainer/ContentLayout/ChatScroll
 @onready var input_field = $MainWindow/InputField
 @onready var send_button = $MainWindow/SendButton
-# 👇 YENİ: HTTP Request düğümü (Sahneye eklediğinden emin ol)
+# HTTP Request node
 @onready var http = $HTTPRequest
 
-# Botun yazıp yazmadığını kontrol etmek için
+# Check if awaiting bot response
 var is_waiting_for_response = false
 
 func _ready():
-	# HTTP sinyalini bağla
-	# HTTP sinyalini bağla (Önce kontrol et)
+	# Connect HTTP signal
 	if http:
 		if not http.request_completed.is_connected(_on_ai_request_completed):
 			http.request_completed.connect(_on_ai_request_completed)
 	
-	# Input enter tuşu sinyali
+	# Input submit signal
 	if input_field:
 		if not input_field.text_submitted.is_connected(_on_input_field_text_submitted):
 			input_field.text_submitted.connect(_on_input_field_text_submitted)
 	
-	# Buton sinyali
+	# Send button signal
 	if send_button:
 		if not send_button.pressed.is_connected(_on_send_button_pressed):
 			send_button.pressed.connect(_on_send_button_pressed)
 	
-	# Close buton sinyali (Eğer varsa)
+	# Close button signal
 	if has_node("MainWindow/CloseButton"):
 		var close_btn = $MainWindow/CloseButton
 		if not close_btn.pressed.is_connected(_on_close_button_pressed):
@@ -46,66 +45,63 @@ func _scroll_to_bottom():
 	chat_scroll.scroll_vertical = chat_scroll.get_v_scroll_bar().max_value
 
 func _on_send_button_pressed():
-	if is_waiting_for_response: return # Cevap gelmeden yeni soru sorulmasın
+	if is_waiting_for_response: return
 
 	var user_text = input_field.text.strip_edges()
 	if user_text == "": return
 
-	# 1. Kullanıcı mesajını ekle
+	# 1. Add user message
 	add_message_to_chat(user_text, true)
 	input_field.clear()
 	
-	# 2. Yükleniyor mesajı (İstersen animasyonlu bir şey yapabilirsin)
+	# 2. Loading state
 	is_waiting_for_response = true
 	input_field.placeholder_text = "Coach is thinking..."
 	input_field.editable = false
 	
-	# 3. VERİLERİ HAZIRLA VE GÖNDER
+	# 3. Prepare payload and dispatch
 	_send_to_ai_coach(user_text)
 
-# --- YAPAY ZEKA İLETİŞİMİ ---
+# --- AI COMMUNICATION ---
 func _send_to_ai_coach(user_msg: String):
-	# A) Kullanıcının Gym Verilerini Al
+	# A) Fetch Gym Logs
 	var gym_logs = Globals.cache.get("gym_log", [])
 	
-	# Veri çok büyükse token limitini yememesi için son 50 kaydı alabiliriz
+	# Slice last 50 entries to conserve context window
 	if typeof(gym_logs) == TYPE_ARRAY and gym_logs.size() > 50:
-		gym_logs = gym_logs.slice(-50) # Sondan 50 tanesini al
+		gym_logs = gym_logs.slice(-50)
 	
-	# B) Kullanıcı Adı (Varsa)
-	var user_name = Globals.cache.get("user", {}).get("name", "Sporcu")
+	# B) User Name
+	var user_name = Globals.cache.get("user", {}).get("name", "Athlete")
 	
-	# C) İsteği Hazırla
+	# C) Prepare Payload
 	var body = {
 		"message": user_msg,
-		"context": gym_logs, # Egzersiz geçmişini buraya gömüyoruz
+		"context": gym_logs,
 		"user_name": user_name
 	}
 	
 	var headers = ["Content-Type: application/json"]
-	
-	# Worker URL'ini buraya yaz (Sonuna /api/ai_chat ekleyerek)
-	# Örn: https://senin-worker-adın.workers.dev/api/ai_chat
 	var api_url = "https://life-sim-worker.life-simulation.workers.dev/api/ai_chat" 
 	
-	# D) Gönder
+	# D) Send request
 	http.request(api_url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))
 
 func _on_ai_request_completed(_result, response_code, _headers, body):
 	is_waiting_for_response = false
-	input_field.placeholder_text = "Enter your text..." # Eski haline getir
+	input_field.placeholder_text = "Enter your text..."
 	input_field.editable = true
 	input_field.grab_focus()
 
 	if response_code == 200:
 		var json = JSON.parse_string(body.get_string_from_utf8())
 		if json and json.has("reply"):
-			# Gemini'nin cevabını ekle
+			# Add AI response
 			add_message_to_chat(json["reply"], false)
 		else:
-			add_message_to_chat("Couldnt understand the answer.", false)
+			add_message_to_chat("Could not understand the answer.", false)
 	else:
-		print("❌ AI Error: ", response_code)
+		print("AI Error: ", response_code)
 		add_message_to_chat("Load error. (Code: %d)" % response_code, false)
 
 func _on_input_field_text_submitted(_new_text: String) -> void:

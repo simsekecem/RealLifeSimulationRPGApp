@@ -5,5 +5,5 @@ extends Panel
 @onready var task_textedit = $HBoxContainer/TaskTextEdit
 
 func _ready():
-	# Sadece root Panel genişliği sabit
-	custom_minimum_size = Vector2(500, 70)  # Width = 862, Height = 40
+	# Set root Panel fixed dimensions
+	custom_minimum_size = Vector2(500, 70)

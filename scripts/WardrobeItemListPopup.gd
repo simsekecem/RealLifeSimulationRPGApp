@@ -1,17 +1,17 @@
 extends PopupPanel
 
-# --- SİNYALLER ---
+# --- SIGNALS ---
 signal item_chosen(item_data) 
 signal item_deleted(item_data)
 signal item_edited(old_data, new_data)
 
-# --- UI REFERANSLARI ---
+# --- UI REFERENCES ---
 @onready var grid = $VBoxContainer/ScrollContainer/GridContainer
 @onready var title_label = $VBoxContainer/Label
 @onready var close_button = $VBoxContainer/CloseButton 
 @onready var confirm_dialog = $ConfirmationDialog
 
-# --- DEĞİŞKENLER ---
+# --- VARIABLES ---
 var edit_dialog: ConfirmationDialog
 var edit_name_input: LineEdit
 var edit_category_input: OptionButton
@@ -21,7 +21,7 @@ var item_card_prefab = preload("res://scenes/prefabs/ItemCard.tscn")
 var item_to_delete = null 
 var current_active_category: String = ""
 
-# --- SABİTLER ---
+# --- CONSTANTS ---
 const CATEGORIES = [
 	{"id": "upper", "text": "Top"}, {"id": "lower", "text": "Bottom"},
 	{"id": "shoes", "text": "Shoes"}, {"id": "outer", "text": "Outerwear"},
@@ -29,21 +29,19 @@ const CATEGORIES = [
 ]
 const COLORS = ["White", "Black", "Grey", "Red", "Blue", "Green", "Yellow", "Orange", "Pink", "Purple", "Brown", "Beige"]
 
-# --- BAŞLANGIÇ ---
+# --- INITIALIZATION ---
 func _ready():
-	# 🔥 İŞTE ÇÖZÜM BURADA 🔥
-	# Bu ana listenin kendisini "Modal" yapar. 
-	# Arkadaki her şeyi kilitler ve dışarı tıklayınca kapanmayı engeller.
+	# Make the main list modal (locks background and prevents closing on outside click)
 	exclusive = true 
 	
 	if close_button: close_button.pressed.connect(_on_button_pressed)
 	
-	# 1. DELETE PENCERESİ
+	# 1. DELETE DIALOG
 	if not confirm_dialog:
 		confirm_dialog = ConfirmationDialog.new()
 		add_child(confirm_dialog)
 	
-	# Pencere Ayarları (Buralar zaten doğruydu)
+	# Dialog Settings
 	confirm_dialog.exclusive = true
 	confirm_dialog.always_on_top = true
 	confirm_dialog.transient = true
@@ -64,13 +62,13 @@ func _ready():
 	if not confirm_dialog.confirmed.is_connected(_on_confirm_delete):
 		confirm_dialog.confirmed.connect(_on_confirm_delete)
 
-	# 2. EDIT PENCERESİ
+	# 2. EDIT DIALOG
 	create_edit_dialog()
 	var q_manager = get_node_or_null("/root/QuestManager")
 	if q_manager:
 		q_manager.trigger_action("first_wardrobe")
 
-# 🔥 PENCERE VE BUTON STİLİ
+# --- WINDOW AND BUTTON STYLES ---
 func apply_window_style(window_node: Window):
 	var font = load("res://assets/fonts/PressStart2P-Regular.ttf")
 	if font: window_node.add_theme_font_override("font", font)
@@ -108,7 +106,7 @@ func apply_window_style(window_node: Window):
 			if font: btn.add_theme_font_override("font", font)
 			btn.custom_minimum_size.y = 60
 
-# 🔥 INPUT ALANI STİLİ
+# --- INPUT FIELD STYLES ---
 func apply_input_style(input_node: Control):
 	var font = load("res://assets/fonts/PressStart2P-Regular.ttf")
 	if font: input_node.add_theme_font_override("font", font)
@@ -156,7 +154,7 @@ func apply_input_style(input_node: Control):
 func create_edit_dialog():
 	edit_dialog = ConfirmationDialog.new()
 	
-	# Bu küçük pencereler zaten exclusive idi ama garanti olsun
+	# Ensure the dialog is modal and on top
 	edit_dialog.exclusive = true
 	edit_dialog.always_on_top = true
 	edit_dialog.transient = true
@@ -226,7 +224,7 @@ func open_category(category_name: String):
 	
 	if not visible: popup_centered() 
 
-# --- İŞLEVLER ---
+# --- FUNCTIONS ---
 
 func _on_card_selected(data):
 	emit_signal("item_chosen", data)

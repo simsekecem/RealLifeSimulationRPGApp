@@ -110,15 +110,14 @@ func get_date_str(d: Dictionary) -> String:
 func load_daily_list():
 	pending_deletes.clear()
 
-	# 1. UI Temizliği: Mevcut satırları tek seferde temizle
+	# 1. UI Cleanup: Clear existing rows
 	for child in daily_list_container.get_children():
 		child.queue_free()
 
 	var target_date := get_date_str(selected_date_dict)
 	var raw_logs = Globals.cache.get("gym_log")
 	
-	# 2. Veri Tipi Düzeltme (Dictionary -> Array)
-	# Sinyal yaymadan (save_cache ile) sessizce düzeltiyoruz
+	# 2. Data type sanitation (Dictionary -> Array)
 	if typeof(raw_logs) == TYPE_DICTIONARY:
 		raw_logs = raw_logs.values() if not raw_logs.has("results") else raw_logs["results"]
 		Globals.cache["gym_log"] = raw_logs
@@ -127,22 +126,20 @@ func load_daily_list():
 	if typeof(raw_logs) != TYPE_ARRAY: 
 		raw_logs = []
 
-	# 3. Kopyaları Ayıkla ve Kalıcı Olarak Güncelle
+	# 3. Deduplicate logs
 	var cleaned_logs = _clean_duplicates(raw_logs)
 	
 	if cleaned_logs.size() != raw_logs.size():
-		print("🧹 Veritabanındaki kopyalar temizlendi: ", raw_logs.size() - cleaned_logs.size(), " adet.")
 		Globals.cache["gym_log"] = cleaned_logs
-		Globals.save_cache() # Dosyaya kalıcı yaz
+		Globals.save_cache()
 
-	# 4. TEK DÖNGÜ: Sadece hedef tarihteki verileri listele
+	# 4. Display entries matching target date
 	for entry in cleaned_logs:
 		if typeof(entry) != TYPE_DICTIONARY: continue
 
 		var entry_date = str(entry.get("date", "")).strip_edges()
 		var e_name = str(entry.get("exercise_name", "")).strip_edges()
 		
-		# Sadece hedef tarihteki ve ismi boş olmayan kayıtları ekrana bas
 		if entry_date == target_date and e_name != "":
 			var row = daily_row_scene.instantiate()
 			daily_list_container.add_child(row)
@@ -151,7 +148,7 @@ func load_daily_list():
 			if row.has_method("set_data"):
 				row.set_data(entry)
 				
-# 👇 ÇİFT KAYIT TEMİZLEYİCİ HELPER FONKSİYON
+# Deduplication helper function
 func _clean_duplicates(raw_list: Array) -> Array:
 	var unique_list = []
 	var seen_fingerprints = []
@@ -159,7 +156,7 @@ func _clean_duplicates(raw_list: Array) -> Array:
 	for entry in raw_list:
 		if typeof(entry) != TYPE_DICTIONARY: continue
 		
-		# ID'yi hariç tutarak tüm değerleri bir metin haline getiriyoruz (Parmak İzi)
+		# Generate composite fingerprint excluding ID
 		var fingerprint = str(entry.get("date", "")) + "|" + \
 						  str(entry.get("exercise_name", "")).to_lower().strip_edges() + "|" + \
 						  str(entry.get("sets", 0)) + "|" + \
@@ -171,8 +168,7 @@ func _clean_duplicates(raw_list: Array) -> Array:
 						  str(entry.get("completed", false))
 		
 		if fingerprint in seen_fingerprints:
-			print("🚫 Birebir aynı olan kopya bulundu ve elendi: ", entry.get("exercise_name"))
-			continue # Eğer bu parmak izini daha önce gördüysek, listeye ekleme
+			continue
 			
 		seen_fingerprints.append(fingerprint)
 		unique_list.append(entry)
@@ -185,13 +181,12 @@ func add_empty_row():
 	row.delete_requested.connect(_on_row_delete_requested)
 
 # ------------------------------------------------------------
-# 🗑️ SİLME YÖNETİMİ
+# DELETION MANAGEMENT
 # ------------------------------------------------------------
 func _on_row_delete_requested(row_node):
 	if row_node.has_method("get_data"):
 		var data = row_node.get_data()
 		if data.has("id") and data["id"] != null:
-			print("🗑️ Silme kuyruğuna eklendi: ID ", data["id"])
 			pending_deletes.append({
 				"id": data["id"],
 				"date": get_date_str(selected_date_dict),
@@ -211,16 +206,16 @@ func save_daily_data():
 
 	var new_log_list: Array = []
 
-	# 1. Başka günleri koru
+	# 1. Preserve other dates
 	for entry in Globals.cache.get("gym_log", []):
 		if typeof(entry) == TYPE_DICTIONARY and entry.get("date") != target_date:
 			new_log_list.append(entry)
 
-	# 2. 🔴 SİLİNENLERİ EKLE (EKSİK OLAN BURASI)
+	# 2. Append pending deletions
 	for del_item in pending_deletes:
 		new_log_list.append(del_item)
 
-	# 3. Ekrandakileri ekle
+	# 3. Append current UI rows
 	for child in daily_list_container.get_children():
 		if not child.has_method("get_data"): continue
 		var data = child.get_data()
@@ -239,15 +234,17 @@ func save_daily_data():
 		data["date"] = target_date
 		new_log_list.append(data)
 
-	# 4. Kaydet
+	# 4. Save to cache
 	Globals.cache["gym_log"] = new_log_list
 	Globals.mark_dirty()
 	Globals.save_cache()
-# 👇 BURAYA EKLE: Kaydetme başarılı olduktan sonra QuestManager'ı tetikle
+
+	# Trigger quest actions
 	if has_node("/root/QuestManager"):
 		QuestManager.trigger_action("gym_action")
 		QuestManager.trigger_action("first_gym")
-	# 5. En sonda temizle
+		
+	# 5. Clear pending deletions
 	pending_deletes.clear()
 
 # ------------------------------------------------------------
@@ -279,7 +276,7 @@ func refresh_weekly_view():
 			logs = logs.values()
 	if typeof(logs) != TYPE_ARRAY: logs = []
 
-	# Haftalık görünümde de temizle
+	# Clean duplicates in weekly view as well
 	logs = _clean_duplicates(logs)
 
 	for i in range(1, 8):

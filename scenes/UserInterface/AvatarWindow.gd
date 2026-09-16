@@ -1,50 +1,48 @@
 extends Control
 
 # =================================================
-# NODE REFERANSLARI
+# NODE REFERENCES
 # =================================================
 
-# --- Ana Ekran (Görüntüleme) ---
+# --- Main View ---
 @onready var close_button_main = $CloseButton 
 @onready var edit_button = $EditButton
 
-# Görüntüleme Etiketleri
+# Display Labels
 @onready var label_name_display = $Name
 @onready var label_level_display = $Level
 @onready var label_xp_display = $XP
 @onready var label_birth_display = $Birthday
 
-# Karakter Önizleme (Hareketli Sprite)
+# Character Preview (Animated Sprite)
 @onready var preview_sprite = $Background/CharacterPreviewHolder/PreviewSprite
 
-# --- Edit Penceresi (Düzenleme) ---
+# --- Edit Window ---
 @onready var edit_window = $EditWindow
 @onready var close_button_edit = $EditWindow/Background/CloseButton
 @onready var save_button = $EditWindow/SaveButton
 @onready var input_name = $EditWindow/NewNameLE
 
-# Karakter Değiştirme Butonları (Hiyerarşine göre düzeltildi)
+# Character Switching Buttons
 @onready var btn_next = $BtnNext
 @onready var btn_prev = $BtnPrev 
 
-# Tarih Seçiciler
+# Date Selectors
 @onready var opt_day = $EditWindow/BirthdayContainer/Day
 @onready var opt_month = $EditWindow/BirthdayContainer/Month 
 @onready var opt_year = $EditWindow/BirthdayContainer/Year
 
 # -----------------------------------------------
-# DEĞİŞKENLER
+# VARIABLES
 # -----------------------------------------------
 var temp_char_id: int = 1
 var max_character_count: int = 2
 
-# ... Mevcut @onready değişkenlerin (btn_prev, opt_day vb.) aynen kalıyor ...
-
 # =================================================
-# BAŞLANGIÇ
+# INITIALIZATION
 # =================================================
 func _ready():
-	# Ana buton bağlantıları
+	# Main button connections
 	close_button_main.pressed.connect(hide_avatar_window)
 	edit_button.pressed.connect(show_edit_window)
 	close_button_edit.pressed.connect(hide_edit_window)
@@ -52,12 +50,11 @@ func _ready():
 	if save_button:
 		save_button.pressed.connect(_on_save_pressed)
 	
-	# 👇 EKLEME: Globals'daki veriler güncellendiğinde (QuestManager XP eklediğinde) 
-	# bu pencere açık olmasa bile veriyi yenilemesi için sinyali bağlıyoruz.
+	# Refresh UI when cache data updates
 	if Globals.has_signal("data_updated"):
 		Globals.data_updated.connect(update_ui_from_cache)
 	
-	# Karakter değiştirme butonlarını bağla
+	# Connect character switching buttons
 	if btn_next: 
 		btn_next.pressed.connect(_change_character.bind(1))
 	if btn_prev: 
@@ -68,43 +65,38 @@ func _ready():
 	update_ui_from_cache()
 
 # =================================================
-# UI GÜNCELLEME (GÜNCELLENDİ 🌟)
+# UI UPDATE
 # =================================================
 func update_ui_from_cache():
 	var user_data = Globals.cache.get("user", {})
 	
-	# Ana Ekranı Doldur
+	# Populate main view
 	if label_name_display: label_name_display.text = str(user_data.get("name", "Player"))
 	
-	# --- LEVEL & XP HESAPLAMA (DÜZELTİLDİ) ---
+	# --- LEVEL & XP CALCULATION ---
 	var total_xp = int(user_data.get("experience", 0))
-	
-	# ❌ ESKİSİ: var current_level = (total_xp / 300) + 1
-	# (Bu formül artık geçerli değil, doğrudan kayıtlı leveli alıyoruz)
-	
-	# ✅ YENİSİ: Kayıtlı leveli kullan
 	var current_level = int(user_data.get("level", 1))
 	
-	# Şu anki levelde ne kadar XP lazım?
-	var xp_needed_for_next = 300 # Varsayılan
+	# Required XP for next level
+	var xp_needed_for_next = 300 # Default
 	if Globals.has_method("get_required_xp"):
 		xp_needed_for_next = Globals.get_required_xp(current_level)
 	
-	# Level Yazısını Güncelle
+	# Update level text
 	if label_level_display: 
 		label_level_display.text = "LEVEL " + str(current_level)
 		
-	# XP Yazısını Güncelle
+	# Update XP text
 	if label_xp_display: 
 		label_xp_display.text = "%d / %d" % [total_xp, xp_needed_for_next]
 	
-	# Progress Bar varsa güncelle
+	# Update Progress Bar if present
 	if get_node_or_null("XPBar"):
 		var bar = get_node("XPBar")
 		bar.max_value = xp_needed_for_next
 		bar.value = total_xp
 	
-	# --- DİĞER VERİLER (AYNEN KALIYOR) ---
+	# Other profile fields
 	var birth_str = str(user_data.get("birthdate", "2000-01-01"))
 	if label_birth_display: label_birth_display.text = birth_str
 	
@@ -114,10 +106,8 @@ func update_ui_from_cache():
 	temp_char_id = int(user_data.get("character_id", 1))
 	_update_character_visual(temp_char_id)
 
-# ... Kodun geri kalanı (Karakter değiştirme, Save, Tarih seçiciler) AYNI KALIYOR ...
-
 # =================================================
-# KARAKTER GÖRSEL YÖNETİMİ
+# CHARACTER VISUAL MANAGEMENT
 # =================================================
 func _update_character_visual(id: int):
 	if id < 1: id = 1
@@ -129,46 +119,42 @@ func _update_character_visual(id: int):
 		preview_sprite.scale = Vector2(4, 4) 
 		preview_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	else:
-		print("⚠️ Karakter animasyonu bulunamadı: ", path)
+		print("⚠️ Character animation not found: ", path)
 
 func _change_character(direction: int):
-	# 1. Mevcut Level'i Öğren
+	# 1. Fetch current level
 	var user_data = Globals.cache.get("user", {})
 	var current_level = int(user_data.get("level", 1))
 	
-	# 2. Yeni Hedef ID'yi Hesapla
+	# 2. Calculate target ID
 	var target_id = temp_char_id + direction
 	
-	# Döngüsel geçiş (1 -> 2 -> 1)
+	# Cyclical wrap (1 -> 2 -> 1)
 	if target_id > max_character_count: target_id = 1
 	elif target_id < 1: target_id = max_character_count
 	
-	# 3. 🛑 KİLİT KONTROLÜ (BURASI EKSİKTİ)
-	# Kural: Karakter ID'si, Level'den büyük olamaz.
-	# (Örn: Level 1 ise sadece Char 1 seçilebilir. Char 2 için Level 2 lazım.)
+	# 3. Lock check: Character ID cannot exceed user level
 	if target_id > current_level:
-		print("🔒 KİLİTLİ! Bu karakter için Level ", target_id, " gerekli.")
+		print("🔒 LOCKED! Level ", target_id, " required for this character.")
 		
-		# Görsel bir uyarı verelim (Ekrana "LOCKED" yazısı veya sarsıntı efekti)
+		# Visual alert: flash red
 		if preview_sprite:
-			# Kırmızı yanıp sönsün
 			preview_sprite.modulate = Color.RED
 			var tween = get_tree().create_tween()
 			tween.tween_property(preview_sprite, "modulate", Color.WHITE, 0.3)
 			
-		# Değişikliği iptal et, fonksiyondan çık
 		return
 
-	# 4. Engel Yoksa Değiştir
-	print("🔘 Karakter Değişiyor: ", temp_char_id, " -> ", target_id)
+	# 4. Apply character change
+	print("🔘 Changing character: ", temp_char_id, " -> ", target_id)
 	temp_char_id = target_id
 	_update_character_visual(temp_char_id)
 
 # =================================================
-# KAYDETME (SAVE)
+# SAVE
 # =================================================
 func _on_save_pressed():
-	# Sadece isim ve doğum günü değişikliklerini kaydet
+	# Save name and birthdate changes
 	var new_name = input_name.text.strip_edges()
 	var new_birth_date = _get_date_string_from_selectors()
 	
@@ -178,42 +164,39 @@ func _on_save_pressed():
 	
 	Globals.mark_dirty()
 	Globals.save_cache()
-	print("✅ Profil (İsim/Tarih) güncellendi.")
-	# 👇 GÖREV TETİKLEYİCİLERİ BURAYA GELMELİ
+	print("✅ Profile (Name/Birthdate) updated.")
+	
+	# Quest triggers
 	var q_manager = get_node_or_null("/root/QuestManager")
 	if q_manager:
-		# İsim değiştirme görevi (Eğer isim varsayılan "Player" veya boş değilse)
 		if new_name != "" and new_name != "Player" and new_name != "Rookie":
 			q_manager.trigger_action("first_name")
 		
-		# Doğum günü görevi (Eğer bir tarih seçildiyse)
 		if new_birth_date != "":
 			q_manager.trigger_action("first_birthday")
 	update_ui_from_cache()
 	hide_edit_window()
 
 # =================================================
-# PENCERE YÖNETİMİ VE ANA KAYIT 💾
+# WINDOW MANAGEMENT & PERSISTENCE
 # =================================================
 func hide_avatar_window():
-	# 🔴 KRİTİK EKLEME: Pencere kapanırken karakteri kaydet
 	if not Globals.cache.has("user"): 
 		Globals.cache["user"] = {}
 	
-	# Geçici olarak seçilen ID'yi asıl kayıt yerine yazıyoruz
+	# Persist selected character ID
 	Globals.cache["user"]["character_id"] = temp_char_id
 	
-	# Verileri kalıcı yap
 	Globals.mark_dirty()
 	Globals.save_cache()
 	
-	print("💾 [AVATAR] Karakter kalıcı olarak seçildi: ", temp_char_id)
+	print("💾 [AVATAR] Character selected: ", temp_char_id)
 	
-	# Diğer UI elemanlarını (Sol üst ikon vb.) uyar
+	# Notify UI elements
 	if Globals.has_signal("data_updated"):
 		Globals.emit_signal("data_updated")
 	
-	# Sol üst köşedeki ikonu anında güncellemek için hiyerarşiyi tara
+	# Update top-left avatar icon
 	_trigger_main_ui_update()
 	
 	self.visible = false
@@ -234,7 +217,7 @@ func hide_edit_window():
 	edit_window.visible = false
 
 # =================================================
-# TARİH YARDIMCILARI (Aynı kalıyor)
+# DATE HELPERS
 # =================================================
 func _setup_date_dropdowns():
 	if opt_day:

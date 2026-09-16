@@ -3,7 +3,7 @@ extends Node
 # ============================================================
 #   GLOBAL STATE
 # ============================================================
-# 👇 UI güncellemesi için sinyal
+# Signal for UI update
 signal data_updated 
 signal sync_finished
 
@@ -16,10 +16,10 @@ var last_scene_path := ""
 var texture_cache: Dictionary = {}
 var is_initial_sync_done: bool = false
 
-var supabase_anon_key: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6c25kdHN0b256dGZ1YXlvZG1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyOTg4OTQsImV4cCI6MjA3NTg3NDg5NH0.UPDS44mZl-YP0UNGqnpPzIedyphNptgnXehax5tUi50" 
-var supabase_project_id: String = "rzsndtstonztfuayodmg"
+var supabase_anon_key: String = "YOUR_SUPABASE_ANON_KEY" 
+var supabase_project_id: String = "YOUR_SUPABASE_PROJECT_ID"
 
-# 👇 GÜNCELLEME: "fcm_token" alanını buraya ekledim.
+# User cache structure
 var cache := {
 	"owner_id": "", 
 	"user": { 
@@ -28,7 +28,7 @@ var cache := {
 		"level": 1, 
 		"experience": 0, 
 		"character_id": 1, 
-		"fcm_token": "" # <-- BURASI ÖNEMLİ
+		"fcm_token": "" # Important for FCM push notifications
 	},
 	"preferences": { "music_volume": 50 }, 
 	"gym_log": [],
@@ -38,8 +38,8 @@ var cache := {
 	"restaurant": [],
 	"calendar_notes": [],
 	"wardrobe": [],
-	"quests": [],             # 👈 BU SATIR EKSİKTİ
-	"last_quest_gen_date": "", # 👈 BU SATIR EKSİKTİ
+	"quests": [],
+	"last_quest_gen_date": "",
 	"unsynced_changes": false 
 }
 
@@ -50,28 +50,28 @@ var cache_path := "user://user_cache.json"
 var WEEK_RESET_DAYS := 7
 
 # ============================================================
-#   FIREBASE DEĞİŞKENLERİ
+#   FIREBASE VARIABLES
 # ============================================================
 var firebase_core
 var firebase_messaging
 
 # ============================================================
-#   BAŞLANGIÇ AYARLARI
+#   INITIALIZATION
 # ============================================================
 func _ready():
 	load_cache()
 	reset_if_week_passed()
 	get_tree().set_auto_accept_quit(false)
 	
-	# 👇 YENİ: Firebase Kurulumu (Sadece Mobilde)
+	# Firebase setup (Mobile only)
 	if OS.get_name() == "Android" or OS.get_name() == "iOS":
 		_setup_firebase()
 
 # ============================================================
-#   FIREBASE KURULUMU
+#   FIREBASE SETUP
 # ============================================================
 func _setup_firebase():
-	print("🔥 Firebase kurulumu başlıyor...")
+	print("Firebase setup initializing...")
 	
 	if Engine.has_singleton("GodotxFirebaseCore"):
 		firebase_core = Engine.get_singleton("GodotxFirebaseCore")
@@ -83,51 +83,50 @@ func _setup_firebase():
 		if not firebase_messaging.messaging_token_received.is_connected(_on_fcm_token_received):
 			firebase_messaging.messaging_token_received.connect(_on_fcm_token_received)
 		
-		# Hata loglarını görmek için
-		if not firebase_messaging.messaging_error.is_connected(func(msg): print("❌ FCM Hatası: ", msg)):
-			firebase_messaging.messaging_error.connect(func(msg): print("❌ FCM Hatası: ", msg))
+		# Error logging
+		if not firebase_messaging.messaging_error.is_connected(func(msg): print("FCM Error: ", msg)):
+			firebase_messaging.messaging_error.connect(func(msg): print("FCM Error: ", msg))
 	
-	# Core başlat
+	# Initialize Core
 	if firebase_core:
 		firebase_core.initialize()
 	else:
-		print("❌ GodotxFirebaseCore bulunamadı.")
+		print("GodotxFirebaseCore singleton not found.")
 
 func _on_core_initialized(success: bool):
 	if success:
-		print("✅ Firebase Core BAŞARILI!")
-		# Messaging başlat
+		print("Firebase Core initialized successfully.")
+		# Initialize Messaging
 		if firebase_messaging:
 			firebase_messaging.request_permission()
 			firebase_messaging.get_token()
 	else:
-		print("❌ Firebase Core başlatılamadı.")
+		print("Firebase Core failed to initialize.")
 
-# 👇 KRİTİK BÖLÜM: Token Gelince Ne Yapıyoruz?
-# 👇 SADECE MOBİLDE ÇALIŞACAK ŞEKİLDE AYARLANDI
+# Handle received FCM token (Runs only on Mobile platforms)
 func _on_fcm_token_received(token: String):
 	if token.is_empty():
 		return
 
-	# Sadece Android veya iOS ise işlem yap
+	# Only process on Android or iOS
 	if OS.get_name() == "Android" or OS.get_name() == "iOS":
-		print("🔥 (MOBİL) Yeni Token Alındı: ", token)
+		print("FCM Token Received: ", token)
 		
-		# Yerel hafızaya yaz
+		# Save to local cache
 		if not cache["user"].has("fcm_token"):
 			cache["user"]["fcm_token"] = ""
 		
 		cache["user"]["fcm_token"] = token
 		save_cache()
 		
-		# Eğer giriş yapmışsak sunucuya hemen gönder
+		# If user is authenticated, sync to server immediately
 		if auth_token != "":
 			send_to_server_background()
 	else:
-		# PC veya Web ise bu gelen token'ı yoksay (genelde null veya boş gelir)
+		# Ignore on PC and Web platforms
 		pass
 # ============================================================
-#   YEREL KAYIT (LOCAL SAVE)
+#   LOCAL SAVE
 # ============================================================
 func mark_dirty():
 	cache["unsynced_changes"] = true
@@ -141,7 +140,7 @@ func _process(delta):
 			save_cache()
 
 # ============================================================
-#   HELPER FONKSİYONLAR
+#   HELPER FUNCTIONS
 # ============================================================
 func ensure_list(data) -> Array:
 	if data == null: return []
@@ -160,12 +159,12 @@ func _get_sync_payload() -> Dictionary:
 
 	var is_mobile = (OS.get_name() == "Android" or OS.get_name() == "iOS")
 
-	# 🔥 PC / WEB -> fcm_token ASLA GÖNDERME
+	# PC / WEB -> Never send fcm_token
 	if not is_mobile:
 		if payload.has("user"):
 			payload["user"].erase("fcm_token")
 	else:
-		# Mobilde de boşsa gönderme
+		# Do not send if empty on mobile
 		var token = payload["user"].get("fcm_token", "")
 		if token == "":
 			payload["user"].erase("fcm_token")
@@ -173,36 +172,32 @@ func _get_sync_payload() -> Dictionary:
 	return payload
 
 # ============================================================
-#   ÇIKIŞ VE ARKA PLAN SİNYALLERİ
+#   EXIT AND NOTIFICATION SIGNALS
 # ============================================================
 func _notification(what):
-	# 1. ÇIKIŞ İSTEĞİ (X TUŞU veya SEKME KAPATMA)
+	# 1. Close request (Exit button or tab close)
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		# Web için tarayıcı genellikle beklemeyeceği için burası %100 garanti değildir.
-		# Ama yine de şansımızı deneriz.
+		# On web, attempt quick save
 		if OS.has_feature("web"):
-			print("🌐 (WEB) Sekme kapanıyor. Hızlı kayıt deneniyor...")
+			print("(WEB) Tab closing. Attempting quick save...")
 			save_cache()
-			# Web'de 'await' veya uzun timer'lar çalışmayabilir,
-			# bu yüzden background save çağırıyoruz ama garantisi yok.
 			send_to_server_background() 
 		else:
-			# PC'de güvenli çıkış
-			print("🛑 (PC) Çıkış İsteği. Veriler sunucuya gönderiliyor...")
+			# Safe exit on PC
+			print("(PC) Exit request. Syncing data to server...")
 			handle_save_and_exit()
 
-	# 2. ODAK KAYBI (Tab Değiştirme / Alt-Tab / Mobil Arka Plan)
+	# 2. Focus loss (Tab switch / Alt-Tab / Mobile background)
 	elif what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		
-		# EĞER MOBİL VEYA WEB İSE -> RİSK ALMA, HEMEN SUNUCUYA GÖNDER!
+		# If Mobile or Web, immediately sync to server
 		if OS.has_feature("web") or OS.get_name() == "Android" or OS.get_name() == "iOS":
-			print("⚠️ (WEB/MOBİL) Odak kaybı/Tab değişimi. Veri güvenliği için sunucuya gönderiliyor...")
+			print("(WEB/MOBILE) App paused / focus lost. Syncing to server...")
 			save_cache()
 			send_to_server_background()
 			
-		# PC İSE -> SAKİN OL, SADECE YERELE KAYDET
+		# If PC, save to local cache only
 		else:
-			print("⏸️ (PC) Pencere odağı kaybedildi (Alt-Tab). Sadece yerel kayıt alındı.")
+			print("(PC) Window focus lost. Saved to local cache.")
 			save_cache()
 
 func handle_save_and_exit():
@@ -212,7 +207,7 @@ func handle_save_and_exit():
 	send_to_server_and_quit()
 
 # ============================================================
-#   SUNUCUYA GÖNDERME (SENKRONİZASYON)
+#   SERVER SYNCHRONIZATION (SAVE)
 # ============================================================
 func send_to_server_and_quit():
 	if auth_token == "": get_tree().quit(); return
@@ -223,19 +218,19 @@ func send_to_server_and_quit():
 	get_tree().create_timer(17.0).timeout.connect(force_quit)
 
 	var headers = ["Content-Type: application/json", "Authorization: Bearer " + auth_token]
-	print("📡 Kapanış verisi gönderiliyor...")
+	print("Sending exit save data...")
 	
 	var payload = _get_sync_payload()
 	http.request("https://life-sim-worker.life-simulation.workers.dev/api/save_all", headers, HTTPClient.METHOD_POST, JSON.stringify(payload))
 
 func _on_exit_save_completed(_result, response_code, _headers, body):
 	if response_code == 200:
-		print("✅ Kapanış kaydı BAŞARILI!")
+		print("Exit save successful.")
 		cache["unsynced_changes"] = false
 		save_cache()
 	else:
-		print("❌ Kayıt başarısız. Yerel veri korunuyor.")
-		if body: print("🔥 Hata: ", body.get_string_from_utf8())
+		print("Save failed. Local data preserved.")
+		if body: print("Error: ", body.get_string_from_utf8())
 	
 	get_tree().quit()
 
@@ -259,7 +254,7 @@ func force_quit():
 	get_tree().quit()
 
 # ============================================================
-#   SUNUCUDAN YÜKLEME
+#   SERVER DATA LOADING
 # ============================================================
 func load_from_server():
 	if auth_token == "": 
@@ -267,7 +262,7 @@ func load_from_server():
 		sync_finished.emit()
 		return
 		
-	print("⬇️ Sunucudan veriler kontrol ediliyor...")
+	print("Checking data from server...")
 	var http = HTTPRequest.new()
 	add_child(http)
 	http.request_completed.connect(_on_load_complete)
@@ -289,7 +284,7 @@ func _on_load_complete(_res, code, _headers, body):
 				else:
 					apply_server_data(data)
 	else:
-		print("❌ Veri çekme hatası: ", code)
+		print("Data fetch error: ", code)
 		is_initial_sync_done = true 
 		sync_finished.emit()
 
@@ -300,10 +295,10 @@ func apply_server_data(data):
 	if data.has("user"):
 		var server_user = data["user"]
 
-		# Server verisini uygula
+		# Apply server data
 		cache["user"] = server_user
 
-		# 🔥 SADECE MOBİLDE token'ı koru
+		# Preserve local FCM token on mobile
 		if is_mobile and current_local_token != "":
 			cache["user"]["fcm_token"] = current_local_token
 	
@@ -320,10 +315,10 @@ func apply_server_data(data):
 	save_cache()
 	
 	is_initial_sync_done = true
-	sync_finished.emit() # 👈 Yükleme ekranına "geçebilirsin" haberi ver
+	sync_finished.emit() # Signal loading screen to proceed
 	data_updated.emit()
 
-# --- Veri Birleştirme ---
+# --- Data Merging ---
 func merge_server_with_local(server_data):
 	var current_local_token = cache["user"].get("fcm_token", "")
 	var is_mobile = (OS.get_name() == "Android" or OS.get_name() == "iOS")
@@ -354,20 +349,19 @@ func merge_server_with_local(server_data):
 	data_updated.emit()
 
 # ============================================================
-# 👇 GÜNCELLENMİŞ MERGE SİSTEMİ (Çift Kayıt Önleyici)
+#   MERGE SYSTEM (DEDUPLICATION)
 # ============================================================
-# Globals.gd içindeki merge_list fonksiyonunu bununla değiştir:
 
 func merge_list(key: String, server_list: Array):
 	var local_list = cache.get(key, [])
 	
-	# Başlangıçta server listesini kopyala
+	# Duplicate server list initially
 	var combined_list = server_list.duplicate()
 	
 	for local_item in local_list:
 		var is_match_found = false
 		
-		# Veri tipi kontrolü
+		# Data type validation
 		if typeof(local_item) != TYPE_DICTIONARY:
 			if local_item in server_list: is_match_found = true
 			if not is_match_found: combined_list.append(local_item)
@@ -376,7 +370,7 @@ func merge_list(key: String, server_list: Array):
 		for server_item in server_list:
 			if typeof(server_item) != TYPE_DICTIONARY: continue
 
-			# --- 1. GYM LOG MANTIĞI ---
+			# --- 1. GYM LOG LOGIC ---
 			if key == "gym_log":
 				var l_id = local_item.get("id"); var s_id = server_item.get("id")
 				if l_id != null and s_id != null:
@@ -385,7 +379,7 @@ func merge_list(key: String, server_list: Array):
 					 local_item.get("exercise_name") == server_item.get("exercise_name"):
 					is_match_found = true
 			
-			# --- 2. WARDROBE MANTIĞI ---
+			# --- 2. WARDROBE LOGIC ---
 			elif key == "wardrobe":
 				if local_item.get("image_url") == server_item.get("image_url"):
 					is_match_found = true
@@ -393,25 +387,25 @@ func merge_list(key: String, server_list: Array):
 					if idx != -1: combined_list[idx] = local_item 
 					break
 
-			# --- 🔥 3. LIBRARY ID MANTIĞI (ÇAKIŞMA ÖNLEYİCİ) 🔥 ---
+			# --- 3. LIBRARY ID LOGIC (CONFLICT PREVENTION) ---
 			elif key == "library":
 				var l_id = local_item.get("id")
 				var s_id = server_item.get("id")
 				var l_title = local_item.get("title", "")
 				var s_title = server_item.get("title", "")
 
-				# A) ID Eşleşmesi (En Güvenli)
+				# A) ID Match (Safest)
 				if l_id != null and s_id != null and str(l_id) == str(s_id):
 					is_match_found = true
-					# Server'daki eski veriyi, Local'deki güncel veriyle ez (Durum değiştiyse güncel kalsın)
+					# Overwrite server data with updated local data
 					var idx = combined_list.find(server_item)
 					if idx != -1: combined_list[idx] = local_item
 					break
 				
-				# B) İsim Eşleşmesi (ID Yoksa)
+				# B) Title Match (If ID missing)
 				elif l_title == s_title:
 					is_match_found = true
-					# Eğer Local'de ID yoksa Server'ın ID'sini al
+					# Inherit server ID if local is missing
 					if l_id == null and s_id != null:
 						local_item["id"] = s_id
 					
@@ -419,7 +413,7 @@ func merge_list(key: String, server_list: Array):
 					if idx != -1: combined_list[idx] = local_item
 					break
 
-			# --- 4. QUESTS MANTIĞI ---
+			# --- 4. QUESTS LOGIC ---
 			elif key == "quests":
 				if str(local_item.get("id")) == str(server_item.get("id")):
 					is_match_found = true
@@ -429,7 +423,7 @@ func merge_list(key: String, server_list: Array):
 						if idx != -1: combined_list[idx] = local_item
 					break
 
-			# --- 5. DİĞERLERİ (Hash) ---
+			# --- 5. OTHER DATA (Hash comparison) ---
 			else:
 				if local_item.hash() == server_item.hash(): 
 					is_match_found = true
@@ -441,10 +435,8 @@ func merge_list(key: String, server_list: Array):
 			
 	cache[key] = combined_list
 # ============================================================
-#   CACHE YÖNETİMİ
+#   CACHE MANAGEMENT
 # ============================================================
-# globals.gd içindeki load_cache fonksiyonunu bu şekilde güncelle:
-
 func load_cache():
 	if not FileAccess.file_exists(cache_path):
 		save_cache()
@@ -460,7 +452,7 @@ func load_cache():
 		if parse_result == OK:
 			var data = json.get_data()
 			if typeof(data) == TYPE_DICTIONARY:
-				# Var olan anahtarları güncelle
+				# Update existing keys
 				for key in data.keys():
 					if cache.has(key):
 						if key == "user" and typeof(data[key]) == TYPE_DICTIONARY:
@@ -469,21 +461,20 @@ func load_cache():
 						else:
 							cache[key] = data[key]
 					else:
-						# Yeni gelen anahtarları ekle (örneğin wardrobe)
+						# Append newly introduced keys (e.g. wardrobe)
 						cache[key] = data[key]
 
-				# wardrobe yoksa boş array oluştur
+				# Ensure wardrobe array exists
 				if not cache.has("wardrobe"):
 					cache["wardrobe"] = []
 
-				print("✅ Yerel cache yüklendi (wardrobe dahil).")
+				print("Local cache loaded.")
 			else:
-				print("❌ Cache dosyası bozuk, sıfırlanıyor.")
+				print("Cache file corrupted, resetting.")
 				save_cache()
 		else:
-			print("❌ JSON parse hatası: ", json.get_error_message())
+			print("JSON parse error: ", json.get_error_message())
 			save_cache()
-
 
 func save_cache():
 	var file = FileAccess.open(cache_path, FileAccess.WRITE)
@@ -492,7 +483,7 @@ func save_cache():
 		file.close()
 
 # ============================================================
-#   HAFTALIK RESET
+#   WEEKLY RESET
 # ============================================================
 func reset_if_week_passed():
 	var meta_path = "user://cache_meta.json"
@@ -518,26 +509,25 @@ func weekly_reset():
 func prepare_for_user(new_user_id: String):
 	var local_owner = cache.get("owner_id", "")
 	
-	# Eğer cache'in bir sahibi varsa VE bu sahip yeni giren kişi değilse:
+	# If cache belongs to a different user, reset to default
 	if local_owner != "" and local_owner != new_user_id:
-		print("⚠️ GÜVENLİK: Farklı bir kullanıcı tespit edildi! Eski veriler temizleniyor...")
+		print("Different user detected. Resetting local cache...")
 		_reset_cache_to_default()
 	
-	# Yeni ID'yi güvenle ata
+	# Assign new user ID
 	user_id = new_user_id
 	cache["owner_id"] = new_user_id
 
 func _reset_cache_to_default():
-	# Cache'i varsayılan, boş bir oyuncu haline getiriyoruz.
-	# Böylece internet olmasa bile B kişisi, A kişisinin eşyalarını görmez.
+	# Reset cache to default player template
 	cache = {
 		"owner_id": "", 
 		"user": { 
 			"name": "Rookie", 
-			"birthdate": "",
+			"birthdate": "", 
 			"level": 1, 
 			"experience": 0, 
-			"character_id": 1,
+			"character_id": 1, 
 			"fcm_token": "" 
 		},
 		"preferences": { "music_volume": 50 }, 
@@ -548,19 +538,13 @@ func _reset_cache_to_default():
 		"restaurant": [],
 		"calendar_notes": [],
 		"wardrobe": [],
-		
-		# --- YENİ EKLENECEKLER ---
-		"quests": [], # Tüm görevler (statik ve günlük) burada duracak
-		"last_quest_gen_date": "", # Günlük görevlerin en son ne zaman üretildiği
-		# -------------------------
-		
+		"quests": [],
+		"last_quest_gen_date": "",
 		"unsynced_changes": false 
 	}
-	# İstersen dosyayı da fiziksel olarak silebilirsin ama RAM'i temizlemek yeterlidir.
-	# DirAccess.remove_absolute(cache_path)
 
 # ============================================================
-#   SAHNE GEÇİŞİ
+#   SCENE TRANSITIONS
 # ============================================================
 func change_scene_with_loading(target_path: String):
 	save_cache()
@@ -575,7 +559,7 @@ func change_scene_with_loading(target_path: String):
 	get_tree().change_scene_to_file("res://scenes/UserInterface/LoadingScreen.tscn")
 	
 # ============================================================
-#   LEVEL & XP SİSTEMİ
+#   LEVEL & XP SYSTEM
 # ============================================================
 func get_required_xp(lvl: int) -> int:
 	return (lvl * 200) + 100
@@ -585,46 +569,33 @@ func add_xp(amount: int):
 	var current_lvl = int(cache["user"].get("level", 1))
 	
 	current_xp += amount
-	print("🌟 XP Kazanıldı: ", amount, " | Mevcut: ", current_xp)
+	print("XP Gained: ", amount, " | Current: ", current_xp)
 	
-	# Bir sonraki seviye sınırı
+	# Calculate threshold for next level
 	var xp_needed = get_required_xp(current_lvl)
 	
-	# LEVEL ATLAMA DÖNGÜSÜ
+	# Level up processing loop
 	while current_xp >= xp_needed:
 		current_xp -= xp_needed
 		current_lvl += 1
-		print("🎉 LEVEL UP! Yeni Seviye: ", current_lvl)
+		print("LEVEL UP! New Level: ", current_lvl)
 		
-		# ============================================================
-		# 👇 YENİ: LEVEL 2 ÖDÜLÜ (KARAKTER EVRİMİ) 🎭
-		# ============================================================
+		# Level 2 Reward (Character Evolution)
 		if current_lvl == 2:
-			print("✨ ÖZEL ÖDÜL: Karakter 2 kilidi açıldı!")
+			print("Special Reward: Character 2 unlocked!")
 			
-			# QuestManager'daki havalı pencereyi çağır
 			var qm = get_node_or_null("/root/QuestManager")
 			if qm and qm.has_method("show_unlock_popup"):
-				# Hemen çıkmasın, görev bildirimiyle çakışmasın diye 2 saniye bekletelim
 				get_tree().create_timer(7.0).timeout.connect(
 					qm.show_unlock_popup.bind(2)
 				)
-			
-			# İstersen buraya bir ses efekti veya particle sinyali de ekleyebilirsin
-			# SoundManager.play_evolution_sound() gibi
-		# ============================================================
 		
-		# Yeni sınır hesapla
 		xp_needed = get_required_xp(current_lvl)
 	
-	# Verileri kaydet
+	# Save updated progress
 	cache["user"]["experience"] = current_xp
 	cache["user"]["level"] = current_lvl
 	
 	save_cache()
-	
-	# 👇 BU SİNYAL ÇOK ÖNEMLİ
-	# Bu sinyal gidince senin Player.gd dosyan "Aaa veri değişti" diyip
-	# load_character_visuals() fonksiyonunu çalıştıracak ve
-	# yeni ID (2) olduğu için char_2.tres dosyasını yükleyecek.
 	data_updated.emit()
+

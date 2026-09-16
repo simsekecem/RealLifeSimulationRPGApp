@@ -4,31 +4,29 @@ extends PopupPanel
 @onready var text_edit = $MarginContainer/VBoxContainer/TextEdit
 @onready var exit_button = $MarginContainer/VBoxContainer/HBoxContainer/ExitBtn
 
-# Şu an hangi tarihi düzenliyoruz?
+# Currently edited date
 var current_date_str: String = ""
 
 func _ready():
 	self.set_exclusive(true)
 	exit_button.pressed.connect(_on_exit_pressed)
-	# Yazarken anlık kaydetmek istersen bunu açabilirsin:
-	# text_edit.text_changed.connect(_on_text_changed)
 
 func open_for_date(date):
-	# Tarihi veritabanı formatına (YYYY-MM-DD) çevir
+	# Convert date to DB format (YYYY-MM-DD)
 	current_date_str = "%04d-%02d-%02d" % [date.year, date.month, date.day]
 	
-	# Başlığı güncelle (GG.AA.YYYY)
+	# Update title (DD.MM.YYYY)
 	title_label.text = "%02d.%02d.%04d" % [date.day, date.month, date.year]
 	
-	# Eski notu yükle (Yoksa boş gelir)
+	# Load existing note from cache
 	text_edit.text = _get_note_from_cache(current_date_str)
 
 	popup_centered()
-	# 👇 TAKVİM GÖREV TETİKLEYİCİSİ
+	# Calendar quest trigger
 	var q_manager = get_node_or_null("/root/QuestManager")
 	if q_manager:
 		q_manager.trigger_action("first_calendar")
-	# Klavyeyi açması için bir kare bekle
+	# Wait a frame to grab focus
 	await get_tree().process_frame
 	text_edit.grab_focus()
 
@@ -36,12 +34,12 @@ func _on_exit_pressed():
 	_save_note_to_cache()
 	hide()
 
-# İsteğe bağlı: Anlık kayıt
+# Optional: Realtime save
 func _on_text_changed():
 	_save_note_to_cache()
 
 # ============================================================
-#  VERİ İŞLEMLERİ
+#  DATA PERSISTENCE
 # ============================================================
 
 func _get_note_from_cache(date_key: String) -> String:
@@ -52,9 +50,9 @@ func _get_note_from_cache(date_key: String) -> String:
 	return ""
 
 func _save_note_to_cache():
-	if current_date_str == "": return
+	if current_date_str == "": return 
 	
-	# 👇 ÖNEMLİ: Boş olsa bile alıyoruz ("")
+	# Retrieve text including empty string
 	var new_note = text_edit.text 
 	
 	var notes_list = Globals.ensure_list(Globals.cache.get("calendar_notes", []))
@@ -64,14 +62,13 @@ func _save_note_to_cache():
 	for i in range(notes_list.size()):
 		var entry = notes_list[i]
 		if typeof(entry) == TYPE_DICTIONARY and Globals.safe_str(entry.get("date", "")) == current_date_str:
-			# Varsa güncelle (Boş string olsa bile günceller)
 			notes_list[i]["note"] = new_note
 			found = true
 			break
 	
-	# Yoksa yeni ekle
+	# Append if not found
 	if not found:
 		notes_list.append({ "date": current_date_str, "note": new_note })
 	
-	# Değişikliği bildir
+	# Mark cache as dirty for synchronization
 	Globals.mark_dirty()

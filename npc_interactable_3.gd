@@ -1,15 +1,15 @@
 extends CharacterBody2D 
 
-# --- EDİTÖRDEN AYARLANACAK DEĞİŞKENLER ---
+# --- EXPORT VARIABLES ---
 @export var interact_type: String = "restaurant" 
 @export var wait_time: float = 1.0
 
-# --- SAHNE BAĞLANTILARI ---
+# --- NODE REFERENCES ---
 @onready var sprite = $Sprite2D
 @onready var dialog_bubble = $DialogBubble
 @onready var quest_label = $DialogBubble/Panel/QuestLabel
 @onready var timer = $Timer
-@onready var interaction_area = $Area2D # Tetikleme için çocuk düğüm olan Area2D
+@onready var interaction_area = $Area2D # Area2D child node for trigger detection
 
 var has_triggered: bool = false 
 var player_ref: Node2D = null 
@@ -18,7 +18,7 @@ func _ready():
 	timer.wait_time = wait_time
 	timer.one_shot = true
 	
-	# Sinyal bağlantılarını alt düğüm olan Area2D üzerinden yapıyoruz
+	# Connect signals to child Area2D
 	if interaction_area:
 		interaction_area.body_entered.connect(_on_body_entered)
 		interaction_area.body_exited.connect(_on_body_exited)
@@ -26,14 +26,14 @@ func _ready():
 	timer.timeout.connect(_on_timer_timeout)
 	dialog_bubble.visible = false
 
-# --- ALANA GİRİNCE ---
+# --- PLAYER ENTERED AREA ---
 func _on_body_entered(body):
 	if body.is_in_group("player"):
 		player_ref = body 
 		has_triggered = false
 		timer.start() 
 
-# --- ALANDAN ÇIKINCA ---
+# --- PLAYER EXITED AREA ---
 func _on_body_exited(body):
 	if body == player_ref:
 		timer.stop() 
@@ -41,14 +41,14 @@ func _on_body_exited(body):
 		has_triggered = false
 		dialog_bubble.visible = false 
 
-# --- SÜRE DOLUNCA ---
+# --- TIMER TIMEOUT ---
 func _on_timer_timeout():
 	if player_ref != null:
 		has_triggered = true
 		update_dialog_from_manager() 
 		show_dialogue()
 
-# --- GÖREVİ HAFIZADAN ÇEKME (Restaurant Kategorisi) ---
+# --- RETRIEVE RESTAURANT QUEST FROM CACHE ---
 func update_dialog_from_manager():
 	if Globals.cache.has("quests"):
 		var all_quests = Globals.cache["quests"]

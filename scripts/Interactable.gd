@@ -1,88 +1,87 @@
 extends Area2D
 
-# 👇 Wardrobe seçeneği eklendi
+# 👇 Wardrobe option added
 @export_enum("Calendar", "NPC", "Bed", "Chest", "Wardrobe") var interact_type: String = "Calendar"
-@export_multiline var dialog_text: String = "Merhaba!"
+@export_multiline var dialog_text: String = "Hello!"
 
-# Kaç saniye bekleyince açılsın?
+# Interaction delay in seconds
 @export var wait_time: float = 2.0
 
-# Kodla oluşturacağımız zamanlayıcı
+# Timer created at runtime
 var timer: Timer
-var has_triggered: bool = false # Zaten açıldı mı?
+var has_triggered: bool = false
 
 func _ready():
-	# 1. Zamanlayıcıyı (Timer) oluştur
+	# 1. Create and setup timer
 	timer = Timer.new()
 	timer.wait_time = wait_time
 	timer.one_shot = true
 	timer.timeout.connect(_on_timer_timeout)
 	add_child(timer)
 	
-	# 2. Giriş-Çıkışları dinle
+	# 2. Connect collision detection
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 
-# --- ALANA GİRİNCE ---
+# --- PLAYER ENTERED AREA ---
 func _on_body_entered(body):
 	if body.is_in_group("player"):
-		print("⏳ Bekleme başladı... (" + str(wait_time) + " sn)")
+		print("⏳ Timer started... (" + str(wait_time) + " s)")
 		has_triggered = false
 		timer.start()
 
-# --- ALANDAN ÇIKINCA ---
+# --- PLAYER EXITED AREA ---
 func _on_body_exited(body):
 	if body.is_in_group("player"):
-		print("❌ Alandan çıkıldı, sayaç iptal.")
+		print("❌ Exited area, timer cancelled.")
 		timer.stop()
 		has_triggered = false
 
-# --- SÜRE DOLUNCA ---
+# --- TIMER TIMEOUT ---
 func _on_timer_timeout():
 	if not has_triggered:
 		has_triggered = true
 		interact()
 
-# --- ETKİLEŞİM İŞLEMLERİ ---
+# --- INTERACTION LOGIC ---
 func interact():
-	print("✅ Süre doldu! Etkileşim: ", interact_type)
+	print("✅ Timer finished! Interaction: ", interact_type)
 	
 	match interact_type:
 		"Calendar":
 			open_calendar()
 		"Wardrobe":
-			open_wardrobe() # 👈 Gardırop buraya yönlendirildi
+			open_wardrobe()
 		"NPC":
 			start_dialog()
 
 # ============================================================
-# 👗 GARDIROP (OVERLAY) MANTIĞI
+# WARDROBE OVERLAY LOGIC
 # ============================================================
 func open_wardrobe():
-	print("👕 Gardırop Overlay olarak açılıyor...")
+	print("👕 Opening Wardrobe overlay...")
 	
-	# 1. Gardırop sahnesini belleğe yükle
-	# Dosya yolunun projendekiyle aynı olduğundan emin ol
+	# 1. Instantiate wardrobe scene
 	var wardrobe_scn = load("res://scenes/Wardrobe.tscn").instantiate()
 	
-	# 2. Pause modunda butonların çalışması için ayar
+	# 2. Allow processing when paused
 	wardrobe_scn.process_mode = Node.PROCESS_MODE_ALWAYS
 	
-	# 3. Oyunu durdur (Karakter arkada hareket etmesin)
+	# 3. Pause game tree
 	get_tree().paused = true
 	
-	# 4. Takvim gibi UIRoot altına ekle
+	# 4. Add child under UIRoot
 	if UI.has_node("UIRoot"):
 		UI.get_node("UIRoot").add_child(wardrobe_scn)
 	else:
-		# Yedek plan: Direkt sahne ağacının köküne ekle
+		# Fallback: add directly to root tree
 		get_tree().root.add_child(wardrobe_scn)
 
 # ============================================================
-# 📅 TAKVİM MANTIĞI
+# CALENDAR OVERLAY LOGIC
 # ============================================================
 func open_calendar():
-	print("📅 Takvim Overlay olarak açılıyor...")
+	print("📅 Opening Calendar overlay...")
 	
 	var calendar_scn = load("res://addons/calendar_library/demo/calendar_demo.tscn").instantiate()
 	calendar_scn.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -94,7 +93,7 @@ func open_calendar():
 		add_child(calendar_scn)
 
 # ============================================================
-# 💬 DİĞERLERİ
+# DIALOGUE
 # ============================================================
 func start_dialog():
 	print("💬 NPC: ", dialog_text)

@@ -6,12 +6,12 @@ const CHAT_MESSAGE_SCENE = preload("res://scenes/prefabs/chat_message_r.tscn")
 @onready var chat_scroll = $MainWindow/MarginContainer/ContentLayout/ChatScroll
 @onready var input_field = $MainWindow/InputField
 @onready var send_button = $MainWindow/SendButton
-@onready var http = $HTTPRequest # ⚠️ Sahneye eklediğinden emin ol!
+@onready var http = $HTTPRequest
 
 var is_waiting_for_response = false
 
 func _ready():
-	# Sinyallerin daha önce bağlanıp bağlanmadığını kontrol ederek bağla
+	# Connect signals if not already connected
 	if http and not http.request_completed.is_connected(_on_ai_request_completed):
 		http.request_completed.connect(_on_ai_request_completed)
 	
@@ -47,14 +47,14 @@ func _on_send_button_pressed():
 	_send_to_ai_dietitian(user_text)
 
 func _send_to_ai_dietitian(user_msg: String):
-	# Restaurant verilerini al
+	# Fetch restaurant data
 	var diet_logs = Globals.cache.get("restaurant", []) 
 	
-	# GÜVENLİK: Eğer çok fazla yemek yendiyse sadece son 40 kaydı gönder (Token sınırı için)
+	# Limit to last 40 entries to avoid prompt token overflow
 	if typeof(diet_logs) == TYPE_ARRAY and diet_logs.size() > 40:
 		diet_logs = diet_logs.slice(-40)
 		
-	var user_name = Globals.cache.get("user", {}).get("name", "Gurme")
+	var user_name = Globals.cache.get("user", {}).get("name", "Gourmet")
 	
 	var body = {
 		"message": user_msg,

@@ -30,42 +30,37 @@ func _on_login_pressed() -> void:
 	}
 	send_request(http, "/api/login", body)
 
-# login.gd içindeki _on_request_completed fonksiyonu:
-
+# _on_request_completed callback in Login.gd:
 func _on_request_completed(_result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	var json = JSON.parse_string(body.get_string_from_utf8())
 	
 	if json == null:
-		print("❌ Invalid JSON response")
-		_show_error("Sunucu hatası! Lütfen tekrar dene.")
+		print("Invalid JSON response")
+		_show_error("Server error! Please try again.")
 		return
 
 	if json.has("access_token"):
-		# --- 1. TOKEN AL ---
+		# --- 1. RECEIVE TOKEN ---
 		Globals.auth_token = json["access_token"]
 		
-		# 👇 DEĞİŞİKLİK BURADA BAŞLIYOR 👇
 		var new_user_id = json.get("user_id", "")
 		
-		# 🛡️ GÜVENLİK DUVARI: Kullanıcı değiştiyse hafızayı temizle!
+		# Reset cache if a different user logged in
 		Globals.prepare_for_user(new_user_id)
 		
-		# (Artık Globals.user_id'yi yukarıdaki fonksiyonda ayarladık ama
-		# garanti olsun diye veya okunabilirlik için burada kalabilir, zararı yok)
-		
-		# --- 2. SENKRONİZASYON AYARLARI ---
+		# --- 2. SYNC SETTINGS ---
 		Globals.is_initial_sync_done = false
 		
-		print("✅ Login başarılı. Kullanıcı: ", new_user_id)
-		print("🔄 Yükleme ekranına geçiliyor...")
+		print("Login successful. User: ", new_user_id)
+		print("Proceeding to loading screen...")
 		
-		# --- 3. SAHNE GEÇİŞİ ---
+		# --- 3. SCENE TRANSITION ---
 		Globals.change_scene_with_loading("res://scenes/MainGame.tscn")
 		
 	else:
 		_handle_login_error(json)
 
-# Hata yönetimi için ayrı fonksiyon (Daha temiz kod)
+# Error handling helper
 func _handle_login_error(json: Dictionary):
 	print("❌ Login failed:", json)
 	var error_msg = "Login failed :("

@@ -76,5 +76,5 @@ func _on_delete_pressed():
 	emit_signal("item_delete_requested", item_data)
 
 func _on_edit_pressed():
-	print("✏️ Edit butonuna basıldı: ", item_data.get("item_name"))
+	print("✏️ Edit button pressed: ", item_data.get("item_name"))
 	emit_signal("item_edit_requested", item_data)

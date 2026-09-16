@@ -9,18 +9,18 @@ func _ready():
 	if close_button:
 		close_button.pressed.connect(_on_close_pressed)
 	
-	# 🔥 YAZI GÖRÜNME SORUNU İÇİN AYARLAR 🔥
+	# --- TEXT LABEL DISPLAY SETTINGS ---
 	if explanation_label:
-		# 1. BBCode'u aç (Renk, kalınlık ve [center] tagleri için şart)
+		# 1. Enable BBCode for styling and center tags
 		explanation_label.bbcode_enabled = true
 		
-		# 2. İçeriğe göre boyutlan (Çok önemli!)
+		# 2. Fit to content
 		explanation_label.fit_content = true
 		
-		# 3. Genişlik sınırı koy (Yoksa tek satırda sonsuza kadar uzar)
+		# 3. Set minimum width limit
 		explanation_label.custom_minimum_size = Vector2(300, 0)
 		
-		# 4. Otomatik satır atlama (Wrap)
+		# 4. Automatic word wrapping
 		explanation_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 func _on_close_pressed():
@@ -29,18 +29,17 @@ func _on_close_pressed():
 func show_outfit(items: Array, explanation: String):
 	popup_centered() 
 	
-	# Önceki resimleri temizle
+	# Clear previous images
 	for child in container.get_children():
 		child.queue_free()
 	
-	# 🔥 YAZIYI GÜNCELLE
-	# Eğer metin boşsa varsayılan bir şeyler yazalım ki çalıştığını görelim
+	# Update description text
 	if explanation == "":
-		explanation_label.text = "[center]Kombin hazır ama açıklama yok.[/center]"
+		explanation_label.text = "[center]Outfit is ready, but no description provided.[/center]"
 	else:
 		explanation_label.text = "[center]" + explanation + "[/center]"
 	
-	# Resimleri yükle
+	# Load item images
 	for item in items:
 		var tex_rect = TextureRect.new()
 		tex_rect.custom_minimum_size = Vector2(120, 120)
