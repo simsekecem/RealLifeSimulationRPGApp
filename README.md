@@ -1,8 +1,15 @@
-<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-  <img src="https://github.com/user-attachments/assets/faaae912-6ca3-4cdb-b187-cf1286a7e4f0" width="85" alt="Rook Mascot" style="image-rendering: pixelated;" />
-  <h1 style="margin: 0; display: inline-block;">✨ My Pixel Life (Real Life Simulation RPG) ✨</h1>
-</div>
 
+
+<table align="center" style="border-collapse: collapse; border: none; background: transparent;">
+  <tr style="border: none; background: transparent;">
+    <td style="border: none; background: transparent; vertical-align: middle; text-align: right; padding-right: 15px;">
+      <h1 style="margin: 0; font-size: 2.2em; border: none;">✨ My Pixel Life (Real Life Simulation RPG) ✨</h1>
+    </td>
+    <td style="border: none; background: transparent; vertical-align: middle; text-align: left;">
+      <img src="https://github.com/user-attachments/assets/faaae912-6ca3-4cdb-b187-cf1286a7e4f0" width="100" alt="Rook Mascot" style="image-rendering: pixelated; display: block;" />
+    </td>
+  </tr>
+</table>
 
 A gamified life management RPG built with **Godot 4**, featuring an intelligent backend powered by **Google Gemini AI**, **Cloudflare Workers AI**, **Cloudflare D1**, and **Supabase**.
 
@@ -12,18 +19,19 @@ Transform your daily habits, study routines, workouts, meal plans, and wardrobe 
 
 ## Screenshots & Gameplay
 
-<!-- 
-Tavsiye: Ekran görüntülerinizi projenizin kök dizininde 'screenshots/' adında bir klasör açıp içine atabilirsiniz (örneğin: screenshots/town.png). 
-Aşağıdaki yer tutucu linkleri kendi resim dosya isimlerinizle değiştirmeniz yeterlidir.
--->
+<p align="center">
+  <img src="screenshots/town.png" alt="Town Exploration & Map" width="48%" />
+  <img src="screenshots/town2.png" alt="Village Overview" width="48%" />
+</p>
 
 <p align="center">
-  <img src="screenshots/town.png" alt="Town Exploration" width="48%" />
-  <img src="screenshots/gym.png" alt="Gym & AI Coach" width="48%" />
+  <img src="screenshots/house.png" alt="Indoor & Rooms" width="48%" />
+  <img src="screenshots/mission.png" alt="NPC Interaction & Dialogue" width="48%" />
 </p>
+
 <p align="center">
-  <img src="screenshots/wardrobe.png" alt="Wardrobe & AI Stylist" width="48%" />
-  <img src="screenshots/library.png" alt="Library & Study Planner" width="48%" />
+  <img src="screenshots/quests.png" alt="Quest & Task Log" width="48%" />
+  <img src="screenshots/mc.png" alt="Inventory & Character Stats" width="48%" />
 </p>
 
 ---
