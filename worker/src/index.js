@@ -156,6 +156,71 @@ if (path === "/api/daily_quests" && method === "POST") {
         }));
     }
 }
+    // ---------- SIGNUP (KAYIT OL - DÜZELTİLMİŞ) ----------
+if (path === "/api/signup" && method === "POST") {
+    try {
+        const body = await request.json();
+        
+        // 1. Supabase Auth Signup API çağrısı (Kullanıcı oluştur)
+        const res = await fetch(`${env.SUPABASE_URL}/auth/v1/signup`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": env.SUPABASE_ANON_KEY,
+            },
+            body: JSON.stringify({
+                email: body.email,
+                password: body.password,
+            }),
+        });
+
+        const data = await res.json();
+
+        // Hata durumları
+        if (!res.ok) {
+            let errorCode = "signup_failed";
+            if (data.msg && data.msg.includes("valid email")) errorCode = "email_address_invalid";
+            if (data.msg && data.msg.includes("6 characters")) errorCode = "weak_password";
+            
+            return addCors(new Response(JSON.stringify({ 
+                error_code: errorCode, 
+                msg: data.msg 
+            }), { status: res.status }));
+        }
+
+        // 🟢 EKSİK OLAN PARÇA BURASIYDI! 🟢
+        // Auth başarılı olduysa, hemen veritabanına "Rookie" profili açalım.
+        // Supabase bazen data.id, bazen data.user.id döndürür, ikisini de kontrol edelim.
+        const newUserId = data.id || (data.user ? data.user.id : null);
+
+        if (newUserId) {
+            try {
+                // D1 Veritabanına varsayılan satırı ekle
+                await env.DB.prepare(
+                    `INSERT INTO users (user_id, name, birthdate, level, experience, character_id) 
+                     VALUES (?, ?, ?, ?, ?, ?)`
+                ).bind(
+                    newUserId,      // User ID
+                    "Rookie",       // Varsayılan İsim
+                    "2000-01-01",   // Varsayılan Tarih
+                    1,              // Level 1
+                    0,              // XP 0
+                    1               // Character 1
+                ).run();
+                
+                console.log(`✅ Yeni kullanıcı için DB profili oluşturuldu: ${newUserId}`);
+            } catch (dbErr) {
+                // Eğer burası hata verirse (örneğin kullanıcı zaten varsa), sessizce logla ama süreci bozma.
+                console.error("DB Profil oluşturma hatası (Signup):", dbErr);
+            }
+        }
+
+        return addCors(new Response(JSON.stringify(data), { status: 200 }));
+
+    } catch (err) {
+        return addCors(new Response(JSON.stringify({ error: err.message }), { status: 500 }));
+    }
+}
         // ---------- LOGIN ----------
         if (path === "/api/login" && method === "POST") {
             const body = await request.json();
@@ -867,7 +932,8 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 // 1. USER (Level, XP ve Karakter ID Eklendi)
                 // 1. USER (İsim Varsayılanı DB Tarafından Kontrol Ediliyor)
                 const userBox = body.user || {}; 
-                const userName = userBox.name || ""; 
+                const rawName = userBox.name || "";
+                const userName = (!rawName || rawName.trim() === "") ? "Rookie" : rawName;
                 const userBirth = userBox.birthdate || "";
                 const userLevel = userBox.level || 1;
                 const userExp = userBox.experience || 0;
@@ -881,10 +947,10 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 
                 await insertOrUpdate(
                     `INSERT INTO users (user_id, name, birthdate, level, experience, character_id, fcm_token) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                    [userId, finalUserName, userBirth, userLevel, userExp, charId, fcmToken],
+                    [userId, userName, userBirth, userLevel, userExp, charId, fcmToken],
                     // UPDATE: fcm_token sütununu güncelliyoruz
                     `UPDATE users SET name=?, birthdate=?, level=?, experience=?, character_id=?, fcm_token = COALESCE(NULLIF(?, ''), fcm_token) WHERE user_id=?`,
-                    [finalUserName, userBirth, userLevel, userExp, charId, fcmToken ?? null, userId]
+                    [userName, userBirth, userLevel, userExp, charId, fcmToken ?? null, userId]
                 );
 
                 // 2. PREFERENCES (KALDIRILDI)
@@ -1185,12 +1251,33 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
         const today = new Date().toISOString().split('T')[0];
         console.log(`🕒 Global Notification Sync Started: ${today}`);
 
+        // =================================================================
+        // 👇 1. SUPABASE PING (Anti-Pause) - EKLENEN KISIM
+        // =================================================================
         try {
-            // 1. Auth Hazırlığı
+            // Supabase Auth servisine basit bir sağlık kontrolü atıyoruz.
+            // Bu istek veritabanını "aktif" gösterir ve uyku moduna girmesini engeller.
+            const sbPing = await fetch(`${env.SUPABASE_URL}/auth/v1/health`, {
+                method: "GET",
+                headers: {
+                    "apikey": env.SUPABASE_ANON_KEY
+                }
+            });
+            console.log(`💓 Supabase Ping Status: ${sbPing.status}`);
+        } catch (e) {
+            // Ping atamazsa bile akış bozulmasın, sadece logla.
+            console.error("Supabase Ping Error:", e.message);
+        }
+
+        // =================================================================
+        // 👇 2. FIREBASE BİLDİRİM SİSTEMİ (Mevcut Kodun)
+        // =================================================================
+        try {
+            // A. Auth Hazırlığı
             const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
             const accessToken = await getGoogleAccessToken(serviceAccount);
 
-            // 2. FCM Token'ı olan kullanıcıları çek
+            // B. FCM Token'ı olan kullanıcıları çek
             const { results: users } = await env.DB.prepare(
                 "SELECT user_id, fcm_token, name FROM users WHERE fcm_token IS NOT NULL AND fcm_token != ''"
             ).all();
@@ -1200,7 +1287,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
 
                 // --- VERİ KONTROLLERİ (BOŞ SATIR FİLTRELİ) ---
                 
-                // A) GYM (Egzersiz adı boş değilse say)
+                // Gym
                 const gym = await env.DB.prepare(`
                     SELECT id FROM gym_log 
                     WHERE user_id=? AND date=? AND completed=0 
@@ -1209,7 +1296,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 
                 if (gym.results.length > 0) summaryParts.push(`🏋️ ${gym.results.length} exercises left!`);
 
-                // B) MARKET (Ürün adı boş değilse say)
+                // Market
                 const mkt = await env.DB.prepare(`
                     SELECT id FROM market_items 
                     WHERE user_id=? AND date=? AND bought=0 
@@ -1218,7 +1305,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 
                 if (mkt.results.length > 0) summaryParts.push(`🛒 ${mkt.results.length} items to buy.`);
 
-                // C) STUDY (Konu adı boş değilse say)
+                // Study
                 const study = await env.DB.prepare(`
                     SELECT subject FROM study_log 
                     WHERE user_id=? AND date=? 
@@ -1227,7 +1314,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 
                 if (study.results.length > 0) summaryParts.push(`📚 ${study.results.length} study sessions planned.`);
 
-                // D) LIBRARY (Okunuyor durumu ve Kitap adı boş değilse)
+                // Library
                 const book = await env.DB.prepare(`
                     SELECT title FROM library_books 
                     WHERE user_id=? AND status='Reading' 
@@ -1236,7 +1323,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 
                 if (book) summaryParts.push(`📖 Reading: "${book.title}"`);
 
-                // E) NOTES (Not içeriği boş değilse)
+                // Notes
                 const note = await env.DB.prepare(`
                     SELECT note FROM calendar_notes 
                     WHERE user_id=? AND date=? 
@@ -1245,9 +1332,7 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                 
                 if (note && note.note.trim() !== "") summaryParts.push(`📝 Note: "${note.note.substring(0, 15)}..."`);
 
-                // F) RESTAURANT (Yemek planı notları veya öğünleri boş değilse)
-                // Burası biraz daha detaylı çünkü 4-5 tane alan var.
-                // Eğer herhangi biri doluysa "Plan Var" sayıyoruz.
+                // Restaurant
                 const meal = await env.DB.prepare(`
                     SELECT id FROM restaurant_log 
                     WHERE user_id=? AND date=? 
@@ -1271,13 +1356,11 @@ if (path === "/api/classify_clothing_vit" && method === "POST") {
                     body = "Unfinished goals for today:\n" + summaryParts.join("\n") + "\n\nLog in now to complete them!";
                 } else {
                     // DURUM 2: Her şey bitti veya plan yok
-                    // Boş bildirim atmamak için burayı 'return' ile geçebilirsin istersen.
-                    // Ama kullanıcıyı oyuna çekmek için motivasyon atmak daha iyidir:
                     title = `Your life is waiting! ✨`;
                     body = `Hey ${user.name || 'Rookie'}, your character needs you. Log in now to plan your next move!`;
                 }
 
-                // 3. GÖNDERİM
+                // C. Gönderim
                 const fcmUrl = `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`;
                 
                 const payload = {

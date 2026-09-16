@@ -1,9 +1,3 @@
-C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\scenes\prefabs\note_pop_up.gd
-C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\scenes\Wardrobe.tscn
-C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\scenes\UserInterface\SettingsWindow.gd
-C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\questmanager.gd.uid
-C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\addons\calendar_library\calendar_locale.gd
-C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\addons\calendar_library\calendar_locale.gd.uid
 C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\addons\calendar_library\calendar.gd
 C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\addons\calendar_library\calendar.gd.uid
 C:\Users\Hp\Desktop\RealLifeSimulationRPGApp\addons\calendar_library\demo\calendar_demo.gd
