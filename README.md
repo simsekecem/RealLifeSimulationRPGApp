@@ -1,4 +1,13 @@
-# 🌟 Real Life Simulation RPG
+<table align="center" style="border-collapse: collapse; border: none; background: transparent;">
+  <tr style="border: none; background: transparent;">
+    <td style="border: none; background: transparent; vertical-align: middle; text-align: right; padding-right: 15px;">
+      <h1 style="margin: 0; font-size: 2.2em; border: none;">✨ My Pixel Life (Real Life Simulation RPG) ✨</h1>
+    </td>
+    <td style="border: none; background: transparent; vertical-align: middle; text-align: left;">
+      <img src="https://github.com/user-attachments/assets/faaae912-6ca3-4cdb-b187-cf1286a7e4f0" width="100" alt="Rook Mascot" style="image-rendering: pixelated; display: block;" />
+    </td>
+  </tr>
+</table>
 
 A gamified life management RPG built with **Godot 4**, featuring an intelligent backend powered by **Google Gemini AI**, **Cloudflare Workers AI**, **Cloudflare D1**, and **Supabase**.
 
@@ -6,30 +15,31 @@ Transform your daily habits, study routines, workouts, meal plans, and wardrobe 
 
 ---
 
-## 📸 Screenshots & Gameplay
-
-<!-- 
-Tavsiye: Ekran görüntülerinizi projenizin kök dizininde 'screenshots/' adında bir klasör açıp içine atabilirsiniz (örneğin: screenshots/town.png). 
-Aşağıdaki yer tutucu linkleri kendi resim dosya isimlerinizle değiştirmeniz yeterlidir.
--->
+## Screenshots & Gameplay
 
 <p align="center">
-  <img src="screenshots/town.png" alt="Town Exploration" width="48%" />
-  <img src="screenshots/gym.png" alt="Gym & AI Coach" width="48%" />
+  <img src="screenshots/town.png" alt="Town Exploration & Map" width="48%" />
+  <img src="screenshots/town2.png" alt="Village Overview" width="48%" />
 </p>
+
 <p align="center">
-  <img src="screenshots/wardrobe.png" alt="Wardrobe & AI Stylist" width="48%" />
-  <img src="screenshots/library.png" alt="Library & Study Planner" width="48%" />
+  <img src="screenshots/house.png" alt="Indoor & Rooms" width="48%" />
+  <img src="screenshots/mission.png" alt="NPC Interaction & Dialogue" width="48%" />
+</p>
+
+<p align="center">
+  <img src="screenshots/quests.png" alt="Quest & Task Log" width="48%" />
+  <img src="screenshots/mc.png" alt="Inventory & Character Stats" width="48%" />
 </p>
 
 ---
 
-## 🚀 Play Online & Download
+## Play Online & Download
 
 Experience the game directly in your web browser on **itch.io** or download the Android APK:
 
 <p align="left">
-  <a href="https://reallifesim.itch.io/reallifesimulationapp" target="_blank">
+  <a href="https://reallifesim.itch.io/mypixelroutine" target="_blank">
     <img src="https://img.shields.io/badge/Play%20on-itch.io-FA5C5C?style=for-the-badge&logo=itchdotio&logoColor=white" alt="Play on itch.io" />
   </a>
   <a href="https://github.com/simsekecem/RealLifeSimulationRPGApp/releases/latest">
@@ -37,46 +47,46 @@ Experience the game directly in your web browser on **itch.io** or download the 
   </a>
 </p>
 
-- 🌐 **Web (Browser):** Play instantly on [itch.io (Real Life Simulation)](https://reallifesim.itch.io/reallifesimulationapp) without installing anything!
-- 📱 **Android (Mobile):** Download the latest standalone `.apk` from the [Releases](https://github.com/simsekecem/RealLifeSimulationRPGApp/releases/latest) section.
+- **Web (Browser):** Play instantly on [itch.io (Real Life Simulation)](https://reallifesim.itch.io/mypixelroutine) without installing anything!
+- **Android (Mobile):** Download the latest standalone `.apk` from the [Releases](https://github.com/simsekecem/RealLifeSimulationRPGApp/releases/latest) section.
 
 > **Android Installation Note:** Since this is an indie build, your Android device may prompt *"Install unknown app"*. Enable the permission to proceed with installation.
 
 ---
 
-## 🎮 Key Features & Gameplay
+##  Features & Gameplay
 
-### 🏋️ Gym & Fitness
+### Gym & Fitness
 - Plan daily and weekly workout routines across muscle groups (*Chest, Back, Legs, etc.*).
 - Chat with an **AI Fitness Coach** powered by Google Gemini that analyzes your past workout logs to give personalized advice.
 
-### 📚 Library & Study Planner
+### Library & Study Planner
 - Track reading progress with books sorted by status (*Reading, To Read, Finished*).
 - Schedule dedicated study sessions and ask the **AI Librarian** for book summaries and study motivation.
 
-### 🛒 Market & Smart Shopping
+### Market & Smart Shopping
 - Categorized shopping lists (*Groceries, Home Goods, Clothing, Personal Care*).
 - Instant sync ensures you never forget groceries on the go.
 
-### 🍽️ Restaurant & Meal Planning
+### Restaurant & Meal Planning
 - Plan weekly meals (*Breakfast, Lunch, Dinner, Snacks*).
 - Consult the **AI Dietitian** for nutritional guidance and recipe suggestions.
 
-### 👗 Smart Wardrobe & AI Stylist
+### Smart Wardrobe & AI Stylist
 - Snap or upload photos of real clothes to your virtual wardrobe.
 - **Zero-Shot Vision AI (ViT):** Automatically recognizes clothing types (*upper, lower, dress, etc.*) and dominant colors.
 - **Magic Button (AI Stylist):** Uses Gemini to generate personalized outfit recommendations from your virtual closet.
 
-### 🎯 Quests & Character Evolution
+### Quests & Character Evolution
 - **Static & Dynamic Quests:** Fresh daily challenges generated every morning via Gemini.
 - Complete real-life tasks to gain XP. Reaching Level 2 unlocks new character visuals and evolutions!
 
-### 🔔 Smart Daily Push Notifications (FCM)
+### Smart Daily Push Notifications (FCM)
 - Automated background checks remind you of unfinished workouts, unbought groceries, or pending study sessions throughout the day.
 
 ---
 
-## 🛠️ Built With
+## Built With
 
 - **Client:** [Godot Engine 4.5](https://godotengine.org/) (2D Pixel RPG)
 - **Backend:** [Cloudflare Workers](https://workers.cloudflare.com/) (Serverless REST API)
@@ -88,7 +98,7 @@ Experience the game directly in your web browser on **itch.io** or download the 
 
 ---
 
-## 🎨 Asset Credits & Acknowledgments
+##  Asset Credits & Acknowledgments
 
 This game was made possible with the help of the following amazing free assets. A huge thanks to their creators!
 
@@ -107,6 +117,16 @@ This game was made possible with the help of the following amazing free assets. 
 
 ---
 
-## 📄 License
+## Authors & Contributors
+
+This project was co-developed as a collaborative effort by:
+
+- **Nida Elvin Mertoğlu**
+  - *Roles:* Co-developed game mechanics, frontend architecture, UI design, database schemas, backend integration, and AI features.
+- **Ecem Şimşek**
+  - *Roles:* Co-developed game mechanics, frontend architecture, UI design, database schemas, backend integration, and AI features.
+
+---
+## License
 
 This project is licensed under the **MIT License**.
